@@ -61,6 +61,18 @@ class UpdateReceivingStatus extends Command
                 // Gửi thông báo
                 $this->notifyStateChange($receiving, $newState, $message);
             });
+            Receiving::where('status', 2)
+            ->where('date_created', '<', $today->copy()->subDays(3))
+            ->where('date_created', '>=', $today->copy()->subDays(21))
+            ->get()
+            ->each(function ($receiving) use ($messages) {
+
+                $newState = 1;
+                $message = $messages[1];
+                $receiving->update(['state' => 0]);
+                // Gửi thông báo
+                $this->notifyStateChange($receiving, $newState, $message);
+            });
 
         // Quá hạn (>= 21 ngày, state = 2)
         Receiving::whereNotIn('status', [3, 4])
