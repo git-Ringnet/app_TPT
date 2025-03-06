@@ -106,7 +106,7 @@
         </table>
         <div class="item">
             <h5 class="text-uppercase font-weight-bold m-0"><u>Điều khoản thương mại:</u></h5>
-            @if ($terms->content)
+            @if (!empty($terms) && !empty($terms->content))
                 <div class="terms-content text-header-print">
                     {!! nl2br(e($terms->content)) !!}
                 </div>
@@ -116,8 +116,7 @@
                     <p class="m-0 text-header-print">*Thời gian bảo hành bo mạch: 03 tháng</p>
                     <p class="m-0 text-header-print">*Thời gian bảo hành ắc quy: 12 tháng</p>
                     <p class="m-0 text-header-print">*Thanh toán: Thanh toán bằng chuyển khoản 100% sau khi xác nhận đơn
-                        hàng
-                    </p>
+                        hàng</p>
                 </div>
             @endif
             <p class="m-0">*Thông tin chuyển khoản:</p>

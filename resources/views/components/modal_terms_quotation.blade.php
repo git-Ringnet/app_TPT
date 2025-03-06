@@ -43,9 +43,7 @@
                             <tbody id="table-body">
                                 <tr class="height-40">
                                     <td class="text-13-black border py-0 text-center">
-                                        @if ($terms->content)
-                                            <textarea id="terms" cols="30" rows="10" class="w-100 h-auto text-danger">{{ trim($terms->content) }}</textarea>
-                                        @endif
+                                        <textarea id="terms" cols="30" rows="10" class="w-100 h-auto text-danger">{{ trim($terms->content ?? "") }}</textarea>
                                     </td>
                                 </tr>
                             </tbody>
