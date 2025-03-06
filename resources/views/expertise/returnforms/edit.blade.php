@@ -131,7 +131,7 @@
                         <div class="d-flex w-100">
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3 required-label" style="flex: 1.5;">Mã
+                                <span class="text-13-black text-nowrap mr-3 required-label" style="width: 180px;">Mã
                                     phiếu</span>
                                 <input type="text" id="return_code" name="return_code" style="flex:2;"
                                     placeholder="Nhập thông tin" value="{{ $returnForm->return_code }}"
@@ -140,7 +140,7 @@
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                 <span class="text-13-black btn-click required-label font-weight-bold"
-                                    style="flex: 1.6;">Khách
+                                style="width: 180px;">Khách
                                     hàng</span>
                                 <input placeholder="Nhập thông tin" autocomplete="off" required id="customer_name"
                                     class="text-13-black w-100 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
@@ -167,7 +167,7 @@
                             </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="flex: 1.5;">Người lập phiếu</span>
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập phiếu</span>
                                 <input type="hidden" name="user_id" value="{{ $returnForm->user_id }}">
                                 <input class="text-13-black w-50 border-0 bg-input-guest py-2 px-2" autocomplete="off"
                                     placeholder="Nhập thông tin" style="flex:2;" name=""
@@ -177,7 +177,7 @@
                         <div class="d-flex w-100">
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3 required-label" style="flex: 1.5;">Ngày
+                                <span class="text-13-black text-nowrap mr-3 required-label" style="width: 180px;">Ngày
                                     lập
                                     phiếu</span>
                                 <input placeholder="Nhập thông tin" autocomplete="off" type="text"
@@ -189,14 +189,14 @@
                             </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black btn-click" style="flex: 1.6;"> Người liên hệ </span>
+                                <span class="text-13-black btn-click" style="width: 180px;"> Người liên hệ </span>
                                 <input name="contact_person" placeholder="Nhập thông tin" autocomplete="off"
                                     class="text-13-black w-100 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
                                     id="contact_person" value="{{ $returnForm->contact_person }}" style="flex:2;" />
                             </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="flex: 1.5;">SĐT liên hệ</span>
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">SĐT liên hệ</span>
                                 <input class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
                                     autocomplete="off" placeholder="Nhập thông tin" style="flex:2;"
                                     name="phone_number" id="phone_number" value="{{ $returnForm->phone_number }}" />
@@ -206,14 +206,16 @@
                         <div class="d-flex w-100">
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="flex:.3;">Địa chỉ</span>
+                                <span class="text-13-black text-nowrap mr-3" style="width:100px;">Địa chỉ</span>
                                 <input placeholder="Nhập thông tin" name="address"
                                     value="{{ $returnForm->address }}" id="address"
                                     class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"style="flex:2;" />
                             </div>
+                            <div class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                        </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="flex:.3;">Phương thức trả
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Phương thức trả
                                     hàng</span>
                                 <select
                                     class="text-13-black w-50 border-0 addr bg-input-guest addr bg-input-guest-blue py-2 px-2"
@@ -232,7 +234,7 @@
                         <div class="d-flex w-100">
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="width: 120px;">Ghi chú</span>
+                                <span class="text-13-black text-nowrap mr-3" style="width: 100px;">Ghi chú</span>
                                 <input name="notes" placeholder="Nhập thông tin" autocomplete="off"
                                     value="{{ $returnForm->notes }}"
                                     class="text-13-black w-50 border-0 addr bg-input-guest addr bg-input-guest-blue py-2 px-2"style="flex:2;" />
