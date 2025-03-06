@@ -7,6 +7,7 @@ use App\Models\Customers;
 use App\Models\Groups;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CustomersController extends Controller
@@ -123,10 +124,17 @@ class CustomersController extends Controller
         if (!$customer) {
             return back()->with('warning', 'Không tìm thấy khách hàng để xóa');
         }
-        // $check = DetailExport::where('guest_id', $id)->first();
-        // if ($check) {
-        //     return back()->with('warning', 'Xóa thất bại do khách hàng này đang báo giá!');
-        // }
+        // Kiểm tra xem customer_id có tồn tại trong các bảng liên quan không
+        $existsInRelatedTables = DB::table('exports')->where('customer_id', $id)->exists()
+            || DB::table('warranty_lookup')->where('customer_id', $id)->exists()
+            || DB::table('receiving')->where('customer_id', $id)->exists()
+            || DB::table('quotations')->where('customer_id', $id)->exists()
+            || DB::table('return_form')->where('customer_id', $id)->exists();
+
+        if ($existsInRelatedTables) {
+            return redirect()->back()
+                ->with('warning', 'Không thể xóa khách hàng vì nó đang được sử dụng trong hệ thống.');
+        }
         $customer->delete();
         return back()->with('msg', 'Xóa khách hàng thành công');
     }

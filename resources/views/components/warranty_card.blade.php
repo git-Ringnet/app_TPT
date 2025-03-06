@@ -21,7 +21,7 @@
             Ngày @php echo date("d"); @endphp tháng @php echo date("m"); @endphp năm @php echo date("Y"); @endphp
         </p>
         <p class="info m-0">Khách hàng:
-            {{ $export->customer->customer_name }}
+            {{ $export->customer->customer_name ?? ""}}
         </p>
         <p class="info m-0">Địa chỉ:
             @php

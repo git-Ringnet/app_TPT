@@ -147,7 +147,7 @@
                                     <input placeholder="{{ $placeholder }}" autocomplete="off" required
                                         id="provider_name" readonly
                                         class="text-13-black w-100 border-0 bg-input-guest {{ $bg }} py-2 px-2"
-                                        style="flex:1;" value="{{ $export->customer->customer_name }}" />
+                                        style="flex:1;" value="{{ $export->customer->customer_name ?? ""}}" />
                                     <input type="hidden" name="customer_id" id="provider_id"
                                         value="{{ $export->customer_id }}">
                                     @if ($isCheck)

@@ -168,7 +168,7 @@
                                             $currentDate = new DateTime();
                                             $purchaseDate = new DateTime($item->export_return_date);
                                             preg_match('/\d+/', $item->name_warranty, $matches);
-                                            $warrantyPeriod = isset($matches[0]) ? (int)$matches[0] : 0; 
+                                            $warrantyPeriod = isset($matches[0]) ? (int) $matches[0] : 0;
 
                                             $expireDate = (clone $purchaseDate)->modify("+$warrantyPeriod months");
                                             $remainingInterval = $expireDate->diff($currentDate);
@@ -195,7 +195,7 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                                {{ $item->customer->customer_name }}
+                                                {{ $item->customer->customer_name ?? '' }}
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
@@ -205,13 +205,15 @@
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
                                                 {{ $item->name_warranty }}
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                            @if ($remainingYears > 0)
-                                              {{ $remainingYears }} năm {{ $remainingMonths }} tháng {{ $remainingDays }} ngày
-                                              @else
-                                                {{ $remainingMonths }} tháng {{ $remainingDays }} ngày
-                                              @endif
-                                             </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                                @if ($remainingYears > 0)
+                                                    {{ $remainingYears }} năm {{ $remainingMonths }} tháng
+                                                    {{ $remainingDays }} ngày
+                                                @else
+                                                    {{ $remainingMonths }} tháng {{ $remainingDays }} ngày
+                                                @endif
+                                            </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->name_expire_date ? ($item->return_date ? date('d/m/Y', strtotime($item->return_date)) : '') : '' }}

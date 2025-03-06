@@ -121,7 +121,7 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                                {{ $item->customer->customer_name }}
+                                                {{ $item->customer->customer_name ?? ""}}
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">

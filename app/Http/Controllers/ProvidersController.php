@@ -6,6 +6,7 @@ use App\Imports\ProvidersImport;
 use App\Models\Groups;
 use App\Models\Providers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProvidersController extends Controller
@@ -99,6 +100,14 @@ class ProvidersController extends Controller
         // if ($check) {
         //     return back()->with('warning', 'Xóa thất bại do khách hàng này đang báo giá!');
         // }
+        // Kiểm tra xem provider_id có tồn tại trong các bảng liên quan không
+        $existsInRelatedTables = DB::table('imports')->where('provider_id', $id)->exists()
+            || DB::table('inventory_lookup')->where('provider_id', $id)->exists();
+
+        if ($existsInRelatedTables) {
+            return redirect()->back()
+                ->with('warning', 'Không thể xóa nhà cung cấp vì nó đang được sử dụng trong hệ thống.');
+        }
         $provider->delete();
         return back()->with('msg', 'Xóa nhà cung cấp thành công');
     }
@@ -156,18 +165,18 @@ class ProvidersController extends Controller
     {
         // Lấy danh sách nhà cung cấp được chọn
         $providers = $request->input('providers', []);
-    
+
         // Nếu không có nhà cung cấp nào được chọn, quay lại mà không làm gì
         if (empty($providers)) {
             return redirect()->route('providers.index')->with('info', 'Không có nhà cung cấp nào được chọn.');
         }
-    
+
         foreach ($providers as $providerData) {
             $providerData = json_decode($providerData, true);
             $providerId = $providerData['provider_id'];
             $rowData = $providerData['row_data'];
             $provider = Providers::find($providerId);
-    
+
             if ($provider) {
                 $provider->update([
                     'provider_code'  => $rowData[0],
@@ -181,7 +190,7 @@ class ProvidersController extends Controller
                 ]);
             }
         }
-    
+
         return redirect()->route('providers.index')->with('success', 'Cập nhật hàng loạt thành công!');
-    }    
+    }
 }
