@@ -6,6 +6,7 @@ use App\Models\Groups;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -122,6 +123,18 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        // Kiểm tra xem user_id có tồn tại trong các bảng liên quan không
+        $existsInRelatedTables = DB::table('exports')->where('user_id', $user->id)->exists()
+            || DB::table('imports')->where('user_id', $user->id)->exists()
+            || DB::table('receiving')->where('user_id', $user->id)->exists()
+            || DB::table('quotations')->where('user_id', $user->id)->exists()
+            || DB::table('return_form')->where('user_id', $user->id)->exists() 
+            || DB::table('warehouse_transfers')->where('user_id', $user->id)->exists();
+
+        if ($existsInRelatedTables) {
+            return redirect()->back()
+                ->with('warning', 'Không thể xóa nhân viên vì đang được sử dụng trong hệ thống.');
+        }
         // Delete the user
         $user->delete();
         return redirect()->route('users.index');

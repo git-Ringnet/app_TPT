@@ -106,7 +106,7 @@ class ProvidersController extends Controller
 
         if ($existsInRelatedTables) {
             return redirect()->back()
-                ->with('warning', 'Không thể xóa nhà cung cấp vì nó đang được sử dụng trong hệ thống.');
+                ->with('warning', 'Không thể xóa nhà cung cấp vì đang được sử dụng trong hệ thống.');
         }
         $provider->delete();
         return back()->with('msg', 'Xóa nhà cung cấp thành công');

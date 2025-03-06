@@ -133,7 +133,7 @@ class CustomersController extends Controller
 
         if ($existsInRelatedTables) {
             return redirect()->back()
-                ->with('warning', 'Không thể xóa khách hàng vì nó đang được sử dụng trong hệ thống.');
+                ->with('warning', 'Không thể xóa khách hàng vì đang được sử dụng trong hệ thống.');
         }
         $customer->delete();
         return back()->with('msg', 'Xóa khách hàng thành công');
