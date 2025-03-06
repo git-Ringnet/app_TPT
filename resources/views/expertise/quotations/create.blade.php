@@ -54,6 +54,8 @@
                 <a class="dropdown-item text-13-black" href="#" data-option="donhang">Tạo phiếu xuất kho</a>
             </div>
             {{-- Thông tin khách hàng --}}
+            <div class="" id="main" style="margin-right: 10px !important;">
+
             <div class="border">
                 <div class="info-form">
                     <div class="bg-filter-search border-0 text-center">
@@ -160,6 +162,8 @@
                     </div>
                 </div>
             </div>
+            </div>
+            {{-- Thông tin khách hàng --}}
             @if ($errors->any())
                 <ul>
                     @foreach ($errors->all() as $error)

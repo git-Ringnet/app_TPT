@@ -3,7 +3,7 @@
 <form action="{{ route('customers.update', ['customer' => $customer->id]) }}" method="POST">
     @csrf
     @method('PUT')
-    <div class="content-wrapper m-0">
+    <div class="content-wrapper m-0 wrapper-height">
         <div class="content-header-fixed p-0">
             <div class="content__header--inner">
                 <div class="content__heading--left text-long-special opacity-0">
@@ -54,7 +54,7 @@
                                     d="M6.75 1V6.75C6.75 7.5297 7.34489 8.17045 8.10554 8.24313L8.25 8.25H14V13C14 14.1046 13.1046 15 12 15H4C2.89543 15 2 14.1046 2 13V3C2 1.89543 2.89543 1 4 1H6.75ZM8 1L14 7.03022H9C8.44772 7.03022 8 6.5825 8 6.03022V1Z"
                                     fill="white" />
                             </svg>
-                            <p class="m-0 ml-1">Lưu khách hàng</p>
+                            <p class="m-0 ">Lưu khách hàng</p>
                         </button>
                     </div>
                 </div>

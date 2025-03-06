@@ -5,7 +5,7 @@
     @csrf
     @method('PUT')
     <input type="hidden" id="idGroup" value="{{ $group->id }}">
-    <div class="content-wrapper m-0">
+    <div class="content-wrapper m-0 wrapper-height">
         <div class="content-header-fixed p-0">
             <div class="content__header--inner">
                 <div class="content__heading--left text-long-special opacity-0">

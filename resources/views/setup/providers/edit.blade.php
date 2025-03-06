@@ -3,7 +3,7 @@
 <form action="{{ route('providers.update', ['provider' => $provider->id]) }}" method="POST">
     @csrf
     @method('PUT')
-    <div class="content editGuest min-height--none p-0" style="min-height: 502px;">
+    <div class="content-wrapper editGuest min-height--none m-0" style="min-height: 735px;">
         <div class="content-header-fixed p-0">
             <div class="content__header--inner">
                 <div class="content__heading--left opacity-0">

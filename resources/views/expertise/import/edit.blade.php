@@ -183,7 +183,7 @@
                             </div>
                             <div class="col-md-12 m-0 p-0">
                                 <div style="width: 99.7%;"
-                                    class="d-flex justify-content-between py-2 px-3 border border-bottom-0 align-items-center text-left text-nowrap position-relative height-44">
+                                    class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 font-weight-bold"
                                         style="width: 180px;">Địa
                                         chỉ</span>
@@ -194,7 +194,7 @@
                             </div>
                             <div class="col-md-12 m-0 p-0">
                                 <div style="width: 99.7%;"
-                                    class="d-flex justify-content-between py-2 px-3 border border-bottom-0 align-items-center text-left text-nowrap position-relative height-44">
+                                    class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black font-weight-bold text-nowrap mr-3" style="width: 180px;">
                                         Ghi chú
                                     </span>
