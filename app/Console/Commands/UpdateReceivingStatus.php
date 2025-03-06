@@ -49,7 +49,7 @@ class UpdateReceivingStatus extends Command
             });
 
         // Chưa xử lý (>= 3 ngày, state = 1)
-        Receiving::whereIn('status', [1, 2])
+        Receiving::whereIn('status', [1])
             ->where('date_created', '<', $today->copy()->subDays(3))
             ->where('date_created', '>=', $today->copy()->subDays(21))
             ->get()
