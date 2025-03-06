@@ -141,7 +141,7 @@
                                         @elseif($item->receiving->form_type == 2)
                                             Dịch vụ
                                         @elseif($item->receiving->form_type == 3)
-                                            Dịch vụ bảo hành
+                                            Bảo hành dịch vụ
                                         @endif
                                     </td>
                                     <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">

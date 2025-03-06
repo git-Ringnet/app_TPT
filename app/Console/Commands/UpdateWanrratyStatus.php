@@ -34,11 +34,28 @@ class UpdateWanrratyStatus extends Command
         $records = WarrantyLookup::all();
 
         foreach ($records as $record) {
-            if ($today->greaterThanOrEqualTo($record->warranty_expire_date)) {
-                $record->update(['status' => 1]); // Cập nhật trạng thái thành "hết bảo hành"
-            } else {
-                $record->update(['status' => 0]);
+            $status = 0; // Mặc định là còn bảo hành
+
+            // Kiểm tra bảo hành thông thường
+            if ($record->warranty_expire_date && $today->greaterThanOrEqualTo($record->warranty_expire_date)) {
+                $status = 1; // Hết bảo hành
             }
+
+            // Kiểm tra bảo hành dịch vụ
+            if ($record->return_date && $record->service_warranty_expired) {
+                $returnDate = Carbon::parse($record->return_date);
+                $serviceExpiredDate = Carbon::parse($record->service_warranty_expired);
+                
+                if ($today->between($returnDate, $serviceExpiredDate)) {
+                    $status = 2; // Đang trong thời gian bảo hành dịch vụ
+                } else {
+                    $status = 1; // Hết hạn bảo hành dịch vụ
+                }
+            }
+
+            // Cập nhật status một lần duy nhất
+            $record->update(['status' => $status]);
+
             // Lọc ra các bản ghi có cùng sn_id
             $snIdRecords = WarrantyLookup::where('sn_id', $record->sn_id)->get();
 
@@ -48,7 +65,7 @@ class UpdateWanrratyStatus extends Command
 
             // Duyệt qua các bản ghi có cùng sn_id
             foreach ($snIdRecords as $snIdRecord) {
-                if ($today->greaterThanOrEqualTo($snIdRecord->warranty_expire_date)) {
+                if ($snIdRecord->warranty_expire_date && $today->greaterThanOrEqualTo($snIdRecord->warranty_expire_date)) {
                     // Nếu bảo hành hết hạn, thêm tên bảo hành vào mảng và đánh dấu hết hạn
                     $expired = true;
                     $warranties[] = $snIdRecord->name_warranty;
@@ -56,12 +73,12 @@ class UpdateWanrratyStatus extends Command
             }
 
             // Nối tên bảo hành hết hạn
-            $status = implode(', ', $warranties) . ' hết bảo hành';
+            $nameStatus = implode(', ', $warranties) . ' hết bảo hành';
 
             // Nếu có bảo hành hết hạn, cập nhật trạng thái của tất cả bản ghi có cùng sn_id
             if ($expired) {
                 WarrantyLookup::where('sn_id', $record->sn_id)
-                    ->update(['name_status' => $status]);
+                    ->update(['name_status' => $nameStatus]);
             } else {
                 // Nếu không có bảo hành hết hạn, thì cập nhật trạng thái là "Còn bảo hành"
                 $record->update(['name_status' => "Còn bảo hành"]);

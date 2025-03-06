@@ -522,7 +522,7 @@ class ImportsController extends Controller
                     'form_type' => match ($detail->reception->form_type) {
                         1 => 'Bảo hành',
                         2 => 'Dịch vụ',
-                        3 => 'Dịch vụ bảo hành',
+                        3 => 'Bảo hành dịch vụ',
                     },
                     'date_create' => Carbon::parse($detail->quotation_date)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y'),
                     'customer_name' => $detail->customer->customer_name,

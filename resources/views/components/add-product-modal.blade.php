@@ -304,11 +304,23 @@
 
     // Check serial number
     $(document).ready(function () {
+        let pendingAjaxRequests = 0; // Biến đếm số request AJAX đang chờ
+        const $submitButton = $('.submit-button'); // Lấy nút submit
+
+        // Hàm cập nhật trạng thái nút submit
+        function updateSubmitButtonState() {
+            if (pendingAjaxRequests > 0) {
+                $submitButton.prop('disabled', true).css('opacity', '0.6');
+            } else {
+                $submitButton.prop('disabled', false).css('opacity', '1');
+            }
+        }
+
         $(document).on('change', '.seri-input-check', function () {
             const $input = $(this);
             const $checkIcon = $input.siblings('.check-icon');
-            const serialNumber = $input.val().trim(); // Giá trị nhập vào
-            const product_id = $('#product_id_input').val(); // Giá trị nhập vào
+            const serialNumber = $input.val().trim();
+            const product_id = $('#product_id_input').val();
             const branch_id = $('input[name="branch_id"]:checked').val();
             const form_type = $('input[name="form_type"]:checked').val();
             const warehouse = $('#warehouse_id').val();
@@ -318,21 +330,23 @@
             let isDuplicate = false;
             $('.seri-input-check').each(function () {
                 const otherValue = $(this).val().trim();
-                if ($(this)[0] !== $input[0] && otherValue === serialNumber && serialNumber !==
-                    '') {
+                if ($(this)[0] !== $input[0] && otherValue === serialNumber && serialNumber !== '') {
                     isDuplicate = true;
-                    return false; // Thoát khỏi vòng lặp nếu tìm thấy trùng lặp
+                    return false;
                 }
             });
 
             if (isDuplicate) {
                 $checkIcon.text('✖').css('color', 'red');
                 console.error('Serial bị trùng lặp.');
-                return; // Không thực hiện kiểm tra AJAX nếu trùng lặp
+                return;
             }
 
-            // Kiểm tra nếu ô nhập liệu không trống và thực hiện AJAX ngay lập tức
+            // Kiểm tra nếu ô nhập liệu không trống và thực hiện AJAX
             if (serialNumber !== "") {
+                pendingAjaxRequests++; // Tăng số request đang chờ
+                updateSubmitButtonState(); // Cập nhật trạng thái nút submit
+
                 $.ajax({
                     url: '{{ route('checkSNImport') }}',
                     type: 'GET',
@@ -347,25 +361,23 @@
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function (response) {
-                        console.log(response.message);
                         if (response.status === 'success' && serialNumber !== "") {
-                            console.log(serialNumber);
-                            $checkIcon.text('✔').css('color', 'green').attr('title',
-                                response.message);
+                            $checkIcon.text('✔').css('color', 'green').attr('title', response.message);
                         } else if (response.status === 'error') {
-                            $checkIcon.text('✖').css('color', 'red').attr('title', response
-                                .message);
+                            $checkIcon.text('✖').css('color', 'red').attr('title', response.message);
                         }
+                        pendingAjaxRequests--; // Giảm số request đang chờ
+                        updateSubmitButtonState(); // Cập nhật trạng thái nút submit
                     },
                     error: function () {
                         $checkIcon.text('?').css('color', 'orange');
                         console.error('Có lỗi xảy ra khi kiểm tra số serial.');
+                        pendingAjaxRequests--; // Giảm số request đang chờ
+                        updateSubmitButtonState(); // Cập nhật trạng thái nút submit
                     }
                 });
             } else {
-                // Nếu ô trống, giữ biểu tượng mặc định hoặc không làm gì cả
                 $checkIcon.text('').css('color', 'transparent');
-                console.log(serialNumber);
             }
             updateSerialCount();
         });

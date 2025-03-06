@@ -134,7 +134,7 @@ class ReturnFormController extends Controller
                             'name_status' => $warranty->name_status,
                             'export_return_date' => $warranty->export_return_date,
                             'warranty' => $warranty->warranty,
-                            'warranty_expire_date' => Carbon::parse($warranty->warranty_expire_date),
+                            'warranty_expire_date' => $warranty->warranty_expire_date,
                             'status' => 0,
                         ]);
                     }
@@ -397,9 +397,9 @@ class ReturnFormController extends Controller
                             'customer_id' => $validated['customer_id'],
                             'name_warranty' => $warranty->name_warranty,
                             'name_status' => $warranty->name_status,
-                            'export_return_date' => $warranty->export_return_date,
+                            'return_date' => $warranty->return_date,
                             'warranty' => $warranty->warranty,
-                            'warranty_expire_date' => Carbon::parse($warranty->warranty_expire_date),
+                            'warranty_expire_date' => $warranty->warranty_expire_date,
                             'status' => 0,
                         ]);
                     }
@@ -435,23 +435,22 @@ class ReturnFormController extends Controller
                     // Update warranty lookup using name_warranty from input
                     $warrantyRecordOld = warrantyLookup::updateOrCreate(
                         [
-                            'sn_id' => $serial_number_id,
-                            'name_warranty' => $name_warranty
+                            'sn_id' => $serial_number_id
                         ],
                         [
                             'product_id' => $product_id,
                             'customer_id' => $validated['customer_id'],
                             'warranty' => $extra_warranty,
-                            'export_return_date' => $validated['date_created'],
+                            'return_date' => $validated['date_created'],
                             'name_status' => 'Còn bảo hành',
-                            'warranty_expire_date' => Carbon::parse($validated['date_created'])->addMonths($extra_warranty),
+                            'service_warranty_expired' => Carbon::parse($validated['date_created'])->addMonths($extra_warranty),
                             'status' => 0,
                         ]
                     );
 
                     // Update warranty status
                     $today = Carbon::now();
-                    if ($today->greaterThanOrEqualTo($warrantyRecordOld->service_warranty_expired) || $warrantyRecordOld->warranty == 0) {
+                    if ($warrantyRecordOld->warranty == 0 || ($warrantyRecordOld->service_warranty_expired && $today->greaterThanOrEqualTo($warrantyRecordOld->service_warranty_expired))) {
                         $warrantyRecordOld->update(['status' => 1]);
                     } else {
                         $warrantyRecordOld->update(['status' => 2]);

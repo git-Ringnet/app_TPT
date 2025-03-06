@@ -173,7 +173,7 @@
                                                 @elseif($item->reception->form_type == 2)
                                                     Dịch vụ
                                                 @elseif($item->reception->form_type == 3)
-                                                    Dịch vụ bảo hành
+                                                    Bảo hành dịch vụ
                                                 @endif
                                             </td>
                                             <td
