@@ -168,6 +168,8 @@
                                         liên hệ</span>
                                     <input name="phone" placeholder="{{ $placeholder }}" type="number"
                                         value="{{ $import->phone }}" {{ $readonly }}
+                                        min="0" step="1" required
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
                                         class="text-13-black w-50 border-0 bg-input-guest {{ $bg }} py-2 px-2"
                                         style="flex:2;" />
                                 </div>

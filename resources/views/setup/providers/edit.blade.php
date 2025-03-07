@@ -129,7 +129,9 @@
                                         </div>
                                         <input type="number" placeholder="Nhập thông tin" name="phone"
                                             autocomplete="off" value="{{ old('phone') ?? $provider->phone }}"
-                                            class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
+                                            class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue"
+                                            min="0" step="1" required
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);">
                                     </div>
 
                                     <div class="d-flex align-items-center height-60-mobile">

@@ -121,7 +121,9 @@
                                 </div>
                                 <input type="text" placeholder="Nhập thông tin" name="phone" autocomplete="off"
                                     value="{{ $user->phone }}"
-                                    class="border height-100 w-100 py-2 border-left-0 border-right-0 border-top-0 px-3 text-13-black bg-input-guest-blue">
+                                    class="border height-100 w-100 py-2 border-left-0 border-right-0 border-top-0 px-3 text-13-black bg-input-guest-blue" 
+                                     min="0" step="1" required
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);">
                             </div>
                             @if ($errors->any())
                                 <ul>

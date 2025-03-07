@@ -109,7 +109,8 @@
                                     <p class="p-0 m-0 margin-left32 text-13">Bảo hành</p>
                                 </div>
                                 <input type="number" placeholder="Nhập thông tin" name="warranty" autocomplete="off"
-                                    class="border height-100 w-100 py-2 border-left-0 border-right-0 border-top-0 px-3 text-13-black bg-input-guest-blue"
+                                    class="border height-100 w-100 py-2 border-left-0 border-right-0 border-top-0 px-3 text-13-black bg-input-guest-blue"  min="0" step="1" required
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
                                     value="{{ $product->warranty }}">
                             </div>
                             {{-- <table class="table table-hover bg-white rounded mt-2">

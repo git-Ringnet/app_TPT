@@ -117,7 +117,9 @@
                                     <p class="p-0 m-0 margin-left32 text-14">Điện thoại</p>
                                 </div>
                                 <input type="number" placeholder="Nhập thông tin" name="phone" autocomplete="off"
-                                    class="border border-white w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue border-top-0">
+                                    class="border border-white w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue border-top-0" 
+                                     min="0" step="1" required
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);">
                             </div>
 
                             <div class="d-flex align-items-center height-60-mobile">

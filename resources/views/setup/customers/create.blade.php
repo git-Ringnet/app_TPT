@@ -8,8 +8,7 @@
                 <div class="content__heading--left text-long-special opacity-0">
                     <span class="ml-4">Thiết lập ban đầu</span>
                     <span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
-                            fill="none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M7.69269 13.9741C7.43577 13.7171 7.43577 13.3006 7.69269 13.0437L10.7363 10.0001L7.69269 6.95651C7.43577 6.69959 7.43577 6.28303 7.69269 6.02611C7.94962 5.76918 8.36617 5.76918 8.6231 6.02611L12.1319 9.53488C12.3888 9.7918 12.3888 10.2084 12.1319 10.4653L8.6231 13.9741C8.36617 14.231 7.94962 14.231 7.69269 13.9741Z"
                                 fill="#26273B" fill-opacity="0.8" />
@@ -19,8 +18,7 @@
                         <a class="text-dark" href="{{ route('customers.create') }}">Khách hàng</a>
                     </span>
                     <span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
-                            fill="none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M7.69269 13.9741C7.43577 13.7171 7.43577 13.3006 7.69269 13.0437L10.7363 10.0001L7.69269 6.95651C7.43577 6.69959 7.43577 6.28303 7.69269 6.02611C7.94962 5.76918 8.36617 5.76918 8.6231 6.02611L12.1319 9.53488C12.3888 9.7918 12.3888 10.2084 12.1319 10.4653L8.6231 13.9741C8.36617 14.231 7.94962 14.231 7.69269 13.9741Z"
                                 fill="#26273B" fill-opacity="0.8" />
@@ -106,8 +104,7 @@
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
                                     <p class="p-0 m-0 margin-left32 text-14">Người liên hệ</p>
                                 </div>
-                                <input type="text" placeholder="Nhập thông tin" name="contact_person"
-                                    autocomplete="off"
+                                <input type="text" placeholder="Nhập thông tin" name="contact_person" autocomplete="off"
                                     class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
@@ -115,7 +112,10 @@
                                     <p class="p-0 m-0 margin-left32 text-14">Điện thoại</p>
                                 </div>
                                 <input type="number" placeholder="Nhập thông tin" name="phone" autocomplete="off"
-                                    class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
+                                    class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue"
+                                    min="0" step="1" required
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);">
+
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
