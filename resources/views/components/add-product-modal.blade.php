@@ -518,7 +518,6 @@
             $.ajax({
                 url: '{{ route('checkSN') }}',
                 type: 'GET',
-                async: false, // Sử dụng đồng bộ để đợi kết quả trước khi xử lý tiếp
                 data: {
                     product_id: product_id,
                     serial: serial,

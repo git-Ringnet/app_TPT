@@ -190,7 +190,7 @@
                 <tbody class="tbody-detail-info">
                     <!-- Hiệu ứng load -->
                     <tr class="loading-row">
-                        <td colspan="<?php echo $name == 'TN' || $name == 'BG' ? 4 : 3; ?>" class="text-center">
+                        <td colspan="<?php echo $name == 'TN' || $name == 'BG' || $name == 'TH' ? 4 : 3; ?>" class="text-center">
                             <div class="spinner-border" role="status"></div>
                         </td>
                     </tr>

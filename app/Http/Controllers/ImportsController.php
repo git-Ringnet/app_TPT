@@ -210,15 +210,19 @@ class ImportsController extends Controller
             ->select("providers.provider_name", "users.name", "imports.*")
             ->where("imports.id", $id)
             ->first();
-        $title = "Sửa phiếu nhập hàng";
-        $users = User::all();
-        $providers = Providers::all();
+        if ($import) {
+            $title = "Sửa phiếu nhập hàng";
+            $users = User::all();
+            $providers = Providers::all();
 
-        $productImports = ProductImport::where("import_id", $id)
-            ->get()->groupBy('product_id');
-        $productAll = Product::all();
-        $data = $this->imports->getAllImports();
-        return view('expertise.import.edit', compact('title', 'import', 'users', 'providers', 'productAll', 'productImports', 'data'));
+            $productImports = ProductImport::where("import_id", $id)
+                ->get()->groupBy('product_id');
+            $productAll = Product::all();
+            $data = $this->imports->getAllImports();
+            return view('expertise.import.edit', compact('title', 'import', 'users', 'providers', 'productAll', 'productImports', 'data'));
+        } else {
+            abort(404);
+        }
     }
 
     /**

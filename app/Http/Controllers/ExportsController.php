@@ -177,15 +177,19 @@ class ExportsController extends Controller
     public function edit(String $id)
     {
         $export = Exports::with(['user', 'customer'])->where("exports.id", $id)->first();
-        $users = User::all();
-        $customers = Customers::all();
-        $title = "Sửa phiếu xuất hàng";
-        $productExports = ProductExport::where("export_id", $id)
-            ->get()->groupBy('product_id');
-        $productAll = Product::all();
-        $exports = Exports::with(['user', 'customer'])->get();
-        $productWarranty = ProductWarranties::all();
-        return view('expertise.export.edit', compact('title', 'export', 'users', 'customers', 'productExports', 'productAll', 'exports', 'productWarranty'));
+        if ($export) {
+            $users = User::all();
+            $customers = Customers::all();
+            $title = "Sửa phiếu xuất hàng";
+            $productExports = ProductExport::where("export_id", $id)
+                ->get()->groupBy('product_id');
+            $productAll = Product::all();
+            $exports = Exports::with(['user', 'customer'])->orderBy('id', 'DESC')->get();
+            $productWarranty = ProductWarranties::all();
+            return view('expertise.export.edit', compact('title', 'export', 'users', 'customers', 'productExports', 'productAll', 'exports', 'productWarranty'));
+        } else {
+            abort(404);
+        }
     }
 
     /**
