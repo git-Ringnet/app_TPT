@@ -191,7 +191,7 @@ class ImportsController extends Controller
             ->leftJoin("users", "users.id", "imports.user_id")
             ->select("providers.provider_name", "users.name", "imports.*")
             ->where("imports.id", $id)
-            ->first();
+            ->first();  
         $productImports = ProductImport::where("import_id", $id)
             ->get()->groupBy('product_id');
         $title = "Xem chi tiết phiếu nhập hàng";
@@ -199,7 +199,7 @@ class ImportsController extends Controller
 
         return view('expertise.import.see', compact('title', 'import', 'productImports', 'providers'));
     }
-
+                                                                                                                                                                      
     /**
      * Show the form for editing the specified resource.
      */
@@ -449,7 +449,7 @@ class ImportsController extends Controller
                     'id' => $detail->id,
                     'import_code' => $detail->import_code,
                     'date_create' => Carbon::parse($detail->date_create)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y'),
-                    'provider_name' => $detail->provider->provider_name,
+                    'provider_name' => $detail->provider->provider_name ?? "",
                 ];
             });
 

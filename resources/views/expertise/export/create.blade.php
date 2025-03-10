@@ -125,7 +125,7 @@
                                 <span class="text-13-black text-nowrap mr-3 font-weight-bold" style="width: 180px;">SĐT
                                     liên hệ</span>
                                 <input name="phone" placeholder="Nhập thông tin" type="number"
-                                min="0" step="1" required
+                                min="0" step="1"
                                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
                                     class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
                                     style="flex:2;" />

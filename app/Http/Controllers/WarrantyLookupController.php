@@ -20,7 +20,7 @@ class WarrantyLookupController extends Controller
     public function index()
     {
         $title = "Tra cứu bảo hành";
-        $warranty = warrantyLookup::with(['product', 'serialNumber', 'customer', 'warrantyHistories.receiving'])->get();
+        $warranty = warrantyLookup::with(['product', 'serialNumber', 'customer', 'warrantyHistories.receiving'])->orderby('id', 'DESC')->get();
         $grouped = $warranty->groupBy('sn_id')->map(function ($items) {
             // Sao chép dữ liệu để tránh ảnh hưởng đến bản gốc
             $first = $items->first()->replicate();

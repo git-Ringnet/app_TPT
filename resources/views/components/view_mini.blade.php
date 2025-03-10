@@ -8,12 +8,14 @@
         <div class="d-flex w-100 my-2">
             <div class="px-1">
                 <p class="m-0 p-0 text-13-black">Từ ngày</p>
-                <input type="text" class="w-100 form-control mr-1 bg-input-guest-blue" id="formatFrom" placeholder="Chọn ngày">
+                <input type="text" class="w-100 form-control mr-1 bg-input-guest-blue" id="formatFrom"
+                    placeholder="Chọn ngày">
                 <input type="hidden" class="w-100 form-control mr-1" id="fromDate">
             </div>
             <div class="px-1">
                 <p class="m-0 p-0 text-13-black">Đến ngày</p>
-                <input type="text" class="w-100 form-control mr-1 bg-input-guest-blue" id="formatTo" placeholder="Chọn ngày">
+                <input type="text" class="w-100 form-control mr-1 bg-input-guest-blue" id="formatTo"
+                    placeholder="Chọn ngày">
                 <input type="hidden" class="w-100 form-control ml-1" id="toDate">
             </div>
         </div>
@@ -221,7 +223,7 @@
                                     {{ date_format(new DateTime($item->date_create), 'd/m/Y') }}
                                 </td>
                                 <td class="text-13-black border-bottom max-width120 border-top-0">
-                                    {{ $item->customer->customer_name ?? ""}}
+                                    {{ $item->customer->customer_name ?? '' }}
                                 </td>
                             </tr>
                         @endforeach
@@ -484,10 +486,11 @@
 
         // Lấy dữ liệu từ localStorage và khôi phục lại tìm kiếm
         const searchData = JSON.parse(localStorage.getItem('searchData'));
+
         if (searchData) {
             // Điền lại giá trị vào input tìm kiếm
-            $('#formatFrom').val(moment(searchData.fromDate).format('DD/MM/YYYY'));
-            $('#formatTo').val(moment(searchData.toDate).format('DD/MM/YYYY'));
+            $('#formatFrom').val(searchData.fromDate ? moment(searchData.fromDate).format('DD/MM/YYYY') : '');
+            $('#formatTo').val(searchData.toDate ? moment(searchData.toDate).format('DD/MM/YYYY') : '');
             $('#fromDate').val(searchData.fromDate);
             $('#toDate').val(searchData.toDate);
             $('.idProviderMiniView').val(searchData.idGuest);

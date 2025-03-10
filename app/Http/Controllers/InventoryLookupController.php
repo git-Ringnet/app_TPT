@@ -35,7 +35,7 @@ class InventoryLookupController extends Controller
                 });
             }
         }
-        $inventory = $inventory->get();
+        $inventory = $inventory->orderby('id', 'DESC')->get();
         $providers = Providers::all();
         return view('expertise.inventoryLookup.index', compact('title', 'inventory', 'providers'));
     }

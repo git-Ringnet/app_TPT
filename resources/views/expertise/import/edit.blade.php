@@ -114,7 +114,7 @@
                                 <div
                                     class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black btn-click required-label font-weight-bold"
-                                    style="width: 195px;">Nhà cung cấp</span>
+                                        style="width: 195px;">Nhà cung cấp</span>
                                     <input placeholder="{{ $placeholder }}" autocomplete="off" required
                                         id="provider_name" readonly
                                         class="text-13-black w-100 border-0 bg-input-guest {{ $bg }} py-2 px-2"
@@ -167,8 +167,8 @@
                                         style="width: 180px;">SĐT
                                         liên hệ</span>
                                     <input name="phone" placeholder="{{ $placeholder }}" type="number"
-                                        value="{{ $import->phone }}" {{ $readonly }}
-                                        min="0" step="1" required
+                                        value="{{ $import->phone }}" {{ $readonly }} min="0"
+                                        step="1"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
                                         class="text-13-black w-50 border-0 bg-input-guest {{ $bg }} py-2 px-2"
                                         style="flex:2;" />
@@ -197,7 +197,8 @@
                             <div class="col-md-12 m-0 p-0">
                                 <div style="width: 99.7%;"
                                     class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                    <span class="text-13-black font-weight-bold text-nowrap mr-3" style="width: 180px;">
+                                    <span class="text-13-black font-weight-bold text-nowrap mr-3"
+                                        style="width: 180px;">
                                         Ghi chú
                                     </span>
                                     <input
