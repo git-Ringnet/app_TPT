@@ -133,6 +133,70 @@ class ReportController extends Controller
         ));
     }
 
+    public function reportOverviewApp()
+    {
+        return response()->json([
+            'title' => 'Tổng quát báo cáo',
+            'phieuNhap' => Imports::count(),
+            'phieuXuat' => Exports::count(),
+            'fromDateExIm' => collect([Imports::min('date_create'), Exports::min('date_create')])->filter()->min(),
+            'toDateExIm' => collect([Imports::max('date_create'), Exports::max('date_create')])->filter()->max(),
+            'tonKho' => SerialNumber::whereIn('status', [1, 5])->count(),
+            'hangMuon' => SerialNumber::where('status', 5)->count(),
+            'toiHanBT' => InventoryLookup::where('status', 1)->count(),
+            'fromDateInventory' => collect([
+                SerialNumber::where('status', 1)->min('created_at'),
+                InventoryLookup::where('status', 1)->min('created_at')
+            ])->filter()->min(),
+            'toDateInventory' => collect([
+                SerialNumber::where('status', 1)->max('created_at'),
+                InventoryLookup::where('status', 1)->max('created_at')
+            ])->filter()->max(),
+            'hangNhap' => ProductImport::count(),
+            'hangXuat' => ProductExport::count(),
+            'fromDateProductExIm' => collect([ProductImport::min('created_at'), ProductExport::min('created_at')])->filter()->min(),
+            'toDateProductExIm' => collect([ProductImport::max('created_at'), ProductExport::max('created_at')])->filter()->max(),
+            'hangTiepNhan' => ReceivedProduct::count(),
+            'hangTraHang' => SerialNumber::where('status', 4)->count(),
+            'fromDateReceiveReturn' => collect([ReceivedProduct::min('created_at'), SerialNumber::where('status', 4)->min('created_at')])->filter()->min(),
+            'toDateReceiveReturn' => collect([ReceivedProduct::max('created_at'), SerialNumber::where('status', 4)->max('created_at')])->filter()->max(),
+            'phieuHoanThanh' => ReturnForm::where('status', 1)->count(),
+            'phieuKhongDongY' => ReturnForm::where('status', 2)->count(),
+            'tongTienHoanThanh' => ReturnForm::join('receiving', 'return_form.reception_id', '=', 'receiving.id')
+                ->join('quotations', 'receiving.id', '=', 'quotations.reception_id')
+                ->where('return_form.status', 1)
+                ->sum('quotations.total_amount'),
+            'tongTienKhongDongY' => ReturnForm::join('receiving', 'return_form.reception_id', '=', 'receiving.id')
+                ->join('quotations', 'receiving.id', '=', 'quotations.reception_id')
+                ->where('return_form.status', 2)
+                ->sum('quotations.total_amount'),
+            'fromDateQuotation' => ReturnForm::join('receiving', 'return_form.reception_id', '=', 'receiving.id')
+                ->join('quotations', 'receiving.id', '=', 'quotations.reception_id')
+                ->selectRaw('MIN(quotations.created_at) as min_date, MAX(quotations.created_at) as max_date')
+                ->first()->min_date,
+            'toDateQuotation' => ReturnForm::join('receiving', 'return_form.reception_id', '=', 'receiving.id')
+                ->join('quotations', 'receiving.id', '=', 'quotations.reception_id')
+                ->selectRaw('MIN(quotations.created_at) as min_date, MAX(quotations.created_at) as max_date')
+                ->first()->max_date,
+            'phieuTiepNhan' => Receiving::count(),
+            'phieuTraHang' => ReturnForm::count(),
+            'phieuChuaXL' => Receiving::where('state', 1)->count(),
+            'phieuQuaHan' => Receiving::where('state', 2)->count(),
+            'fromDatePhieuTNTH' => collect([
+                Receiving::min('created_at'),
+                ReturnForm::min('created_at'),
+                Receiving::where('state', 1)->min('created_at'),
+                Receiving::where('state', 2)->min('created_at')
+            ])->filter()->min(),
+            'toDatePhieuTNTH' => collect([
+                Receiving::max('created_at'),
+                ReturnForm::max('created_at'),
+                Receiving::where('state', 1)->max('created_at'),
+                Receiving::where('state', 2)->max('created_at')
+            ])->filter()->max()
+        ]);
+    }
+
     public function reportExportImport()
     {
         $title = 'Báo cáo hàng xuất nhập';
@@ -148,6 +212,26 @@ class ReportController extends Controller
                 ];
             });
         return view('reports.export_import', compact('title', 'products'));
+    }
+
+    public function reportExportImportApp()
+    {
+        $products = Product::with(['imports', 'exports'])
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'product_id' => $product->id,
+                    'product_code' => $product->product_code,
+                    'product_name' => $product->product_name,
+                    'total_import' => $product->imports->sum('quantity'),
+                    'total_export' => $product->exports->sum('quantity'),
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $products
+        ]);
     }
 
     public function reportReceiptReturn()
@@ -167,6 +251,26 @@ class ReportController extends Controller
         return view('reports.receipt_return', compact('title', 'products'));
     }
 
+    public function reportReceiptReturnApp()
+    {
+        $products = Product::with(['receivedProducts', 'returnProducts'])
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'product_id' => $product->id,
+                    'product_code' => $product->product_code,
+                    'product_name' => $product->product_name,
+                    'total_receive' => $product->receivedProducts->sum('quantity'),
+                    'total_return' => $product->returnProducts->sum('quantity'),
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $products
+        ]);
+    }
+
     public function reportQuotation()
     {
         $title = 'Báo cáo phiếu báo giá';
@@ -177,6 +281,30 @@ class ReportController extends Controller
         $customers = Customers::all();
         return view('reports.quotation', compact('title', 'quotations', 'customers'));
     }
+
+    public function reportQuotationApp()
+    {
+        $quotations = Quotation::join('receiving', 'receiving.id', 'quotations.reception_id')
+            ->join('return_form', 'return_form.reception_id', 'receiving.id')
+            ->join('customers', 'receiving.customer_id', 'customers.id')
+            ->select('quotations.*', 'receiving.status as status_return','receiving.form_code_receiving','customers.customer_name')
+            ->get();
+
+        // Kiểm tra dữ liệu có bị rỗng không
+        if ($quotations->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không có dữ liệu phiếu báo giá!',
+                'quotations' => []
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'quotations' => $quotations
+        ]);
+    }
+
 
     public function filterReportOverview(Request $request)
     {
@@ -630,7 +758,7 @@ class ReportController extends Controller
             $phieuChuaXL = Receiving::where('state', 1)->whereBetween('created_at', [$date_start, $date_end])->count();
             $phieuQuaHan = Receiving::where('state', 2)->whereBetween('created_at', [$date_start, $date_end])->count();
             $response = [
-                'phieuTiepNhan' => $phieuTiepNhan, 
+                'phieuTiepNhan' => $phieuTiepNhan,
                 'phieuTraHang' => $phieuTraHang,
                 'phieuChuaXL' => $phieuChuaXL,
                 'phieuQuaHan' => $phieuQuaHan,
@@ -732,7 +860,7 @@ class ReportController extends Controller
                 $currentYear = $data['year'];
             }
             $filters[] = ['value' => $value];
-        }else if (isset($data['date']) && $data['date'][1] !== null) {
+        } else if (isset($data['date']) && $data['date'][1] !== null) {
             $date_start = date("d/m/Y", strtotime($data['date'][0]));
             $date_end = date("d/m/Y", strtotime($data['date'][1]));
             $filters[] = ['value' => 'Khoảng thời gian: từ ' . $date_start . ' đến ' . $date_end, 'name' => 'ngay', 'icon' => 'date'];
@@ -845,7 +973,7 @@ class ReportController extends Controller
                 $currentYear = $data['year'];
             }
             $filters[] = ['value' => $value];
-        }else if (isset($data['date']) && $data['date'][1] !== null) {
+        } else if (isset($data['date']) && $data['date'][1] !== null) {
             $date_start = date("d/m/Y", strtotime($data['date'][0]));
             $date_end = date("d/m/Y", strtotime($data['date'][1]));
             $filters[] = ['value' => 'Khoảng thời gian: từ ' . $date_start . ' đến ' . $date_end, 'name' => 'ngay', 'icon' => 'date'];

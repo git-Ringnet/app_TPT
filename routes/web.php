@@ -21,6 +21,7 @@ use App\Http\Controllers\ReturnFormController;
 use App\Http\Controllers\SerialNumberController;
 use App\Http\Controllers\WarehouseTransferController;
 use App\Http\Controllers\WarrantyLookupController;
+use App\Http\Middleware\CorsMiddleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -150,6 +151,20 @@ Route::get('/reportQuotation', [ReportController::class, 'reportQuotation'])->na
 //
 Route::get('/filterReportOverview', [ReportController::class, 'filterReportOverview'])->name('filterReportOverview');
 Route::get('/filterReportPeriodTime', [ReportController::class, 'filterReportPeriodTime'])->name('filterReportPeriodTime');
+
+//Report app mobile
+Route::middleware([CorsMiddleware::class])->group(function () {
+    Route::get('/reportOverviewApp', [ReportController::class, 'reportOverviewApp']);
+});
+Route::middleware([CorsMiddleware::class])->group(function () {
+    Route::get('/reportExportImportApp', [ReportController::class, 'reportExportImportApp']);
+});
+Route::middleware([CorsMiddleware::class])->group(function () {
+    Route::get('/reportReceiptReturnApp', [ReportController::class, 'reportReceiptReturnApp']);
+});
+Route::middleware([CorsMiddleware::class])->group(function () {
+    Route::get('/reportQuotationApp', [ReportController::class, 'reportQuotationApp']);
+});
 
 //Warehouse transfer
 Route::resource('/warehouseTransfer', WarehouseTransferController::class);

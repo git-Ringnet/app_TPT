@@ -472,7 +472,7 @@
                 url = "{{ route('quotations.edit', ':id') }}".replace(':id',
                     id); // Gán giá trị cho url
             }
-            if (page == 'TH') {
+            if (page == 'TH') { 
                 url = "{{ route('returnforms.edit', ':id') }}".replace(':id',
                     id); // Gán giá trị cho url
             }
