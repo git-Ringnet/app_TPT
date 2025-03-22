@@ -454,8 +454,8 @@
                 return false;
             }
         }
-        if (nameModal == "XH") {
-            if (!validateInput("#provider_id", "Vui lòng chọn khách hàng!", "#provider_name")) {
+        if (nameModal == "XH" || nameModal == "CXH") {
+            if (!validateInput("#provider_name", "Vui lòng chọn khách hàng!", "#provider_name")) {
                 return false;
             }
         }
