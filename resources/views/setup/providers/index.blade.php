@@ -134,25 +134,25 @@
                                     <tr class="position-relative provide-info height-40">
                                         <input type="hidden" name="id-provide" class="id-provide" id="id-provide"
                                             value="{{ $item->id }}">
-                                        <td class="text-13-black border-right-0 border-bottom border-top-0 py-0 pl-4">
+                                        <td class="text-13-black border-right-0 border-bottom border-top-0 py-0 pl-4" style="width: 10%;">
                                             <a href="{{ route('providers.edit', ['provider' => $item->id]) }}">
                                                 {{ $item->provider_code }}
                                             </a>
                                         </td>
                                         <td
-                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
+                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width: 20%;">
                                             {{ $item->provider_name }}
                                         </td>
                                         <td
-                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
+                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width: 20%;">
                                             {{ $item->address }}
                                         </td>
                                         <td
-                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width: 15%;">
                                             {{ $item->phone }}
                                         </td>
                                         <td
-                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0" style="width: 15%;">
                                             {{ $item->email }}
                                         </td>
                                         <td
@@ -228,26 +228,26 @@
                                                 <input type="hidden" name="id-provide" class="id-provide"
                                                     id="id-provide" value="{{ $item->id }}">
                                                 <td
-                                                    class="text-13-black border-right-0 border-bottom border-top-0 py-0 pl-4">
+                                                    class="text-13-black border-right-0 border-bottom border-top-0 py-0 pl-4" style="width: 10%;">
                                                     <a
                                                         href="{{ route('providers.edit', ['provider' => $item->id]) }}">
                                                         {{ $item->provider_code }}
                                                     </a>
                                                 </td>
                                                 <td
-                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
+                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width: 20%;">
                                                     {{ $item->provider_name }}
                                                 </td>
                                                 <td
-                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
+                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width: 20%;">
                                                     {{ $item->address }}
                                                 </td>
                                                 <td
-                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width: 15%;">
                                                     {{ $item->phone }}
                                                 </td>
                                                 <td
-                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0" style="width: 15%;">
                                                     {{ $item->email }}
                                                 </td>
                                                 <td
