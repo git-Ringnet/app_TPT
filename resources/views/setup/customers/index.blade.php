@@ -51,7 +51,7 @@
                         <table id="example2" class="table table-hover bg-white rounded">
                             <thead class="border-custom">
                                 <tr>
-                                    <th class="height-40 py-0 border border-right-0" scope="col">
+                                    <th class="height-40 py-0 border border-right-0" scope="col" style="width: 10%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="customer_code"
                                                 data-sort-type="DESC">
@@ -62,7 +62,7 @@
                                             <div class="icon" id="icon-customer_code"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border border-right-0" scope="col">
+                                    <th class="height-40 py-0 border border-right-0" scope="col" style="width: 20%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="customer_name"
                                                 data-sort-type="DESC">
@@ -73,7 +73,7 @@
                                             <div class="icon" id="icon-customer_name"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border border-right-0" scope="col">
+                                    <th class="height-40 py-0 border border-right-0" scope="col" style="width: 20%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="address"
                                                 data-sort-type="DESC">
@@ -84,7 +84,7 @@
                                             <div class="icon" id="icon-address"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border border-right-0" scope="col">
+                                    <th class="height-40 py-0 border border-right-0" scope="col" style="width: 15%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="phone"
                                                 data-sort-type="DESC">
@@ -95,7 +95,7 @@
                                             <div class="icon" id="icon-phone"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border border-right-0" scope="col">
+                                    <th class="height-40 py-0 border border-right-0" scope="col" style="width: 15%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="email"
                                                 data-sort-type="DESC">
