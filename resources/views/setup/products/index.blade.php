@@ -58,7 +58,7 @@
                         <table id="example2" class="table table-hover bg-white rounded">
                             <thead class="border-custom">
                                 <tr>
-                                    <th class="height-40 py-0 border-right" scope="col" style="">
+                                    <th class="height-40 py-0 border-right" scope="col" style="width: 20%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="product_code"
                                                 data-sort-type="DESC">
@@ -69,7 +69,7 @@
                                             <div class="icon" id="icon-product_code"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border-right" scope="col" style="">
+                                    <th class="height-40 py-0 border-right" scope="col" style="width: 60%;">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="product_name"
                                                 data-sort-type="DESC">
@@ -91,17 +91,6 @@
                                             <div class="icon" id="icon-brand"></div>
                                         </span>
                                     </th>
-                                    {{-- <th class="height-40 py-0 border-right" scope="col" style="">
-                                        <span class="d-flex justify-content-start">
-                                            <a href="#" class="sort-link btn-submit" data-sort-by="warranty"
-                                                data-sort-type="DESC">
-                                                <button class="btn-sort" type="submit">
-                                                    <span class="text-14">Bảo hành</span>
-                                                </button>
-                                            </a>
-                                            <div class="icon" id="icon-warranty"></div>
-                                        </span>
-                                    </th> --}}
                                 </tr>
                             </thead>
                             <tbody class="tbody-product">
