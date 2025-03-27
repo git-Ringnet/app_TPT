@@ -51,7 +51,7 @@
                                 </table>
                                 <div class="d-flex">
                                     <button type="submit" class="btn btn-primary custom-btn mx-1 d-flex align-items-center h-100">Xác nhận hàng loạt</button>
-                                    <a href="{{ route('c.index') }}">
+                                    <a href="{{ route('providers.index') }}">
                                         <button type="button"
                                             class="btn-save-print rounded mx-1 py-1 px-2 d-flex align-items-center h-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"

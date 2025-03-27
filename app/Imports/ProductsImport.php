@@ -29,7 +29,7 @@ class ProductsImport implements ToCollection
                     'product_code' => $product_code,
                     'product_name' => $row[1] ?? null,
                     'brand'        => $row[2] ?? null,
-                    'warranty'     => $row[3] ?? null,
+                    'warranty'     => $row[3] ?? 0,
                 ]);
             }
         }

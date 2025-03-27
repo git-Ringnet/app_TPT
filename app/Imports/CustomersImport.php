@@ -13,33 +13,25 @@ class CustomersImport implements ToCollection
 
     public function collection(Collection $rows)
     {
-        $rows = $rows->skip(1);
+        $rows = $rows->skip(1); // Bỏ qua hàng tiêu đề
+    
+        // Lấy danh sách tất cả mã số thuế có trong database
+        $existingTaxCodes = Customers::pluck('id', 'tax_code')->toArray();
+    
         foreach ($rows as $row) {
-            $customer_name = $row[1] ?? null;
             $tax_code = $row[6] ?? null;
-        
-            // Tạo truy vấn cơ sở dữ liệu
-            $query = Customers::where('customer_name', $customer_name);
-        
-            // Nếu tax_code không null, thêm điều kiện kiểm tra tax_code
-            if (!empty($tax_code)) {
-                $query->orWhere('tax_code', $tax_code);
-            }
-        
-            // Lấy khách hàng đầu tiên tìm thấy
-            $existingCustomer = $query->first();
-        
-            if ($existingCustomer) {
-                // Nếu có khách hàng trùng, lưu id của khách hàng vào mảng duplicates
+    
+            if (!empty($tax_code) && isset($existingTaxCodes[$tax_code])) {
+                // Nếu mã số thuế đã tồn tại, lưu vào danh sách trùng lặp
                 $this->duplicates[] = [
-                    'customer_id' => $existingCustomer->id, // Lưu id của khách hàng trùng
+                    'customer_id' => $existingTaxCodes[$tax_code], // Lấy ID khách hàng trùng
                     'row_data' => $row // Lưu dữ liệu hàng trùng lặp
                 ];
             } else {
-                // Nếu không có trùng lặp, thêm khách hàng mới vào cơ sở dữ liệu
+                // Nếu không trùng lặp, thêm vào database
                 Customers::create([
-                    'customer_code'  => $row[0],
-                    'customer_name'  => $customer_name,
+                    'customer_code'  => $row[0] ?? null,
+                    'customer_name'  => $row[1] ?? null,
                     'address'        => $row[2] ?? null,
                     'contact_person' => $row[3] ?? null,
                     'phone'          => $row[4] ?? null,
@@ -47,9 +39,13 @@ class CustomersImport implements ToCollection
                     'tax_code'       => $tax_code,
                     'note'           => $row[7] ?? null,
                 ]);
+    
+                // Cập nhật mảng kiểm tra trùng lặp
+                if (!empty($tax_code)) {
+                    $existingTaxCodes[$tax_code] = true;
+                }
             }
         }
-        
     }
     
     // Phương thức trả về các khách hàng bị trùng lặp với id

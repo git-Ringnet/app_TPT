@@ -13,33 +13,25 @@ class ProvidersImport implements ToCollection
 
     public function collection(Collection $rows)
     {
-        $rows = $rows->skip(1);
+        $rows = $rows->skip(1); // Bỏ qua hàng tiêu đề
+    
+        // Lấy danh sách tất cả mã số thuế có trong database
+        $existingTaxCodes = Providers::pluck('id', 'tax_code')->toArray();
+    
         foreach ($rows as $row) {
-            $provider_name = $row[1] ?? null;
             $tax_code = $row[6] ?? null;
-
-            // Tạo truy vấn kiểm tra nhà cung cấp đã tồn tại hay chưa
-            $query = Providers::where('provider_name', $provider_name);
-
-            // Nếu tax_code không null, thêm điều kiện kiểm tra tax_code
-            if (!empty($tax_code)) {
-                $query->orWhere('tax_code', $tax_code);
-            }
-
-            // Lấy nhà cung cấp đầu tiên tìm thấy
-            $existingProvider = $query->first();
-
-            if ($existingProvider) {
-                // Nếu có nhà cung cấp trùng, lưu id vào mảng duplicates
+    
+            // Nếu tax_code không rỗng và đã tồn tại -> lưu vào danh sách trùng lặp
+            if (!empty($tax_code) && isset($existingTaxCodes[$tax_code])) {
                 $this->duplicates[] = [
-                    'provider_id' => $existingProvider->id, // Lưu id của nhà cung cấp trùng
+                    'provider_id' => $existingTaxCodes[$tax_code], // Lấy ID nhà cung cấp trùng
                     'row_data' => $row // Lưu dữ liệu hàng trùng lặp
                 ];
             } else {
-                // Nếu không có trùng lặp, thêm nhà cung cấp mới vào cơ sở dữ liệu
-                Providers::create([
+                // Thêm vào database (không kiểm tra nếu mã số thuế rỗng)
+                $provider = Providers::create([
                     'provider_code' => $row[0] ?? null,
-                    'provider_name' => $provider_name,
+                    'provider_name' => $row[1] ?? null,
                     'address' => $row[2] ?? null,
                     'contact_person' => $row[3] ?? null,
                     'phone' => $row[4] ?? null,
@@ -47,9 +39,16 @@ class ProvidersImport implements ToCollection
                     'tax_code' => $tax_code,
                     'note' => $row[7] ?? null,
                 ]);
+    
+                // Cập nhật vào danh sách đã kiểm tra nếu tax_code không rỗng
+                if (!empty($tax_code)) {
+                    $existingTaxCodes[$tax_code] = $provider->id;
+                }
             }
         }
     }
+    
+    
 
     // Phương thức trả về các nhà cung cấp bị trùng lặp với id
     public function getDuplicates()
