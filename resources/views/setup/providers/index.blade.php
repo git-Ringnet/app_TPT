@@ -156,7 +156,7 @@
                                             {{ $item->email }}
                                         </td>
                                         <td
-                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
                                             {{ $item->note }}
                                         </td>
                                         <td class="position-absolute m-0 p-0 bg-hover-icon icon-center border-top-0">
@@ -251,7 +251,7 @@
                                                     {{ $item->email }}
                                                 </td>
                                                 <td
-                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
                                                     {{ $item->note }}
                                                 </td>
                                                 <td
