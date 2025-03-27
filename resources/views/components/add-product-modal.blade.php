@@ -1,8 +1,9 @@
-<div class="modal fade" id="{{ $id }}" tabindex="-1" role="dialog" aria-labelledby="{{ $id }}" aria-hidden="true">
+<div class="modal fade" id="{{ $id }}" tabindex="-1" role="dialog" aria-labelledby="{{ $id }}"
+    aria-hidden="true">
     <input type="hidden" name="modal_id" value="{{ $id }}">
     <input type="hidden" name="name_modal" id="name_modal" value="{{ $name }}">
-    <div class="modal-dialog modal-dialog-centered" role="document" @if ($name == 'XH' || $name == 'CXH')
-    style="max-width: 800px;" @endif>
+    <div class="modal-dialog modal-dialog-centered" role="document"
+        @if ($name == 'XH' || $name == 'CXH') style="max-width: 800px;" @endif>
         <div class="modal-content">
             <div class="modal-header justify-content-end">
                 <div class="d-flex content__heading--right">
@@ -84,35 +85,35 @@
                                                         );
                                                     @endphp
                                                     @foreach ($dataProduct as $product_value)
-                                                                                                        @php
-                                                                                                            // Lấy danh sách bảo hành của sản phẩm (nếu có)
-                                                                                                            $warrantyList =
-                                                                                                                $warrantyByProduct[$product_value->id] ?? collect();
+                                                        @php
+                                                            // Lấy danh sách bảo hành của sản phẩm (nếu có)
+                                                            $warrantyList =
+                                                                $warrantyByProduct[$product_value->id] ?? collect();
 
-                                                                                                            // Định dạng lại để đảm bảo JSON đúng
-                                                                                                            $warrantyArray = $warrantyList
-                                                                                                                ->map(
-                                                                                                                    fn($w) => [
-                                                                                                                        'info' => $w->info,
-                                                                                                                        'warranty' => $w->warranty,
-                                                                                                                    ],
-                                                                                                                )
-                                                                                                                ->toArray();
-                                                                                                        @endphp
-                                                                                                        <li class="p-2 align-items-center text-wrap border-top"
-                                                                                                            data-id="{{ $product_value->id }}">
-                                                                                                            <a href="#" title="{{ $product_value->product_code }}"
-                                                                                                                style="flex:2;" id="{{ $product_value->id }}"
-                                                                                                                data-code="{{ $product_value->product_code }}"
-                                                                                                                data-name="{{ $product_value->product_name }}"
-                                                                                                                data-brand="{{ $product_value->brand }}"
-                                                                                                                data-id="{{ $product_value->id }}"
-                                                                                                                data-warranty='@json($warrantyArray)' name="info-product"
-                                                                                                                class="search-info">
-                                                                                                                <span
-                                                                                                                    class="text-13-black">{{ $product_value->product_code }}</span>
-                                                                                                            </a>
-                                                                                                        </li>
+                                                            // Định dạng lại để đảm bảo JSON đúng
+                                                            $warrantyArray = $warrantyList
+                                                                ->map(
+                                                                    fn($w) => [
+                                                                        'info' => $w->info,
+                                                                        'warranty' => $w->warranty,
+                                                                    ],
+                                                                )
+                                                                ->toArray();
+                                                        @endphp
+                                                        <li class="p-2 align-items-center text-wrap border-top"
+                                                            data-id="{{ $product_value->id }}">
+                                                            <a href="#" title="{{ $product_value->product_code }}"
+                                                                style="flex:2;" id="{{ $product_value->id }}"
+                                                                data-code="{{ $product_value->product_code }}"
+                                                                data-name="{{ $product_value->product_name }}"
+                                                                data-brand="{{ $product_value->brand }}"
+                                                                data-id="{{ $product_value->id }}"
+                                                                data-warranty='@json($warrantyArray)'
+                                                                name="info-product" class="search-info">
+                                                                <span
+                                                                    class="text-13-black">{{ $product_value->product_code }}</span>
+                                                            </a>
+                                                        </li>
                                                     @endforeach
                                                 </ul>
                                             </div>
@@ -128,13 +129,16 @@
                                     </td>
                                     @if ($name == 'XH' || $name == 'CXH')
                                         <td class="text-13-black border border-bottom-0 py-0">
-                                            <input type="text" name="name_warranty" id="name_warranty" style="flex:2;"
+                                            <input type="text" name="name_warranty" id="name_warranty"
+                                                style="flex:2;"
                                                 class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                                         </td>
                                         <td class="text-13-black border border-bottom-0 py-0">
-                                            <input type="number" id="product_warranty_input" name="product_warranty_input"
-                                                style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2"
-                                                step="1" oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')"
+                                            <input type="number" id="product_warranty_input"
+                                                name="product_warranty_input" style="flex:2;"
+                                                class="text-13-black w-100 border-0 bg-input-guest-blue p-2"
+                                                step="1"
+                                                oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')"
                                                 onkeydown="if(event.key === '.' || event.key === ',') event.preventDefault();">
                                         </td>
                                     @endif
@@ -281,7 +285,8 @@
                             <span>
                                 <button id="add-rows" class="border-0 bg-transparent pl-3 text-purble">Thêm</button>
                                 <input type="number" id="row-count" class="rounded d-inline-block p-0 text-center"
-                                    style="width: 36px; height: 22px; font-size: 12px;" value="5" min="1">
+                                    style="width: 36px; height: 22px; font-size: 12px;" value="5"
+                                    min="1">
                                 dòng
                             </span>
                             <span class="mr-5 text-danger font-weight-bold">Số lượng : <b
@@ -303,7 +308,7 @@
     // Khi bấm vào nút
 
     // Check serial number
-    $(document).ready(function () {
+    $(document).ready(function() {
         let pendingAjaxRequests = 0; // Biến đếm số request AJAX đang chờ
         const $submitButton = $('.submit-button'); // Lấy nút submit
 
@@ -316,7 +321,7 @@
             }
         }
 
-        $(document).on('change', '.seri-input-check', function () {
+        $(document).on('change', '.seri-input-check', function() {
             const $input = $(this);
             const $checkIcon = $input.siblings('.check-icon');
             const serialNumber = $input.val().trim();
@@ -328,9 +333,10 @@
 
             // Kiểm tra trùng lặp trong các ô nhập liệu khác
             let isDuplicate = false;
-            $('.seri-input-check').each(function () {
+            $('.seri-input-check').each(function() {
                 const otherValue = $(this).val().trim();
-                if ($(this)[0] !== $input[0] && otherValue === serialNumber && serialNumber !== '') {
+                if ($(this)[0] !== $input[0] && otherValue === serialNumber && serialNumber !==
+                    '') {
                     isDuplicate = true;
                     return false;
                 }
@@ -360,16 +366,18 @@
                         warehouseTransferId: warehouseTransferId,
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.status === 'success' && serialNumber !== "") {
-                            $checkIcon.text('✔').css('color', 'green').attr('title', response.message);
+                            $checkIcon.text('✔').css('color', 'green').attr('title',
+                                response.message);
                         } else if (response.status === 'error') {
-                            $checkIcon.text('✖').css('color', 'red').attr('title', response.message);
+                            $checkIcon.text('✖').css('color', 'red').attr('title', response
+                                .message);
                         }
                         pendingAjaxRequests--; // Giảm số request đang chờ
                         updateSubmitButtonState(); // Cập nhật trạng thái nút submit
                     },
-                    error: function () {
+                    error: function() {
                         $checkIcon.text('?').css('color', 'orange');
                         console.error('Có lỗi xảy ra khi kiểm tra số serial.');
                         pendingAjaxRequests--; // Giảm số request đang chờ
@@ -381,7 +389,7 @@
             }
             updateSerialCount();
         });
-        $(document).on('change', "[name='serial_borrow']", function () {
+        $(document).on('change', "[name='serial_borrow']", function() {
             const $input = $(this);
             const $checkIcon = $input.siblings('.check-icon-borrow');
             const serialNumber = $input.val().trim(); // Giá trị nhập vào
@@ -393,7 +401,7 @@
 
             // Kiểm tra trùng lặp trong các ô nhập liệu khác
             let isDuplicate = false;
-            $('.seri-input-check').each(function () {
+            $('.seri-input-check').each(function() {
                 const otherValue = $(this).val().trim();
                 if ($(this)[0] !== $input[0] && otherValue === serialNumber && serialNumber !==
                     '') {
@@ -423,7 +431,7 @@
                         warehouseTransferId: warehouseTransferId,
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
-                    success: function (response) {
+                    success: function(response) {
                         if (response.status === 'success' && serialNumber !== "") {
                             console.log(serialNumber);
                             $checkIcon.text('✔').css('color', 'green').attr('title',
@@ -433,7 +441,7 @@
                                 .message);
                         }
                     },
-                    error: function () {
+                    error: function() {
                         $checkIcon.text('?').css('color', 'orange');
                         console.error('Có lỗi xảy ra khi kiểm tra số serial.');
                     }
@@ -447,213 +455,191 @@
         });
     });
 
-    $('#btn-get-unique-products').click(function (e) {
-        // e.preventDefault();
+    $('#btn-get-unique-products').click(function(e) {
+        e.preventDefault();
+
+        let $btn = $(this);
+        $btn.prop('disabled', true); // Vô hiệu hóa nút khi đang xử lý
+
         if (nameModal == "NH") {
             if (!validateInput("#provider_id", "Vui lòng chọn nhà cung cấp!", "#provider_name")) {
+                $btn.prop('disabled', false);
                 return false;
             }
         }
         if (nameModal == "XH" || nameModal == "CXH") {
             if (!validateInput("#provider_name", "Vui lòng chọn khách hàng!", "#provider_name")) {
+                $btn.prop('disabled', false);
                 return false;
             }
         }
 
         if ($('#tbody-product-data tr#serials-data').length === 0) {
             showAutoToast("warning", "Vui lòng thêm sản phẩm.");
-            e.preventDefault();
+            $btn.prop('disabled', false);
+            return false;
         }
 
         if (nameModal === "PCK" || nameModal === "CPCK") {
             let warehouse = $("#warehouse_id").val();
-            let warehousereceive = $("#warehouse_receive_id").val();
-            if (warehouse === "" || warehousereceive === "") {
+            let warehouseReceive = $("#warehouse_receive_id").val();
+            if (warehouse === "" || warehouseReceive === "") {
                 showAutoToast("warning", "Vui lòng chọn kho xuất và kho nhận");
-                e.preventDefault();
-            } else {
-                if (warehouse === warehousereceive) {
-                    showAutoToast("warning", "Kho xuất và kho nhận không được trùng nhau");
-                    e.preventDefault();
-                }
+                $btn.prop('disabled', false);
+                return false;
+            } else if (warehouse === warehouseReceive) {
+                showAutoToast("warning", "Kho xuất và kho nhận không được trùng nhau");
+                $btn.prop('disabled', false);
+                return false;
             }
         }
 
         // Kiểm tra nhập S/N trùng
         let duplicates = [];
         let seen = new Set();
-
-        // Duyệt qua từng input để lấy giá trị
-        $('input[name="serial[]"]').each(function () {
-            let value = $(this).val().trim().toLowerCase(); // Chuẩn hóa về chữ thường
+        $('input[name="serial[]"]').each(function() {
+            let value = $(this).val().trim().toLowerCase();
             if (seen.has(value) && value !== "") {
-                duplicates.push(value); // Thêm giá trị trùng vào mảng
+                duplicates.push(value);
             } else {
-                seen.add(value); // Thêm giá trị vào tập hợp
+                seen.add(value);
             }
         });
 
-        // Nếu có giá trị trùng, thông báo
         if (duplicates.length > 0) {
             showAutoToast("warning", "Các S/N bị trùng: " + duplicates.join(", "));
-            e.preventDefault();
+            $btn.prop('disabled', false);
+            return false;
         }
 
-        //Kiểm tra S/N tồn tại
-        let SNExist = []; //mảng chứa S/N tồn tại
+        // Kiểm tra S/N tồn tại
+        let SNExist = [];
+        let ajaxCalls = [];
+        let warehouse_id = $("#warehouse_id").val();
 
-        let isDuplicate = false; // Cờ kiểm tra xem có serial nào bị trùng không
-        const rows = $(
-            '#tbody-product-data .row-product[data-product-id]'); // Lấy tất cả các hàng có product_id
-        const warehouse_id = $("#warehouse_id").val();
-        rows.each(function () {
-            const $row = $(this); // Lấy dòng hiện tại
-            const product_id = $row.find('.product_id').val();
-            const serial = $row.find('.serial').val().trim();
-            const serial_borrow = $row.find('.serial_borrow').val()?.trim() || "";
+        $('#tbody-product-data .row-product[data-product-id]').each(function() {
+            let $row = $(this);
+            let product_id = $row.find('.product_id').val();
+            let serial = $row.find('.serial').val().trim();
+            let serial_borrow = $row.find('.serial_borrow').val()?.trim() || "";
 
-            // Nếu serial rỗng, bỏ qua
             if (!serial) return;
-            // Gửi AJAX kiểm tra từng serial
-            $.ajax({
+
+            let ajaxCall = $.ajax({
                 url: '{{ route('checkSN') }}',
                 type: 'GET',
                 data: {
-                    product_id: product_id,
-                    serial: serial,
-                    nameModal: nameModal,
-                    import_id: import_id,
-                    warehouse_id: warehouse_id,
-                    serial_borrow: serial_borrow,
+                    product_id,
+                    serial,
+                    nameModal,
+                    import_id,
+                    warehouse_id,
+                    serial_borrow,
                     _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (response) {
-                    if (nameModal === "NH" && response.exists) {
+                }
+            }).done(function(response) {
+                if ((nameModal === "NH" || nameModal === "CNH") && response.exists) {
+                    SNExist.push(serial);
+                }
+                if ((nameModal === "XH" || nameModal === "CXH") && !response.exists) {
+                    SNExist.push(serial);
+                }
+                if (nameModal === "PCK" && !response.exists) {
+                    if (warehouse_id == 1) {
                         SNExist.push(serial);
-                        isDuplicate = true; // Đánh dấu có lỗi trùng lặp
-                    }
-                    if (nameModal === "CNH" && response.exists) {
-                        SNExist.push(serial);
-                        isDuplicate = true; // Đánh dấu có lỗi trùng lặp
-                    }
-                    if (nameModal === "XH" && !response.exists) {
-                        SNExist.push(serial);
-                        isDuplicate = true; // Đánh dấu lỗi không tồn tại
-                    }
-                    if (nameModal === "CXH" && !response.exists) {
-                        SNExist.push(serial);
-                        isDuplicate = true; // Đánh dấu lỗi không tồn tại
-                    }
-                    if (nameModal === "PCK" && !response.exists) {
-                        if (warehouse_id == 1) {
+                    } else {
+                        if (!response.existsSerial) {
                             SNExist.push(serial);
-                            isDuplicate = true; // Đánh dấu lỗi không tồn tại
-                        } else {
-                            if (!response.existsSerial) {
-                                SNExist.push(serial);
-                                isDuplicate = true;
-                            }
-                            if (!response.existsSerialBorrow) {
-                                SNExist.push(serial_borrow);
-                                isDuplicate = true;
-                            }
+                        }
+                        if (!response.existsSerialBorrow) {
+                            SNExist.push(serial_borrow);
                         }
                     }
                 }
             });
+
+            ajaxCalls.push(ajaxCall);
         });
 
-        // Nếu có serial trùng, dừng submit
-        if (isDuplicate) {
-            let message = '';
-
-            if (nameModal === "NH" || nameModal === "CNH") {
-                message = `Serial này đã có trong hệ thống: ${SNExist.join(", ")}`;
-            } else if (nameModal === "XH" || nameModal === "CXH") {
-                message = `Serial này không tồn tại hoặc đã được xuất: ${SNExist.join(", ")}`;
-            } else if (nameModal === "PCK") {
-                message = `Serial này không tồn tại: ${SNExist.join(", ")}`;
+        $.when.apply($, ajaxCalls).done(function() {
+            if (SNExist.length > 0) {
+                let message = '';
+                if (nameModal === "NH" || nameModal === "CNH") {
+                    message = `Serial này đã có trong hệ thống: ${SNExist.join(", ")}`;
+                } else if (nameModal === "XH" || nameModal === "CXH") {
+                    message = `Serial này không tồn tại hoặc đã được xuất: ${SNExist.join(", ")}`;
+                } else if (nameModal === "PCK") {
+                    message = `Serial này không tồn tại: ${SNExist.join(", ")}`;
+                }
+                showAutoToast("warning", message);
+                $btn.prop('disabled', false);
+                return;
             }
 
-            showAutoToast("warning", message);
-            e.preventDefault(); // Ngăn form submit
-        }
+            // Tạo danh sách sản phẩm hợp lệ
+            const uniqueProducts = new Map();
+            $('#tbody-product-data .row-product[data-product-id]').each(function() {
+                const $row = $(this);
+                const product_id = $row.find('.product_id').val();
+                const serial = $row.find('.serial').val();
+                const serialBorrow = $row.find('.serial_borrow').val();
+                const note_seri = $row.find('.note_seri').val();
+                const status_recept = $row.find('.status_recept').val();
 
-        // e.preventDefault(); // Nếu cần, hãy giữ lại để ngăn mặc định
-        // Khởi tạo một Map để lưu sản phẩm duy nhất
-        const uniqueProducts = new Map();
+                const warranties = [];
+                const productWarrantyName = $row.find('.name_warranty').val() || "Toàn bộ";
+                const productWarrantyMonth = $row.find('.warranty').val() || 24;
 
-        // Duyệt qua từng hàng có thuộc tính data-product-id trong tbody
-        $('#tbody-product-data .row-product[data-product-id]').each(function () {
-            const $row = $(this); // Dòng hiện tại
-            const product_id = $row.find('.product_id').val();
-            const serial = $row.find('.serial').val();
-            const serialBorrow = $row.find('.serial_borrow').val();
-            const note_seri = $row.find('.note_seri').val();
-            const status_recept = $row.find('.status_recept').val();
-
-            // Lấy bảo hành từ hàng .row-product
-            const warranties = [];
-            const productWarrantyName = $row.find('.name_warranty').val() || "Toàn bộ";
-            const productWarrantyMonth = $row.find('.warranty').val() || 24;
-
-            if (productWarrantyName && productWarrantyMonth) {
-                warranties.push([productWarrantyName, productWarrantyMonth]);
-            }
-
-            // Tìm các hàng .row-warranty ngay sau .row-product
-            let $nextRow = $row.next();
-
-            while ($nextRow.hasClass('row-warranty')) {
-                const name_warranty = $nextRow.find('.name_warranty').val() || "Toàn bộ";
-                const warranty_month = $nextRow.find('.warranty').val() || 24;
-
-                if (name_warranty && warranty_month) {
-                    warranties.push([name_warranty, warranty_month]);
+                if (productWarrantyName && productWarrantyMonth) {
+                    warranties.push([productWarrantyName, productWarrantyMonth]);
                 }
 
-                $nextRow = $nextRow.next();
-            }
+                let $nextRow = $row.next();
+                while ($nextRow.hasClass('row-warranty')) {
+                    const name_warranty = $nextRow.find('.name_warranty').val() || "Toàn bộ";
+                    const warranty_month = $nextRow.find('.warranty').val() || 24;
+                    if (name_warranty && warranty_month) {
+                        warranties.push([name_warranty, warranty_month]);
+                    }
+                    $nextRow = $nextRow.next();
+                }
 
-            // Khởi tạo object chứa dữ liệu cơ bản
-            const productData = {
-                product_id,
-                serial,
-                note_seri,
-                status_recept
-            };
+                const productData = {
+                    product_id,
+                    serial,
+                    note_seri,
+                    status_recept
+                };
 
-            if (nameModal === "XH" || nameModal === "CXH") {
-                productData.warranty = warranties;
-            }
+                if (nameModal === "XH" || nameModal === "CXH") {
+                    productData.warranty = warranties;
+                }
+                if (nameModal === "PCK" || nameModal === "CPCK") {
+                    productData.serialBorrow = serialBorrow;
+                }
 
-            if (nameModal === "PCK" || nameModal === "CPCK") {
-                productData.serialBorrow = serialBorrow;
-            }
+                const uniqueKey = `${product_id}-${serial}-${note_seri}`;
+                if (!uniqueProducts.has(uniqueKey)) {
+                    uniqueProducts.set(uniqueKey, productData);
+                }
+            });
 
-            // Tạo khóa duy nhất bao gồm cả note_seri
-            const uniqueKey = `${product_id}-${serial}-${note_seri}`;
+            $('#data-test').val(JSON.stringify(Array.from(uniqueProducts.values())));
 
-            // Thêm vào Map nếu chưa tồn tại
-            if (!uniqueProducts.has(uniqueKey)) {
-                uniqueProducts.set(uniqueKey, productData);
-            }
+            // Nếu hợp lệ, submit form
+            $('#form-submit').submit(); // Đổi thành ID form thực tế
+        }).always(function() {
+            $btn.prop('disabled', false); // Bật lại nút sau khi xử lý xong
         });
-
-        // Chuyển Map thành mảng
-        const uniqueProductsArray = Array.from(uniqueProducts.values());
-
-        // Chuyển mảng thành chuỗi JSON và gán vào data-test
-        $('#data-test').val(JSON.stringify(uniqueProductsArray));
     });
 
     if (nameModal === "XH") {
-        $(document).on('click', '.search-info', function (e) {
+        $(document).on('click', '.search-info', function(e) {
             e.preventDefault();
 
             // Lấy thông tin từ data-* attributes
             const productId = $(this).data('id');
-            const serialInputs = $('.seri-input-check').map(function () {
+            const serialInputs = $('.seri-input-check').map(function() {
                 return $(this).val().trim(); // Lấy giá trị từ input và loại bỏ khoảng trắng
             }).get();
 
@@ -669,8 +655,8 @@
                         productId: productId,
                         serialNumbers: serialInputs,
                     },
-                    success: function (response) {
-                        $('.seri-input-check').each(function () {
+                    success: function(response) {
+                        $('.seri-input-check').each(function() {
                             const serial = $(this).val().trim();
 
                             // Kiểm tra nếu serial hợp lệ
@@ -685,7 +671,7 @@
                             }
                         });
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         console.error('Error checking serial numbers:', xhr.responseText);
                     },
                 });

@@ -50,7 +50,7 @@
                     <!-- /.card-header -->
                     <div class="outer2 text-nowrap">
                         <table id="example2" class="table table-hover">
-                            <thead class="sticky-head">
+                            <thead class="border-custom">
                                 <tr class="height-40">
                                     <th scope="col" class="height-40 py-0 border border-right-0">
                                         <span class="d-flex">
@@ -144,7 +144,7 @@
                                             {{ $item->provider_name }}
                                         </td>
                                         <td
-                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                            class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
                                             {{ $item->address }}
                                         </td>
                                         <td
@@ -239,7 +239,7 @@
                                                     {{ $item->provider_name }}
                                                 </td>
                                                 <td
-                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0">
+                                                    class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">
                                                     {{ $item->address }}
                                                 </td>
                                                 <td

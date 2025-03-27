@@ -86,7 +86,7 @@
                                             <div class="icon" id="icon-rolename"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border-right" scope="col" style="">
+                                    <th class="height-40 py-0 border-right border-left" scope="col" style="">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="address"
                                                 data-sort-type="DESC">
@@ -108,7 +108,7 @@
                                             <div class="icon" id="icon-phone"></div>
                                         </span>
                                     </th>
-                                    <th class="height-40 py-0 border-right" scope="col" style="">
+                                    <th class="height-40 py-0 border-right border-left" scope="col" style="">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="email"
                                                 data-sort-type="DESC">

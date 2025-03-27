@@ -139,7 +139,7 @@
                                                 {{ $item->customer_name }}
                                             </td>
                                             <td
-                                                class="text-13-black border border-right-0 border-bottom border-top-0 py-0">
+                                                class="text-13-black border border-right-0 border-bottom border-top-0 py-0 max-width180">
                                                 {{ $item->address }}
                                             </td>
                                             <td
@@ -231,7 +231,7 @@
                                                     {{ $item->customer_name }}
                                                 </td>
                                                 <td
-                                                    class="text-13-black border border-right-0 border-bottom border-top-0 py-0">
+                                                    class="text-13-black border border-right-0 border-bottom border-top-0 py-0 max-width180">
                                                     {{ $item->address }}
                                                 </td>
                                                 <td
