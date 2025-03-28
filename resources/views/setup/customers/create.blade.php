@@ -63,7 +63,7 @@
                         <div class="content-info">
                             <div class="d-flex align-items-center height-60-mobile ">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Chọn nhóm</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Chọn nhóm</p>
                                 </div>
                                 <div
                                     class="border border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
@@ -79,7 +79,7 @@
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-left-0 border-top-0">
-                                    <p class="p-0 m-0 required-label margin-left32 text-14">Mã khách hàng</p>
+                                    <p class="p-0 m-0 required-label margin-left32 text-13-red">Mã khách hàng</p>
                                 </div>
                                 <input type="text" required placeholder="Nhập thông tin" name="customer_code"
                                     autocomplete="off"
@@ -87,7 +87,7 @@
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-left-0 border-top-0">
-                                    <p class="p-0 m-0 required-label margin-left32 text-14">Tên khách hàng</p>
+                                    <p class="p-0 m-0 required-label margin-left32 text-13-red">Tên khách hàng</p>
                                 </div>
                                 <input type="text" required placeholder="Nhập thông tin" name="customer_name"
                                     autocomplete="off"
@@ -95,21 +95,21 @@
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Địa chỉ</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Địa chỉ</p>
                                 </div>
                                 <input type="text" placeholder="Nhập thông tin" name="address" autocomplete="off"
                                     class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Người liên hệ</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Người liên hệ</p>
                                 </div>
                                 <input type="text" placeholder="Nhập thông tin" name="contact_person" autocomplete="off"
                                     class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Điện thoại</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Điện thoại</p>
                                 </div>
                                 <input type="number" placeholder="Nhập thông tin" name="phone" autocomplete="off"
                                     class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue"
@@ -119,14 +119,14 @@
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Email</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Email</p>
                                 </div>
                                 <input type="email" placeholder="Nhập thông tin" name="email" autocomplete="off"
                                     class="border border-white border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Mã số thuế</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Mã số thuế</p>
                                 </div>
                                 <input type="text" placeholder="Nhập thông tin" name="tax_code"
                                     oninput="validateInput(this)" autocomplete="off"
@@ -134,7 +134,7 @@
                             </div>
                             <div class="d-flex align-items-center height-60-mobile">
                                 <div class="title-info height-100 py-2 border border-top-0 border-left-0">
-                                    <p class="p-0 m-0 margin-left32 text-14">Ghi chú</p>
+                                    <p class="p-0 m-0 margin-left32 text-13">Ghi chú</p>
                                 </div>
                                 <input type="text" placeholder="Nhập thông tin" name="note" autocomplete="off"
                                     class="border border-top-0 w-100 py-2 border-left-0 border-right-0 px-3 text-13-black height-100 bg-input-guest-blue">
