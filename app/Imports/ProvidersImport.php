@@ -32,8 +32,8 @@ class ProvidersImport implements ToCollection
                 $provider = Providers::create([
                     'provider_code' => $row[0] ?? null,
                     'provider_name' => $row[1] ?? null,
-                    'address' => $row[2] ?? null,
-                    'contact_person' => $row[3] ?? null,
+                    'address' => $row[3] ?? null,
+                    'contact_person' => $row[2] ?? null,
                     'phone' => $row[4] ?? null,
                     'email' => $row[5] ?? null,
                     'tax_code' => $tax_code,
