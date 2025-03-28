@@ -580,14 +580,14 @@ function createSerialRow(
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0 ${hideLastWarranty}">
                 <input type="text" autocomplete="off"
                     class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32 bg-input-guest-blue"
-                    name="name_warranty_product[]" value="${
+                    name="name_warranty_product[]" placeholder="Thông tin" value="${
                         product.name_warranty || ""
                     }">
             </td>
            <td class="border-right p-2 text-13 align-top border-bottom border-top-0 ${hideLastWarranty}">
     <input type="number" autocomplete="off"
         class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 bg-input-guest-blue"
-        name="warranty[]" value="${product.warranty || ''}"
+        name="warranty[]" placeholder="Tháng" value="${product.warranty || ''}"
         step="1"
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        onkeydown="if(event.key === '.' || event.key === ',') event.preventDefault();" >
@@ -621,14 +621,14 @@ function createSerialRow(
                 <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
                     <input type="text" autocomplete="off"
                         class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32 bg-input-guest-blue"
-                        name="name_warranty_product[]" value="${
+                        name="name_warranty_product[]" placeholder="Thông tin" value="${
                             warrantyItem.name_warranty || ""
                         }">
                 </td>
                 <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
                     <input type="number" autocomplete="off"
                         class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 bg-input-guest-blue"
-                        name="warranty[]" value="${
+                        name="warranty[]" placeholder="Tháng" value="${
                             warrantyItem.product_warranty_input || ""
                         }" step="1"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
@@ -795,10 +795,10 @@ $(document).ready(function () {
                         <td class="text-13-black border border-bottom-0 border-top-0 py-0"></td>
                         <td class="text-13-black border border-bottom-0 border-top-0 py-0"></td>
                         <td class="text-13-black border border-bottom-0 py-0 border-white">
-                            <input type="text" name="name_warranty" value="${dataWarranty[i].info}" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
+                            <input type="text" name="name_warranty" placeholder="Thông tin" value="${dataWarranty[i].info}" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                         </td>
                         <td class="text-13-black border border-bottom-0 py-0 border-white">
-                            <input type="number" name="product_warranty_input" value="${dataWarranty[i].warranty}" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
+                            <input type="number" name="product_warranty_input" placeholder="Tháng" value="${dataWarranty[i].warranty}" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                         </td>
                         <td class="text-13-black border border-bottom-0 py-0 border-white delete-warranty text-center">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -912,10 +912,10 @@ $(document).on("click", ".save-info-product", function (e) {
                 <td class="text-13-black border border-bottom-0 py-0 pl-3"></td>
                 <td class="text-13-black border border-bottom-0 py-0 pl-3"></td>
                 <td class="text-13-black border border-bottom-0 py-0 border-white">
-                    <input type="text" name="name_warranty" id="name_warranty" value="${warranty.name_warranty}" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
+                    <input type="text" name="name_warranty" placeholder="Thông tin" id="name_warranty" value="${warranty.name_warranty}" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                 </td>
                 <td class="text-13-black border border-bottom-0 py-0 border-white">
-                    <input type="number" id="product_warranty_input" name="product_warranty_input" value="${warranty.product_warranty_input}" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
+                    <input type="number" id="product_warranty_input" name="product_warranty_input" placeholder="Tháng" value="${warranty.product_warranty_input}" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                 </td>
                 <td class="text-13-black border border-bottom-0 py-0 border-white delete-warranty text-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1042,10 +1042,10 @@ $("#add-warranty").click(function (e) {
         <td class="text-13-black border border-bottom-0 border-top-0 py-0"></td>
         <td class="text-13-black border border-bottom-0 border-top-0 py-0"></td>
         <td class="text-13-black border border-bottom-0 py-0 border-white">
-            <input type="text" name="name_warranty" id="name_warranty" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2 ">
+            <input type="text" name="name_warranty" placeholder="Thông tin" id="name_warranty" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2 ">
         </td>
         <td class="text-13-black border border-bottom-0 py-0 border-white">
-            <input type="number" id="product_warranty_input" name="product_warranty_input" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2"  step="1"
+            <input type="number" id="product_warranty_input" name="product_warranty_input" placeholder="Tháng" style="flex:2;" class="text-13-black w-100 border-0 bg-input-guest-blue p-2"  step="1"
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        onkeydown="if(event.key === '.' || event.key === ',') event.preventDefault();">
         </td>
@@ -1073,8 +1073,8 @@ $(document).on("click", ".add-warranty-row", function () {
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0"></td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0"></td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0"></td>
-            <td class="border-right p-2 text-13 align-top border-bottom border-top-0"><input type="text" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32 bg-input-guest-blue" name="name_warranty_product[]"></td>
-            <td class="border-right p-2 text-13 align-top border-bottom border-top-0"><input type="number" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 bg-input-guest-blue" name="warranty[]"  step="1"
+            <td class="border-right p-2 text-13 align-top border-bottom border-top-0"><input type="text" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32 bg-input-guest-blue" placeholder="Thông tin" name="name_warranty_product[]"></td>
+            <td class="border-right p-2 text-13 align-top border-bottom border-top-0"><input type="number" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 bg-input-guest-blue" placeholder="Tháng" name="warranty[]"  step="1"
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        onkeydown="if(event.key === '.' || event.key === ',') event.preventDefault();"></td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0"></td>

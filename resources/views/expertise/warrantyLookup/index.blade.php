@@ -167,7 +167,7 @@
                                             $formType = $firstHistory?->receiving?->form_type ?? 0;
                                             $currentDate = new DateTime();
                                             $purchaseDate = new DateTime($item->export_return_date);
-                                            preg_match('/\d+/', $item->name_warranty, $matches);
+                                            preg_match('/\d+/', $item->warranty, $matches);
                                             $warrantyPeriod = isset($matches[0]) ? (int) $matches[0] : 0;
 
                                             $expireDate = (clone $purchaseDate)->modify("+$warrantyPeriod months");

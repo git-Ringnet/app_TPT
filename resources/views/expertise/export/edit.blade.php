@@ -373,7 +373,7 @@
                                                             <input type="text" autocomplete="off"
                                                                 {{ $readonly }}
                                                                 class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32 {{ $bg }}"
-                                                                name="name_warranty[]" value="{{ $warranty[0] }}" 
+                                                                name="name_warranty[]" placeholder="Thông tin" value="{{ $warranty[0] }}" 
                                                                 step="1"
 
                                                                  oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')">
@@ -383,7 +383,7 @@
                                                             <input type="text" autocomplete="off"
                                                                 {{ $readonly }}
                                                                 class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 {{ $bg }}"
-                                                                name="warranty[]" value="{{ $warranty[1] }} "step="1"
+                                                                name="warranty[]" placeholder="Tháng" value="{{ $warranty[1] }} "step="1"
                                                                 oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')">
                                                         </td>
                                                         @if ($index === 0)

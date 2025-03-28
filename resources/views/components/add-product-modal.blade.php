@@ -129,13 +129,13 @@
                                     </td>
                                     @if ($name == 'XH' || $name == 'CXH')
                                         <td class="text-13-black border border-bottom-0 py-0">
-                                            <input type="text" name="name_warranty" id="name_warranty"
+                                            <input type="text" name="name_warranty" placeholder="Thông tin" id="name_warranty"
                                                 style="flex:2;"
                                                 class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                                         </td>
                                         <td class="text-13-black border border-bottom-0 py-0">
                                             <input type="number" id="product_warranty_input"
-                                                name="product_warranty_input" style="flex:2;"
+                                                name="product_warranty_input" placeholder="Tháng" style="flex:2;"
                                                 class="text-13-black w-100 border-0 bg-input-guest-blue p-2"
                                                 step="1"
                                                 oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')"

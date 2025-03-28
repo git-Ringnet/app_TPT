@@ -7,7 +7,7 @@ $(document).ready(function () {
                         class="border border-white height-100 w-100 py-2 border-right-0 border-top-0 px-3 text-13-black bg-input-guest-blue">
                 </td>
                 <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
-                    <input type="number" name="warranty[]" required placeholder="Nhập thông tin"
+                    <input type="number" name="warranty[]" placeholder="Tháng" required placeholder="Nhập thông tin"
                         class="border border-white height-100 w-100 py-2 border-right-0 border-top-0 px-3 text-13-black bg-input-guest-blue">
                 </td>
                 <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
