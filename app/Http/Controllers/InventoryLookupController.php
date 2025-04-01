@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Providers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InventoryLookupController extends Controller
 {
@@ -67,7 +68,7 @@ class InventoryLookupController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(String $id)
+    public function edit(string $id)
     {
         $title = "Tra cứu tồn kho";
         $inventoryLookup = InventoryLookup::with(['product', 'serialNumber'])
@@ -87,7 +88,7 @@ class InventoryLookupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(String $id, Request $request)
+    public function update(string $id, Request $request)
     {
         $inventoryLookup = InventoryLookup::findOrFail($id);
         $inventoryLookup->warranty_date = $request->warranty_date;
@@ -162,4 +163,34 @@ class InventoryLookupController extends Controller
         }
         return false;
     }
+    public function summary()
+    {
+        $warehouse_id = GlobalHelper::getWarehouseId();
+
+        $inventory = InventoryLookup::with(['product', 'serialNumber'])
+            ->whereHas('serialNumber', function ($query) {
+                $query->whereIn('status', [1, 5]);
+            });
+
+        if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho'])) {
+            if ($warehouse_id) {
+                $inventory = $inventory->whereHas('serialNumber', function ($query) use ($warehouse_id) {
+                    $query->where('warehouse_id', $warehouse_id);
+                });
+            }
+        }
+
+        // Correct the table name to `inventory_lookup`
+        $summary = $inventory->selectRaw('products.product_code, products.product_name, products.brand, COUNT(*) as quantity')
+            ->join('products', 'inventory_lookup.product_id', '=', 'products.id') // Fixed table name
+            ->groupBy('products.product_code', 'products.product_name', 'products.brand')
+            ->get();
+
+        return response()->json(['data' => $summary]);
+    }
+//     public function summary()
+// {
+//     $columns = \DB::getSchemaBuilder()->getColumnListing('products');
+//     dd($columns); // Xem danh sách cột của bảng products
+// }
 }

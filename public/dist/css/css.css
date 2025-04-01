@@ -1267,6 +1267,7 @@ td p {
 
 .table-hover.bg-white th {
     font-weight: 600;
+    color: black;
 }
 
 .checkbox-options #dropdown-menu {
