@@ -34,19 +34,20 @@
             <div class="container-fluided">
             <div class="toggle-container"  left: 10px; top: 150px;">
     <button id="toggleSummary" style="
-        background: linear-gradient(to right, #024996, #043365);
+        background: #25406E;
         color: white;
         border: none;
-        padding: 10px 15px;
-        border-radius: 8px;
-        font-size: 14px;
-        margin: 10px 25px;
+        height: 28px;
+        padding: 1px 15px;
+        border-radius: 5px;
+        font-size: 13px;
+        margin: 10px 25px 5px 25px;
         cursor: pointer;
-        transition: 0.3s;
+      
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     " 
-    onmouseover="this.style.background='linear-gradient(to right, #024996, #024996)'; this.style.transform='scale(1.05)';"
-    onmouseout="this.style.background='linear-gradient(to right, #024996, #024996)'; this.style.transform='scale(1)';">
+    onmouseover="this.style.background='  background: #25406E;'; this.style.transform='scale(1)';"
+    onmouseout="this.style.background='  background: #25406E;'; this.style.transform='scale(1)';">
         Hiển thị bảng tổng hợp
     </button>
 </div>
