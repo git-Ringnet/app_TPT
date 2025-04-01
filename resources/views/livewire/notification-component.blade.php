@@ -14,24 +14,24 @@
     </a>
     <div class="list-noti p-2">
         <ul class="nav nav-tabs p-2">
-            {{-- @unlessrole('Bảo hành') --}}
+            @unlessrole('Bảo hành')
                 <li>
                     <a class="text-secondary active mx-2 m-0 text-12" data-toggle="tab" href="#info">
                         Tra cứu tồn kho
                     </a>
                 </li>
-            {{-- @endunlessrole
-            @unlessrole('Quản lý kho') --}}
+            @endunlessrole
+            @unlessrole('Quản lý kho')
                 <li>
                     <a class="text-secondary @role('Bảo hành') active @endrole m-0 mx-2 text-12" data-toggle="tab"
                         href="#history">
                         Phiếu tiếp nhận
                     </a>
                 </li>
-            {{-- @endunlessrole --}}
+            @endunlessrole
         </ul>
         <div class="tab-content overflow-auto" style="height: 280px;">
-            {{-- @unlessrole('Bảo hành') --}}
+            @unlessrole('Bảo hành')
                 <div class="tab-pane fade show active notification-list" id="info"
                     style="background: none !important;">
                     <button class="mt-1 btn btn-outline-success btn-sm rounded-pill float-right markAllRead"
@@ -61,8 +61,8 @@
                         @endif
                     @endforeach
                 </div>
-            {{-- @endunlessrole
-            @unlessrole('Quản lý kho') --}}
+            @endunlessrole
+            @unlessrole('Quản lý kho')
                 <div class="tab-pane fade @role('Bảo hành') show active @endrole bg-none"
                     style="background: none !important;" id="history">
                     <button class="mt-1 btn btn-outline-success btn-sm rounded-pill float-right markAllRead"
@@ -91,7 +91,7 @@
                         @endif
                     @endforeach
                 </div>
-            {{-- @endunlessrole --}}
+            @endunlessrole
         </div>
     </div>
 </div>
