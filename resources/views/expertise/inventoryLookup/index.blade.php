@@ -347,7 +347,7 @@ function loadSummaryData() {
                 let rows = response.data.map(item => `
                     <tr class="position-relative inven-lookup-info height-40">
                         <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.product_code || ''}</td>
-                        <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.product_name || ''}</td>
+                        <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 note-text">${item.product_name || ''}</td>
                         <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.brand || ''}</td>
                         <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.quantity || 0}</td>
                     </tr>
