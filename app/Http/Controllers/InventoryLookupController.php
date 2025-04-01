@@ -163,31 +163,59 @@ class InventoryLookupController extends Controller
         }
         return false;
     }
-    public function summary()
-    {
-        $warehouse_id = GlobalHelper::getWarehouseId();
+    public function summary(Request $request)
+{
+    $warehouse_id = GlobalHelper::getWarehouseId();
 
-        $inventory = InventoryLookup::with(['product', 'serialNumber'])
-            ->whereHas('serialNumber', function ($query) {
-                $query->whereIn('status', [1, 5]);
+    $inventory = InventoryLookup::with(['product', 'serialNumber'])
+        ->whereHas('serialNumber', function ($query) {
+            $query->whereIn('status', [1, 5]);
+        });
+
+    if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho'])) {
+        if ($warehouse_id) {
+            $inventory = $inventory->whereHas('serialNumber', function ($query) use ($warehouse_id) {
+                $query->where('warehouse_id', $warehouse_id);
             });
-
-        if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho'])) {
-            if ($warehouse_id) {
-                $inventory = $inventory->whereHas('serialNumber', function ($query) use ($warehouse_id) {
-                    $query->where('warehouse_id', $warehouse_id);
-                });
-            }
         }
-
-        // Correct the table name to `inventory_lookup`
-        $summary = $inventory->selectRaw('products.product_code, products.product_name, products.brand, COUNT(*) as quantity')
-            ->join('products', 'inventory_lookup.product_id', '=', 'products.id') // Fixed table name
-            ->groupBy('products.product_code', 'products.product_name', 'products.brand')
-            ->get();
-
-        return response()->json(['data' => $summary]);
     }
+
+    // Chỉ lọc trên 3 cột: product_code, product_name, brand
+    if ($request->filled('ma')) {
+        $inventory->whereHas('product', function ($query) use ($request) {
+            $query->where('product_code', 'like', '%' . $request->input('ma') . '%');
+        });
+    }
+
+    if ($request->filled('ten')) {
+        $inventory->whereHas('product', function ($query) use ($request) {
+            $query->where('product_name', 'like', '%' . $request->input('ten') . '%');
+        });
+    }
+
+    if ($request->filled('brand')) {
+        $inventory->whereHas('product', function ($query) use ($request) {
+            $query->where('brand', 'like', '%' . $request->input('brand') . '%');
+        });
+    }
+
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $inventory->whereHas('product', function ($query) use ($search) {
+            $query->where('product_code', 'like', '%' . $search . '%')
+                  ->orWhere('product_name', 'like', '%' . $search . '%')
+                  ->orWhere('brand', 'like', '%' . $search . '%');
+        });
+    }
+
+    // Tính toán tổng hợp
+    $summary = $inventory->selectRaw('products.product_code, products.product_name, products.brand, COUNT(*) as quantity')
+        ->join('products', 'inventory_lookup.product_id', '=', 'products.id')
+        ->groupBy('products.product_code', 'products.product_name', 'products.brand')
+        ->get();
+
+    return response()->json(['data' => $summary]);
+}
 //     public function summary()
 // {
 //     $columns = \DB::getSchemaBuilder()->getColumnListing('products');

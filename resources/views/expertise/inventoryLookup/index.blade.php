@@ -2,17 +2,17 @@
 @section('title', $title)
 <div class="content-wrapper m-0 min-height--none p-0">
     <div class="content-header-fixed px-1">
-        <div class="content__header--inner">
+        <div class="content__header--inner" style="position: relative; display: flex; align-items: center;">
             <x-search-filter :keywords="request('keywords')" :filters="[
-        'Mã hàng',
-        'Tên hàng',
-        'Hãng',
-        'Serial',
-        'Nhà cung cấp',
-        'Ngày nhập hàng',
-        'Thời gian tồn kho',
-        'Trạng thái',
-    ]">
+                'Mã hàng',
+                'Tên hàng',
+                'Hãng',
+                'Serial',
+                'Nhà cung cấp',
+                'Ngày nhập hàng',
+                'Thời gian tồn kho',
+                'Trạng thái',
+            ]">
                 <x-filter-text name="ma-hang" title="Mã hàng" />
                 <x-filter-text name="ten-hang" title="Tên hàng" />
                 <x-filter-text name="serial" title="Serial" />
@@ -21,51 +21,47 @@
                     namedisplay="provider_name" />
                 <x-filter-date name="ngay-nhap-hang" title="Ngày nhập hàng" />
                 <x-filter-status name="trang-thai" title="Trạng thái" :filters="[
-        ['key' => '1', 'value' => 'Tới hạn bào trì', 'color' => '#858585'],
-        ['key' => '0', 'value' => 'Blank', 'color' => '#08AA36BF'],
-    ]" />
+                    ['key' => '1', 'value' => 'Tới hạn bào trì', 'color' => '#858585'],
+                    ['key' => '0', 'value' => 'Blank', 'color' => '#08AA36BF'],
+                ]" />
                 <x-filter-compare name="thoi-gian-ton-kho" title="Thời gian tồn kho" />
             </x-search-filter>
+            <div class="toggle-container" style="position: absolute; left: 345px; top: 0;">
+                <button id="toggleSummary" style="
+                    background: #25406E;
+                    color: white;
+                    border: none;
+                    height: 30px;
+                    padding: 0px 15px;
+                    border-radius: 5px;
+                    font-size: 13px;
+                    margin: 9px 25px 5px 0px;
+                    cursor: pointer;
+                    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+                ">
+                    Hiển thị bảng tổng hợp
+                </button>
+            </div>
             <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
         </div>
     </div>
     <div class="content margin-top-127">
         <section class="content">
             <div class="container-fluided">
-            <div class="toggle-container"  left: 10px; top: 150px;">
-    <button id="toggleSummary" style="
-        background: #25406E;
-        color: white;
-        border: none;
-        height: 28px;
-        padding: 1px 15px;
-        border-radius: 5px;
-        font-size: 13px;
-        margin: 10px 25px 5px 25px;
-        cursor: pointer;
-      
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    " 
-    onmouseover="this.style.background='  background: #25406E;'; this.style.transform='scale(1)';"
-    onmouseout="this.style.background='  background: #25406E;'; this.style.transform='scale(1)';">
-        Hiển thị bảng tổng hợp
-    </button>
-</div>
-
-
+                <div class="row result-filter-inven-lookup margin-left20 my-1">
+                </div>  
                 <div id="summaryTable" class="col-12 p-0 m-0" style="display: none;">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Tổng hợp tồn kho</h3>
                         </div>
                         <div class="outer2 table-responsive text-nowrap">
-                            <table id="summaryTableData" class="table table-hover bg-white rounded" style="font-size: 14px; ">
-                                <thead class="border-custom" >
+                            <table id="summaryTableData" class="table table-hover bg-white rounded" style="font-size: 14px;">
+                                <thead class="border-custom">
                                     <tr class="height-40 py-0 border-right-0" scope="col">
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_code"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_code" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Mã hàng</span>
                                                     </button>
@@ -75,8 +71,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_name"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_name" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Tên hàng</span>
                                                     </button>
@@ -86,8 +81,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Hãng</span>
                                                     </button>
@@ -105,19 +99,15 @@
                         </div>
                     </div>
                 </div>
-
-
                 <div class="col-12 p-0 m-0">
                     <div class="card">
-                        <!-- /.card-header -->
                         <div class="outer2 table-responsive text-nowrap">
                             <table id="example2" class="table table-hover bg-white rounded">
                                 <thead class="border-custom">
                                     <tr>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_code"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_code" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Mã hàng</span>
                                                     </button>
@@ -127,8 +117,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_name"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_name" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Tên hàng</span>
                                                     </button>
@@ -138,8 +127,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Hãng</span>
                                                     </button>
@@ -149,8 +137,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="sericode"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="sericode" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">S/N</span>
                                                     </button>
@@ -160,8 +147,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="providername"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="providername" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Nhà cung cấp</span>
                                                     </button>
@@ -171,8 +157,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="import_date"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="import_date" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Ngày nhập hàng</span>
                                                     </button>
@@ -183,8 +168,7 @@
                                         @if (!auth()->user()->hasAnyRole(['Quản lý kho', 'Bảo hành']))
                                             <th class="height-40 py-0 border-right-0" scope="col">
                                                 <span class="d-flex justify-content-start">
-                                                    <a href="#" class="sort-link btn-submit" data-sort-by="warehouse_id"
-                                                        data-sort-type="DESC">
+                                                    <a href="#" class="sort-link btn-submit" data-sort-by="warehouse_id" data-sort-type="DESC">
                                                         <button class="btn-sort" type="submit">
                                                             <span class="text-14">Kho</span>
                                                         </button>
@@ -195,8 +179,7 @@
                                         @endif
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="storage_duration"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="storage_duration" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Thời gian tồn kho</span>
                                                     </button>
@@ -206,8 +189,7 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="status"
-                                                    data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="status" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Trạng thái</span>
                                                     </button>
@@ -220,22 +202,17 @@
                                 <tbody class="tbody-inven-lookup">
                                     @foreach ($inventory as $item)
                                         <tr class="position-relative inven-lookup-info height-40">
-                                            <input type="hidden" name="id-inven-lookup" class="id-inven-lookup"
-                                                id="id-inven-lookup" value="{{ $item->id }}">
-                                            <td
-                                                class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
+                                            <input type="hidden" name="id-inven-lookup" class="id-inven-lookup" id="id-inven-lookup" value="{{ $item->id }}">
+                                            <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->product->product_code }}
                                             </td>
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
                                                 {{ $item->product->product_name }}
                                             </td>
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->product->brand }}
                                             </td>
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 <a href="{{ route('inventoryLookup.edit', $item->id) }}">
                                                     {{ $item->serialNumber->serial_code ?? '' }}
                                                     @if ($item->serialNumber->status == 5)
@@ -243,28 +220,23 @@
                                                     @endif
                                                 </a>
                                             </td>
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
                                                 @if ($item->provider)
                                                     {{ $item->provider->provider_name }}
                                                 @endif
                                             </td>
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ date_format(new DateTime($item->import_date), 'd/m/Y') }}
                                             </td>
                                             @if (!auth()->user()->hasAnyRole(['Quản lý kho', 'Bảo hành']))
-                                                <td
-                                                    class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                     {{ $item->serialNumber->warehouse->warehouse_name }}
                                                 </td>
                                             @endif
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->storage_duration }} ngày
                                             </td>
-                                            <td
-                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 @if ($item->status == '1')
                                                     <span class="text-danger">Tới hạn bảo trì</span>
                                                 @endif
@@ -298,71 +270,94 @@
             provider: getStatusData(this, 'nha-cung-cap'),
             status: getStatusData(this, 'trang-thai'),
             time_inven: retrieveComparisonData(this, 'thoi-gian-ton-kho'),
-            sort: getSortData(buttonElement)
+            sort: deepeningSort(getSortData(buttonElement)) // Điều chỉnh nếu cần để sort bảng tổng hợp
         };
         // Ẩn tùy chọn nếu cần
         if (!$(e.target).closest('li, input[type="checkbox"]').length) {
             $('#' + $(this).data('button-name') + '-options').hide();
         }
-        // Gọi hàm AJAX
-        var route = "{{ route('filter-inven-lookup') }}"; // Thay route phù hợp
-        var nametable = 'inven-lookup'; // Thay tên bảng phù hợp
+        // Gọi hàm AJAX cho bảng chi tiết
+        var route = "{{ route('filter-inven-lookup') }}";
+        var nametable = 'inven-lookup';
         handleAjaxRequest(formData, route, nametable);
-    });
-    exportTableToExcel("#exportBtn", "#example2", "ton_kho.xlsx");
 
-    
-    // Toggle bảng tổng hợp
-    $(document).on('click', '#toggleSummary', function () {
-    var $summaryTable = $('#summaryTable');
-    var $mainTable = $('#example2').closest('.col-12'); // Hoặc nếu muốn chọn chính xác hơn 
-    
-    if ($summaryTable.is(':visible')) {
-        $summaryTable.hide();
-        $mainTable.show();
-        $(this).text('Hiển thị bảng tổng hợp');
-    } else {
-        $summaryTable.show();
-        $mainTable.hide();
-        $(this).text('Hiển thị bảng chi tiết');
-        loadSummaryData(); 
-    }
-});
-
-    // Hàm tải dữ liệu tổng hợp qua Ajax
-function loadSummaryData() {
-    $.ajax({
-        url: "{{ route('inventoryLookup.summary') }}",
-        method: "GET",
-        cache: true,
-        dataType: "json", 
-        beforeSend: function () {
-            $('#summaryTableBody').html('<tr><td colspan="4">Đang tải dữ liệu...</td></tr>');
-        },
-        success: function (response) {
-            var tbody = $('#summaryTableBody');
-            tbody.empty();
-
-            if (response.data?.length) {
-                let rows = response.data.map(item => `
-                    <tr class="position-relative inven-lookup-info height-40">
-                        <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.product_code || ''}</td>
-                        <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 note-text">${item.product_name || ''}</td>
-                        <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.brand || ''}</td>
-                        <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.quantity || 0}</td>
-                    </tr>
-                `).join(''); 
-                
-                tbody.append(rows);
-            } else {
-                tbody.append('<tr><td colspan="4">Không có dữ liệu</td></tr>');
-            }
-        },
-        error: function (xhr) {
-            console.log('Lỗi:', xhr.responseText);
-            $('#summaryTableBody').html('<tr><td colspan="4">Lỗi khi tải dữ liệu</td></tr>');
+        // Nếu bảng tổng hợp đang hiển thị, cập nhật nó
+        if ($('#summaryTable').is(':visible')) {
+            loadSummaryData(formData);
         }
     });
-}
 
+    exportTableToExcel("#exportBtn", "#example2", "ton_kho.xlsx");
+
+    // Toggle bảng tổng hợp
+    $(document).on('click', '#toggleSummary', function () {
+        var $summaryTable = $('#summaryTable');
+        var $mainTable = $('#example2').closest('.col-12');
+        var formData = {
+            search: $('#search').val(),
+            ma: getData('#ma-hang', this),
+            ten: getData('#ten-hang', this),
+            brand: getData('#hang', this),
+            sn: getData('#serial', this),
+            date: retrieveDateData(this, 'ngay-nhap-hang'),
+            provider: getStatusData(this, 'nha-cung-cap'),
+            status: getStatusData(this, 'trang-thai'),
+            time_inven: retrieveComparisonData(this, 'thoi-gian-ton-kho')
+        };
+
+        if ($summaryTable.is(':visible')) {
+            $summaryTable.hide();
+            $mainTable.show();
+            $(this).text('Hiển thị bảng tổng hợp');
+        } else {
+            $summaryTable.show();
+            $mainTable.hide();
+            $(this).text('Hiển thị bảng chi tiết');
+            loadSummaryData(formData); // Truyền formData khi toggle
+        }
+    });
+
+    // Hàm tải dữ liệu tổng hợp qua Ajax
+    function loadSummaryData(formData = {}) {
+        $.ajax({
+            url: "{{ route('inventoryLookup.summary') }}",
+            method: "GET",
+            data: formData, // Truyền dữ liệu lọc
+            cache: true,
+            dataType: "json",
+            beforeSend: function () {
+                $('#summaryTableBody').html('<tr><td colspan="4">Đang tải dữ liệu...</td></tr>');
+            },
+            success: function (response) {
+                var tbody = $('#summaryTableBody');
+                tbody.empty();
+
+                if (response.data?.length) {
+                    let rows = response.data.map(item => `
+                        <tr class="position-relative inven-lookup-info height-40">
+                            <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.product_code || ''}</td>
+                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180 note-text">${item.product_name || ''}</td>
+                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">${item.brand || ''}</td>
+                            <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">${item.quantity || 0}</td>
+                        </tr>
+                    `).join('');
+                    tbody.append(rows);
+                } else {
+                    tbody.append('<tr><td colspan="4">Không có dữ liệu</td></tr>');
+                }
+            },
+            error: function (xhr) {
+                console.log('Lỗi:', xhr.responseText);
+                $('#summaryTableBody').html('<tr><td colspan="4">Lỗi khi tải dữ liệu</td></tr>');
+            }
+        });
+    }
+
+    // Hàm deepeningSort để xử lý sort nếu cần (giả định)
+    function deepeningSort(sortData) {
+        if (sortData && sortData.sort_by && sortData.sort_type) {
+            return { sort_by: sortData.sort_by, sort_type: sortData.sort_type };
+        }
+        return {};
+    }
 </script>
