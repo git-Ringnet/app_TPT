@@ -26,23 +26,19 @@
                 ]" />
                 <x-filter-compare name="thoi-gian-ton-kho" title="Thời gian tồn kho" />
             </x-search-filter>
-            <div class="toggle-container" style="position: absolute; left: 345px; top: 0;">
-                <button id="toggleSummary" style="
-                    background: #25406E;
-                    color: white;
-                    border: none;
-                    height: 30px;
-                    padding: 0px 15px;
-                    border-radius: 5px;
-                    font-size: 13px;
-                    margin: 9px 25px 5px 0px;
-                    cursor: pointer;
-                    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-                ">
-                    Hiển thị bảng tổng hợp
-                </button>
+            <div class="d-flex content__heading--right">
+                <div class="row m-0">
+                    <div class="toggle-container" style="">
+                        <button class="custom-btn-1 mr-1" id="toggleSummary">
+                            Hiển thị bảng tổng hợp
+                        </button>
+                    </div>
+                </div>
+                <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
+
             </div>
-            <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
+           
+        
         </div>
     </div>
     <div class="content margin-top-127">

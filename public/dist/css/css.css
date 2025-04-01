@@ -1704,6 +1704,16 @@ input[type="number"] {
     border-radius: 5px;
     text-wrap: nowrap;
 }
+.custom-btn-1 {
+    position: relative;
+    padding: 4px 8px;
+    background-color: #15469a;
+    border: 1px solid #25406e;
+    color: white;
+    border-radius: 5px;
+    text-wrap: nowrap;
+    font-size: 13px;
+}
 
 .custom-btn-excel {
     position: relative;
