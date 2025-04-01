@@ -166,18 +166,26 @@ class ImportsController extends Controller
 
     private function notifyStatusChange($record, $message)
     {
-        $users = User::all(); // Lọc user cần thiết nếu muốn
-        foreach ($users as $user) {
-            // Gửi thông báo nếu chưa tồn tại thông báo tương tự cho user
-            $existingNotification = $user->notifications()
-                ->where('type', InventoryLookupNotification::class)
-                ->where('data->inventoryLookup_id', $record->id)
-                ->where('data->message', $message)
-                ->where('data->warranty_date', $record->warranty_date)
-                ->exists();
+        // Lấy tất cả người dùng không có quyền 'dichvu'
+        $users = User::whereDoesntHave('permissions', function ($query) {
+            $query->where('name', 'dichvu');
+        })->get();
 
-            if (!$existingNotification) {
-                $user->notify(new InventoryLookupNotification($record, $message));
+        foreach ($users as $user) {
+            // Kiểm tra nếu người dùng không có quyền 'dichvu' và chưa nhận thông báo này
+            if (!$user->hasPermissionTo('dichvu')) {
+                // Gửi thông báo nếu chưa tồn tại thông báo tương tự cho user
+                $existingNotification = $user->notifications()
+                    ->where('type', InventoryLookupNotification::class)
+                    ->where('data->inventoryLookup_id', $record->id)
+                    ->where('data->message', $message)
+                    ->where('data->warranty_date', $record->warranty_date)
+                    ->exists();
+
+                if (!$existingNotification) {
+                    // Tạo thông báo mới
+                    $user->notify(new InventoryLookupNotification($record, $message));
+                }
             }
         }
     }
@@ -191,7 +199,7 @@ class ImportsController extends Controller
             ->leftJoin("users", "users.id", "imports.user_id")
             ->select("providers.provider_name", "users.name", "imports.*")
             ->where("imports.id", $id)
-            ->first();  
+            ->first();
         $productImports = ProductImport::where("import_id", $id)
             ->get()->groupBy('product_id');
         $title = "Xem chi tiết phiếu nhập hàng";
@@ -199,7 +207,7 @@ class ImportsController extends Controller
 
         return view('expertise.import.see', compact('title', 'import', 'productImports', 'providers'));
     }
-                                                                                                                                                                      
+
     /**
      * Show the form for editing the specified resource.
      */
