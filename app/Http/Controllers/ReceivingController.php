@@ -69,6 +69,9 @@ class ReceivingController extends Controller
             'status' => 'nullable|integer',
             'state' => 'nullable|integer',
         ]);
+
+        // dd($request->all());
+
         // Tạo phiếu tiếp nhận
         $receiving = Receiving::create($validated);
         Artisan::call('receiving:update-status');
@@ -81,7 +84,7 @@ class ReceivingController extends Controller
                 if (!$existSeri) {
                     $newSerial = SerialNumber::create([
                         'product_id' => $product['product_id'],
-                        'status'     => 2,
+                        'status' => 2,
                         'serial_code' => $product['serial'],
                     ]);
                     $serialId = $newSerial->id;
@@ -90,21 +93,33 @@ class ReceivingController extends Controller
                 }
                 $receivedProduct = ReceivedProduct::create([
                     'reception_id' => $receiving->id,
-                    'product_id'   => $product['product_id'],
-                    'quantity'     => 1,
-                    'serial_id'    => $serialId,
-                    'status'       => 0,
-                    'note'         => '',
+                    'product_id' => $product['product_id'],
+                    'quantity' => 1,
+                    'serial_id' => $serialId,
+                    'status' => 0,
+                    'note' => '',
                 ]);
 
                 // Lưu thông tin bảo hành cho từng serial
+                $hasInsertedFull = false;
                 foreach ($product['id_seri'] as $index => $serial) {
-                    if ($product['name_warranty'][$index] != null) {
+                    $nameWarranty = $product['name_warranty'][$index] ?? 'Toàn bộ';
+
+                    // Nếu là "Toàn bộ" và đã insert rồi thì bỏ qua
+                    if ($nameWarranty === 'Toàn bộ') {
+                        if ($hasInsertedFull) {
+                            continue;
+                        }
+                        $hasInsertedFull = true;
+                    }
+
+                    // Nếu có bảo hành thì insert
+                    if ($nameWarranty != null) {
                         WarrantyReceived::create([
                             'product_received_id' => $receivedProduct->id,
-                            'name_warranty'       => $product['name_warranty'][$index] ?? null,
-                            'state_recei'         => $product['warranty'][$index] ?? null,
-                            'note'                => $product['note_seri'][$index] ?? null,
+                            'name_warranty' => $nameWarranty,
+                            'state_recei' => $product['warranty'][$index] ?? null,
+                            'note' => $product['note_seri'][$index] ?? null,
                         ]);
                     }
                 }
@@ -182,7 +197,7 @@ class ReceivingController extends Controller
                 if (!$existSeri) {
                     $newSerial = SerialNumber::create([
                         'product_id' => $product['product_id'],
-                        'status'     => 2, // Trạng thái mới
+                        'status' => 2, // Trạng thái mới
                         'serial_code' => $product['serial'], // Tạo mã serial tạm thời
                     ]);
 
@@ -193,11 +208,11 @@ class ReceivingController extends Controller
                 // Tạo sản phẩm tiếp nhận
                 $receivedProduct = ReceivedProduct::create([
                     'reception_id' => $receiving->id,
-                    'product_id'   => $product['product_id'],
-                    'quantity'     => 1,
-                    'serial_id'    => $serialId,
-                    'status'       => 0,
-                    'note'         => '',
+                    'product_id' => $product['product_id'],
+                    'quantity' => 1,
+                    'serial_id' => $serialId,
+                    'status' => 0,
+                    'note' => '',
                 ]);
 
                 // Lưu thông tin bảo hành cho từng serial nếu tồn tại
@@ -205,9 +220,9 @@ class ReceivingController extends Controller
                     foreach ($product['id_seri'] as $index => $serial) {
                         WarrantyReceived::create([
                             'product_received_id' => $receivedProduct->id,
-                            'name_warranty'       => $product['name_warranty'][$index] ?? null,
-                            'state_recei'         => $product['warranty'][$index] ?? null,
-                            'note'                => $product['note_seri'][$index] ?? null,
+                            'name_warranty' => $product['name_warranty'][$index] ?? null,
+                            'state_recei' => $product['warranty'][$index] ?? null,
+                            'note' => $product['note_seri'][$index] ?? null,
                         ]);
                     }
                 }

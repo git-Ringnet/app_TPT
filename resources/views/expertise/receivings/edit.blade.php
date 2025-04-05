@@ -464,7 +464,7 @@
                                                         data-product-code="{{ $receivedProduct->product->product_code }}"
                                                         data-product-id="{{ $receivedProduct->product_id }}"
                                                         data-seri="{{ $receivedProduct->serial->serial_code ?? '' }}">
-                                                        <td colspan="5"
+                                                        <td colspan="6"
                                                             class="border-right p-2 text-13 align-top border-bottom border-top-0">
                                                         </td>
                                                         <td

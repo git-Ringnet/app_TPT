@@ -1772,10 +1772,14 @@ input[type="number"] {
     border-radius: 5px;
 }
 
-.btn-save-print,.btn-add-item, .btn-add-warranty {
+.btn-save-print,.btn-add-item, .btn-add-warranty,.btn-copy-item {
     border: 1px solid #C6CFFC;
     color: #42526e;
     background-color: #ffffff;
+}
+.row-highlight {
+    background-color: #e0f2ff !important; /* xanh nhạt dễ nhìn */
+    transition: background-color 0.5s ease;
 }
 
 .info-chung--heading {
