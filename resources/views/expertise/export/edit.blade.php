@@ -111,7 +111,7 @@
                                 <div
                                     class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 required-label font-weight-bold"
-                                    style="width: 180px;">Mã phiếu</span>
+                                        style="width: 180px;">Mã phiếu</span>
                                     <input type="text" name="export_code" style="flex:1;" {{ $readonly }}
                                         placeholder="{{ $placeholder }}" required value="{{ $export->export_code }}"
                                         class="text-13-black w-50 border-0 bg-input-guest date_picker py-2 px-2 {{ $bg }}">
@@ -119,7 +119,7 @@
                                 <div
                                     class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 required-label font-weight-bold"
-                                    style="width: 180px;">Ngày lập phiếu</span>
+                                        style="width: 180px;">Ngày lập phiếu</span>
                                     <input placeholder="{{ $placeholder }}" autocomplete="off" required
                                         value="{{ date_format(new DateTime($export->date_create), 'd/m/Y') }}"
                                         type="text" id="dateCreate" {{ $readonly }}
@@ -132,7 +132,7 @@
                                 <div
                                     class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 required-label font-weight-bold"
-                                    style="width: 180px">Người lập phiếu</span>
+                                        style="width: 180px">Người lập phiếu</span>
                                     <input autocomplete="off" placeholder="{{ $placeholder }}" required
                                         id="user_name" value="{{ $export->user->name }}" readonly
                                         class="text-13-black w-50 border-0 bg-input-guest py-2 px-2"
@@ -143,11 +143,11 @@
                                 <div
                                     class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black btn-click required-label font-weight-bold"
-                                    style="width: 195px">Khách hàng</span>
+                                        style="width: 195px">Khách hàng</span>
                                     <input placeholder="{{ $placeholder }}" autocomplete="off" required
                                         id="provider_name" readonly
                                         class="text-13-black w-100 border-0 bg-input-guest {{ $bg }} py-2 px-2"
-                                        style="flex:1;" value="{{ $export->customer->customer_name ?? ""}}" />
+                                        style="flex:1;" value="{{ $export->customer->customer_name ?? '' }}" />
                                     <input type="hidden" name="customer_id" id="provider_id"
                                         value="{{ $export->customer_id }}">
                                     @if ($isCheck)
@@ -193,11 +193,11 @@
                                 <div style="width: 99%;"
                                     class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 font-weight-bold"
-                                    style="width: 180px;">SĐT
+                                        style="width: 180px;">SĐT
                                         liên hệ</span>
                                     <input name="phone" placeholder="{{ $placeholder }}" type="number"
-                                    min="0" step="1"
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
+                                        min="0" step="1"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11);"
                                         value="{{ $export->phone }}" {{ $readonly }}
                                         class="text-13-black w-50 border-0 bg-input-guest {{ $bg }} py-2 px-2"
                                         style="flex:1;" />
@@ -205,7 +205,7 @@
                                 <div style="width: 99%;"
                                     class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 font-weight-bold"
-                                    style="width: 180px;">Người liên hệ</span>
+                                        style="width: 180px;">Người liên hệ</span>
                                     <input name="contact_person" placeholder="{{ $placeholder }}" type="text"
                                         value="{{ $export->contact_person }}" {{ $readonly }}
                                         class="text-13-black w-50 border-0 bg-input-guest {{ $bg }} py-2 px-2"
@@ -216,7 +216,7 @@
                                 <div style="width: 99.7%;"
                                     class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black text-nowrap mr-3 font-weight-bold"
-                                    style="width: 180px;">Địa
+                                        style="width: 180px;">Địa
                                         chỉ</span>
                                     <input name="address" placeholder="{{ $placeholder }}" autocomplete="off"
                                         value="{{ $export->address }}" {{ $readonly }}
@@ -227,7 +227,7 @@
                                 <div style="width: 99.7%;"
                                     class="d-flex justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                     <span class="text-13-black font-weight-bold text-nowrap mr-3"
-                                    style="width: 180px;">Ghi chú
+                                        style="width: 180px;">Ghi chú
                                     </span>
                                     <input
                                         class="text-13-black w-50 border-0 bg-input-guest {{ $bg }} py-2 px-2"
@@ -373,17 +373,16 @@
                                                             <input type="text" autocomplete="off"
                                                                 {{ $readonly }}
                                                                 class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32 {{ $bg }}"
-                                                                name="name_warranty[]" placeholder="Thông tin" value="{{ $warranty[0] }}" 
-                                                                step="1"
-
-                                                                 oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')">
+                                                                name="name_warranty[]" placeholder="Thông tin"
+                                                                value="{{ $warranty[0] }}">
                                                         </td>
                                                         <td
                                                             class="border-right p-2 text-13 align-top border-bottom border-top-0">
                                                             <input type="text" autocomplete="off"
                                                                 {{ $readonly }}
                                                                 class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 {{ $bg }}"
-                                                                name="warranty[]" placeholder="Tháng" value="{{ $warranty[1] }} "step="1"
+                                                                name="warranty[]" placeholder="Tháng"
+                                                                value="{{ $warranty[1] }} "step="1"
                                                                 oninput="this.value = this.value.replace(/\D|^0+|\.|,/g, '')">
                                                         </td>
                                                         @if ($index === 0)

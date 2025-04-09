@@ -163,8 +163,8 @@ li {
 }
 
 .border-custom {
-    border-bottom: 1px solid #C6CFFC !important;
-    border-top: 1px solid #C6CFFC !important;
+    border-bottom: 1px solid #c6cffc !important;
+    border-top: 1px solid #c6cffc !important;
 }
 
 .max-width180 {
@@ -275,7 +275,7 @@ li {
 }
 
 .filter-group {
-    background: #C6CFFC;
+    background: #c6cffc;
     border-radius: 8px;
     padding: 8px 16px;
     margin-right: 5px;
@@ -326,7 +326,7 @@ li {
 .input-group > .operator,
 .input-group > .quantity {
     padding: 5px 10px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 5px;
 }
 
@@ -673,25 +673,138 @@ th {
 }
 
 @media print {
+    @page {
+        size: auto;
+        margin: 0;
+    }
     #print-price {
         display: block;
     }
 
-    #btn-print {
-        display: none;
-    }
-
-    .export-add {
-        display: none;
-    }
-    .header-fixed {
-        display: none !important;
-    }
+    #btn-print,
+    .export-add,
+    .header-fixed,
     #form-submit {
         display: none !important;
     }
+
     .print-section {
         display: block !important;
+    }
+
+    /* A3 Portrait */
+    @page :A3-portrait {
+        size: A3 portrait;
+        margin: 10mm;
+    }
+    @media print and (max-width: 297mm) and (max-height: 420mm) {
+        .print-content {
+            padding: 10mm !important;
+            width: 100% !important;
+            height: auto !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+        }
+    }
+
+    /* A3 Landscape */
+    @page :A3-landscape {
+        size: A3 landscape;
+        margin: 10mm;
+    }
+    @media print and (max-width: 420mm) and (max-height: 297mm) {
+        .print-content {
+            padding: 10mm !important;
+            width: 100% !important;
+            height: auto !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+        }
+    }
+
+    /* A4 Portrait */
+    @page :A4-portrait {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+    @media print and (max-width: 210mm) and (max-height: 297mm) {
+        .print-content {
+            padding: 10mm !important;
+            width: 100% !important;
+            height: auto !important;
+            font-size: 12px !important;
+            line-height: 1.4 !important;
+        }
+    }
+
+    /* A4 Landscape */
+    @page :A4-landscape {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+    @media print and (max-width: 297mm) and (max-height: 210mm) {
+        .print-content {
+            padding: 10mm !important;
+            width: 100% !important;
+            height: auto !important;
+            font-size: 12px !important;
+            line-height: 1.4 !important;
+        }
+    }
+
+    /* A5 Portrait */
+    @page :A5-portrait {
+        size: A5 portrait;
+        margin: 5mm;
+    }
+    @media print and (max-width: 148mm) and (max-height: 210mm) {
+        .print-content {
+            padding: 5mm !important;
+            width: 85% !important;
+            height: auto !important;
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+        }
+    }
+
+    /* A5 Landscape */
+    @page :A5-landscape {
+        size: A5 landscape;
+        margin: 5mm;
+    }
+    @media print and (max-width: 210mm) and (max-height: 148mm) {
+        .print-content {
+            padding: 5mm !important;
+            width: 100% !important;
+            height: auto !important;
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+        }
+    }
+
+    /* Common print styles for all sizes */
+    .print-content {
+        page-break-inside: avoid !important;
+    }
+
+    .print-content table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    .print-content table th,
+    .print-content table td {
+        border: 0.5px solid black !important;
+    }
+
+    thead {
+        display: table-header-group !important;
+    }
+    tfoot {
+        display: table-footer-group !important;
+    }
+    tr {
+        page-break-inside: avoid !important;
     }
 }
 
@@ -848,7 +961,7 @@ td p {
 
 .file-upload {
     background: #f5f5f5;
-    border: 1px dashed #C6CFFC;
+    border: 1px dashed #c6cffc;
     border-radius: 8px;
     width: 75%;
 }
@@ -970,7 +1083,7 @@ td p {
     left: 0;
     right: 0;
     z-index: 99;
-    border-bottom: 1px solid #C6CFFC;
+    border-bottom: 1px solid #c6cffc;
     background-color: white;
 }
 
@@ -980,7 +1093,7 @@ td p {
     left: 0;
     right: 0;
     z-index: 99;
-    border-bottom: 1px solid #C6CFFC;
+    border-bottom: 1px solid #c6cffc;
     background-color: white;
 }
 .content-header-fixed-report-1 {
@@ -1031,7 +1144,7 @@ td p {
         left: 0;
         right: 0;
         z-index: 99;
-        border-bottom: 1px solid #C6CFFC;
+        border-bottom: 1px solid #c6cffc;
         background-color: white;
     }
     .content-header-fixed-report-1 {
@@ -1060,7 +1173,7 @@ td p {
     left: 0;
     right: 0;
     z-index: 99;
-    border-bottom: 1px solid #C6CFFC;
+    border-bottom: 1px solid #c6cffc;
     background-color: white;
 }
 
@@ -1074,8 +1187,8 @@ td p {
 
 .content-header--options {
     height: 60px;
-    border-top: 1px solid #C6CFFC;
-    border-bottom: 1px solid #C6CFFC;
+    border-top: 1px solid #c6cffc;
+    border-bottom: 1px solid #c6cffc;
 }
 
 .header-options--nav {
@@ -1169,7 +1282,7 @@ td p {
     height: 100%;
     padding: 3px 12px;
     border-radius: 4px;
-    border-bottom: 1px solid #C6CFFC;
+    border-bottom: 1px solid #c6cffc;
 }
 
 .card {
@@ -1286,7 +1399,7 @@ td p {
 }
 
 .d-flex.justify-contents-center.align-items-baseline.p-2 {
-    border-top: 1px solid #C6CFFC;
+    border-top: 1px solid #c6cffc;
 }
 
 .wrap .cursor.mr-auto {
@@ -1473,7 +1586,7 @@ input[type="number"] {
     padding: 7px 8px 7px 8px;
     gap: 6px;
     border-radius: 4px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     color: #6d7075;
     flex: 1;
     margin-left: 35% !important;
@@ -1563,7 +1676,7 @@ input[type="number"] {
 .sticky-footer th {
     padding: 10px;
     text-align: center;
-    border-top: 1px solid #C6CFFC;
+    border-top: 1px solid #c6cffc;
 }
 
 .table-layout {
@@ -1583,7 +1696,7 @@ input[type="number"] {
 .gold_value,
 .product_quantity,
 .desc {
-    background-color: #C6CFFC;
+    background-color: #c6cffc;
 }
 
 .internal {
@@ -1617,7 +1730,7 @@ input[type="number"] {
 .btn-filter_search {
     width: 99px;
     height: 30px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 4px;
     background-color: white;
 }
@@ -1655,7 +1768,7 @@ input[type="number"] {
 }
 
 .btn-add-product {
-    background-color: #C6CFFC;
+    background-color: #c6cffc;
     cursor: pointer;
 }
 
@@ -1737,7 +1850,7 @@ input[type="number"] {
 
 .btn-status {
     padding: 6px 8px;
-    border: 2px solid #C6CFFC;
+    border: 2px solid #c6cffc;
     border-radius: 4px;
 }
 
@@ -1768,12 +1881,15 @@ input[type="number"] {
     background-color: white;
     border: 1px solid #6e79d6;
     color: #6d7075;
-    border: 2px solid #C6CFFC;
+    border: 2px solid #c6cffc;
     border-radius: 5px;
 }
 
-.btn-save-print,.btn-add-item, .btn-add-warranty,.btn-copy-item {
-    border: 1px solid #C6CFFC;
+.btn-save-print,
+.btn-add-item,
+.btn-add-warranty,
+.btn-copy-item {
+    border: 1px solid #c6cffc;
     color: #42526e;
     background-color: #ffffff;
 }
@@ -1814,8 +1930,8 @@ input[type="number"] {
 
 .bg-filter-search {
     background-color: #f3f5f7;
-    border-top: 1px solid #C6CFFC;
-    border-bottom: 1px solid #C6CFFC;
+    border-top: 1px solid #c6cffc;
+    border-bottom: 1px solid #c6cffc;
 }
 
 .filter-btn {
@@ -1827,7 +1943,7 @@ input[type="number"] {
 .input-search {
     height: 30px;
     padding: 5px 12px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 5px;
 }
 
@@ -2139,7 +2255,7 @@ input[type="checkbox"]:checked {
 .block-optionss .start input,
 .block-optionss .end input {
     border-radius: 8px;
-    border: 1px solid var(--gray-2-disable-outline, #C6CFFC);
+    border: 1px solid var(--gray-2-disable-outline, #c6cffc);
     background: var(--white, #fff);
     padding: 4px;
 }
@@ -2382,7 +2498,7 @@ input[type="checkbox"]:checked {
 }
 
 .bg-white-sn tr:hover {
-    background-color: #C6CFFC !important;
+    background-color: #c6cffc !important;
 }
 
 .select2-selection__rendered {
@@ -2646,17 +2762,20 @@ input[type="checkbox"]:checked {
     border-bottom-width: 0 !important;
 }
 
-.content-wrapper .content .list_product li:hover,.warranty-dropdown li:hover ,.search-list li:hover{
+.content-wrapper .content .list_product li:hover,
+.warranty-dropdown li:hover,
+.search-list li:hover {
     background-color: #ececec;
     cursor: pointer;
 }
 
-.content-wrapper .content .list_code li:hover,.warranty-dropdown li:hover {
+.content-wrapper .content .list_code li:hover,
+.warranty-dropdown li:hover {
     background-color: #ececec;
 }
 
 .filter-item {
-    background: #C6CFFC;
+    background: #c6cffc;
     border-radius: 5px;
     padding: 4px 12px;
     margin-right: 5px;
@@ -2672,14 +2791,14 @@ input[type="checkbox"]:checked {
 
 .form-control {
     padding: 5px 10px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 5px;
     height: 2.25rem !important;
 }
 
 .form-control-1 {
     padding: 5px 10px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 5px;
 }
 
@@ -2796,10 +2915,10 @@ input[type="checkbox"]:checked {
 }
 
 .bg-input-guest-blue {
-    background-color: #C6CFFC !important;
+    background-color: #c6cffc !important;
 }
 tbody .bg-input-guest-blue {
-    background-color: #C6CFFC !important;
+    background-color: #c6cffc !important;
     border-radius: 5px;
 }
 .bg-input-guest:focus {
@@ -2841,7 +2960,7 @@ tbody .bg-input-guest-blue {
 .line-vertical {
     height: auto;
     width: 0.5px;
-    background-color: #C6CFFC;
+    background-color: #c6cffc;
 }
 
 .nav-tabs li .active {
@@ -2870,7 +2989,7 @@ tbody .bg-input-guest-blue {
 }
 
 .table thead th {
-    border-bottom: 1px solid #C6CFFC;
+    border-bottom: 1px solid #c6cffc;
 }
 
 .opacity-0 {
@@ -3024,7 +3143,7 @@ tbody .bg-input-guest-blue {
     min-width: 160px;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
     z-index: 10000;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 7px;
 }
 
@@ -3129,7 +3248,7 @@ tbody .bg-input-guest-blue {
     left: 0;
     right: 0;
     z-index: 100;
-    border-bottom: 1px solid #C6CFFC;
+    border-bottom: 1px solid #c6cffc;
     background-color: white;
     z-index: 999;
 }
@@ -3231,8 +3350,8 @@ tbody .bg-input-guest-blue {
 }
 /* Border-left and border-right */
 .border-lr {
-    border-left: 1px solid #C6CFFC;
-    border-right: 1px solid #C6CFFC;
+    border-left: 1px solid #c6cffc;
+    border-right: 1px solid #c6cffc;
 }
 .list-product {
     top: 40px;
@@ -3343,7 +3462,8 @@ tbody .bg-input-guest-blue {
 .blur-wrapper * {
     pointer-events: none;
 }
-.check-icon,.check-icon-seri {
+.check-icon,
+.check-icon-seri {
     position: absolute;
     right: 10px;
     top: 50%;
@@ -3413,7 +3533,7 @@ tbody .bg-input-guest-blue {
     border-radius: 5px;
     cursor: pointer;
     text-align: left;
-    border-bottom: 1px solid #C6CFFC !important;
+    border-bottom: 1px solid #c6cffc !important;
 }
 .option-btn:hover {
     background-color: #9699961a;
@@ -3458,7 +3578,7 @@ tbody .bg-input-guest-blue {
 }
 .btn-filter_search-1 {
     height: 30px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     border-radius: 4px;
     background-color: white;
 }
@@ -3477,7 +3597,7 @@ tbody .bg-input-guest-blue {
 
 .report-content .table th,
 .report-content .table td {
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     padding: 8px;
 }
 
@@ -3498,7 +3618,7 @@ tbody .bg-input-guest-blue {
 
 .table-footer td {
     padding: 10px;
-    border: 1px solid #C6CFFC;
+    border: 1px solid #c6cffc;
     font-weight: bold;
 }
 /*In Phieu*/
@@ -3588,8 +3708,9 @@ tbody .bg-input-guest-blue {
 .bg-quotation {
     background-color: #deeaf6;
 }
-.text-16{
-    font-size: 16px;}
+.text-16 {
+    font-size: 16px;
+}
 .status-list {
     z-index: 1000;
     width: 150px;
@@ -3616,7 +3737,7 @@ tbody .bg-input-guest-blue {
     color: #151516 !important;
     font-weight: 500;
 }
-.btndropdown{
+.btndropdown {
     border-radius: 5px;
     font-size: 14px;
     font-weight: 500;
@@ -3624,14 +3745,14 @@ tbody .bg-input-guest-blue {
     margin: 4px 0;
     padding: 5px 10px;
 }
-.btn-filter{
+.btn-filter {
     font-size: 14px;
     font-weight: 500;
     border-radius: 5px;
 }
-#scrollbar{
+#scrollbar {
     padding: 0 10px;
 }
-.cursor-pointer{
+.cursor-pointer {
     cursor: pointer;
 }
