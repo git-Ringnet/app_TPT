@@ -9,6 +9,7 @@ use App\Models\Receiving;
 use App\Models\ReturnForm;
 use App\Models\SerialNumber;
 use App\Models\User;
+use App\Models\warrantyLookup;
 use App\Models\WarrantyReceived;
 use App\Notifications\ReceiNotification;
 use Illuminate\Http\Request;
@@ -53,8 +54,6 @@ class ReceivingController extends Controller
             return back()->with('warning', 'Mã phiếu tiếp nhận đã tồn tại.');
         }
         $validated = $request->validate([
-            'branch_id' => 'required|min:1',
-            'branch_id.*' => 'in:1,2',
             'form_type' => 'required|min:1',
             'form_type.*' => 'in:1,2,3',
             'form_code_receiving' => 'required|string|unique:receiving,form_code_receiving',
@@ -69,7 +68,7 @@ class ReceivingController extends Controller
             'status' => 'nullable|integer',
             'state' => 'nullable|integer',
         ]);
-
+        $validated['branch_id'] = 1;
         // dd($request->all());
 
         // Tạo phiếu tiếp nhận
@@ -144,7 +143,7 @@ class ReceivingController extends Controller
         $title = 'Chi tiết phiếu tiếp nhận';
         $products_all = Product::all();
         $customers = Customers::all();
-        $receivedProducts = ReceivedProduct::with('product')
+        $receivedProducts = ReceivedProduct::with(['product', 'serial', 'serial.exports'])
             ->where('reception_id', $receiving->id)
             ->get()
             ->groupBy('product_id');
@@ -253,9 +252,9 @@ class ReceivingController extends Controller
 
             // Xóa tất cả sản phẩm tiếp nhận và bảo hành liên quan
             foreach ($receiving->receivedProducts as $receivedProduct) {
-                if ($receiving->branch_id == 2) {
-                    SerialNumber::find($receivedProduct->serial_id)?->delete();
-                }
+                // if ($receiving->branch_id == 2) {
+                // SerialNumber::find($receivedProduct->serial_id)?->delete();
+                // }
                 $receivedProduct->warrantyReceived()->delete();
                 $receivedProduct->delete();
             }
@@ -457,7 +456,7 @@ class ReceivingController extends Controller
         $sn_id = SerialNumber::where('serial_code', $serial)->first();
         if ($sn_id) {
             // Truy vấn dữ liệu từ bảng warranty_lookup
-            $warranty = DB::table('warranty_lookup')
+            $warranty = warrantyLookup::with('serialNumber.exports.export')
                 ->where('product_id', $productId)
                 ->where('sn_id', $sn_id->id)
                 ->get();

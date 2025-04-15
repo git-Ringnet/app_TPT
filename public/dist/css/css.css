@@ -3463,7 +3463,7 @@ tbody .bg-input-guest-blue {
     pointer-events: none;
 }
 .check-icon,
-.check-icon-seri {
+.check-icon-seri{
     position: absolute;
     right: 10px;
     top: 50%;
@@ -3474,6 +3474,34 @@ tbody .bg-input-guest-blue {
     /* Không cho phép click vào biểu tượng */
     transition: color 0.3s ease-in-out;
     /* Hiệu ứng chuyển màu mượt mà */
+}
+.date-export {
+    cursor: pointer;
+    margin-left: 5px;
+    color: #6c757d;
+    position: relative;
+}
+
+.date-export:hover {
+    color: #007bff;
+}
+
+.date-export i {
+    font-size: 14px;
+}
+
+.date-popup {
+    position: absolute;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    top: -25px;
+    left: 25px;
+    display: none;
+    z-index: 1000;
+    font-size: 12px;
+    white-space: nowrap;
 }
 
 .check-icon-borrow {

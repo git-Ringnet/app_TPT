@@ -52,6 +52,10 @@ class SerialNumber extends Model
     {
         return $this->hasMany(ProductImport::class, 'sn_id', 'id');
     }
+    public function exports()
+    {
+        return $this->hasMany(ProductExport::class, 'sn_id', 'id');
+    }
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');

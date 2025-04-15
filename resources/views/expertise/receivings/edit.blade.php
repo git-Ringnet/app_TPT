@@ -170,7 +170,8 @@
                             </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập phiếu</span>
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập
+                                    phiếu</span>
                                 <input type="hidden" name="user_id" value="{{ $receiving->user_id }}">
                                 <input class="text-13-black w-50 border-0 bg-input-guest py-2 px-2" autocomplete="off"
                                     placeholder="Nhập thông tin" style="flex:2;" name=""
@@ -187,8 +188,7 @@
                                     id="dateCreate"
                                     class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
                                     style=" flex:2;"
-                                    value="{{ date_format(new DateTime($receiving->date_created), 'd/m/Y') }}"
-                                     />
+                                    value="{{ date_format(new DateTime($receiving->date_created), 'd/m/Y') }}" />
                                 <input type="hidden" value="{{ $receiving->date_created }}" name="date_created"
                                     id="hiddenDateCreate">
                             </div>
@@ -246,6 +246,7 @@
                             <table class="table" id="inputcontent">
                                 <thead>
                                     <tr style="height:44px;">
+                                        <th class="border-right px-2 p-0 pl-4"></th>
                                         <th class="border-right px-2 p-0 pl-4">
                                             <span class="text-table text-secondary">Mã hàng</span>
                                         </th>
@@ -283,6 +284,10 @@
                                                 data-index="{{ $indexRecei }}"
                                                 data-product-code="{{ $receivedProduct->product->product_code }}"
                                                 data-product-id="{{ $receivedProduct->product_id }}">
+                                                <td
+                                                    class="border-right p-2 text-13 align-top border-bottom border-top-0">
+
+                                                </td>
                                                 <td
                                                     class="border-right p-2 text-13 align-top border-bottom border-top-0 d-none">
                                                     <input type="text" autocomplete="off"
@@ -334,13 +339,31 @@
                                                         readonly value="{{ $receivedProduct->quantity }}">
                                                 </td>
                                                 <td
-                                                    class="border-right p-2 text-13 align-top border-bottom position-relative border-top-0">
+                                                    class="border-right p-2 text-13 align-top border-bottom position-relative border-top-0 d-flex align-items-center">
                                                     <input type="text" autocomplete="off"
                                                         class="border-0 pl-1 serial pr-2 py-1 w-100 height-32" readonly
                                                         name="product_id[{{ $indexRecei }}][serial]"
                                                         data-index="{{ $indexRecei }}"
                                                         value="{{ $receivedProduct->serial->serial_code ?? '' }}">
                                                     <span class="check-icon-seri"></span>
+                                                    @php
+                                                        $exportDate = optional(
+                                                            optional(
+                                                                optional(
+                                                                    optional($receivedProduct->serial)->exports,
+                                                                )->first(),
+                                                            )->export,
+                                                        )->date_create;
+                                                    @endphp
+                                                    @if ($exportDate)
+                                                    <span class="date-export">
+                                                        <i class="fas fa-calendar-alt" style="cursor: pointer;"
+                                                            aria-hidden="true"></i>
+                                                        <div class="date-popup">
+                                                            {{ $exportDate ? \Carbon\Carbon::parse($exportDate)->format('d/m/Y') : '' }}
+                                                        </div>
+                                                        </span>
+                                                    @endif
                                                 </td>
                                                 <td
                                                     class="border-right p-2 text-13 align-top border-bottom border-top-0 product-cell position-relative">
@@ -356,9 +379,10 @@
                                                         value="{{ $receivedProduct->warrantyReceived[0]->id ?? '' }}">
                                                     <input type="text" autocomplete="off"
                                                         class="border-0 pl-1 pr-2 py-1 w-100 warranty-input name_warranty height-32"
-                                                        name="product_id[{{ $indexRecei }}][name_warranty][]" readonly
-                                                        data-index="{{ $indexRecei }}"
+                                                        name="product_id[{{ $indexRecei }}][name_warranty][]"
+                                                        readonly data-index="{{ $indexRecei }}"
                                                         value="{{ $receivedProduct->warrantyReceived[0]->name_warranty ?? '' }}">
+                                                    <span class="date-export"></span>
                                                     <span class="check-icon"></span>
                                                     <ul class='warranty-dropdown bg-white position-absolute w-100 rounded shadow p-0 scroll-data'
                                                         style='z-index: 99;top: 75%;display: none;'>
@@ -395,7 +419,7 @@
                                                         data-index="{{ $indexRecei }}" data-product-code=""
                                                         data-product-id="{{ $receivedProduct->product_id }}"
                                                         data-seri="{{ $receivedProduct->serial_id }}">
-                                                        <td colspan="5"
+                                                        <td colspan="6"
                                                             class="border-right p-2 text-13 align-top border-bottom border-top-0">
                                                             <input type="hidden" autocomplete="off"
                                                                 class="border-0 pl-1 pr-2 py-1 w-100 product_code height-32"
@@ -422,10 +446,12 @@
                                                                 data-index="{{ $indexRecei }}"
                                                                 value="{{ $warrantyReceived->id }}">
                                                             <input type="text" autocomplete="off"
-                                                                class="border-0 pl-1 pr-2 py-1 w-100 warranty-input name_warranty height-32" readonly
+                                                                class="border-0 pl-1 pr-2 py-1 w-100 warranty-input name_warranty height-32"
+                                                                readonly
                                                                 name="product_id[{{ $indexRecei }}][name_warranty][]"
                                                                 data-index="{{ $indexRecei }}"
                                                                 value="{{ $warrantyReceived->name_warranty }}">
+                                                            <span class="date-export"></span>
                                                             <span class="check-icon"></span>
                                                             <ul class="warranty-dropdown bg-white position-absolute w-100 rounded shadow p-0 scroll-data"
                                                                 style="z-index: 99;top: 75%;display: none;">
@@ -547,13 +573,33 @@
                     responseData[index] = response;
                     const $inputField = $row.find(".warranty-input");
                     const $dropdownList = $row.find(".warranty-dropdown");
-
+                    const $dateExport = $row.find(".date-export");
                     $dropdownList.empty();
 
                     if (response.warranty && response.warranty.length > 0) {
+                        const date = response.warranty[0].serial_number.exports[0].export
+                            .date_create;
+                        if (date) {
+                            const formattedDate = new Date(date).toLocaleDateString('vi-VN');
+                            $dateExport.html(`
+                                <i class="fas fa-calendar-alt" style="cursor: pointer;"></i>
+                                <div class="date-popup">${formattedDate}</div>
+                            `);
+
+                            // Thêm sự kiện click
+                            $dateExport.find('i').on('click', function(e) {
+                                e.stopPropagation();
+                                $dateExport.find('.date-popup').toggle();
+                            });
+
+                            // Đóng popup khi click ra ngoài
+                            $(document).on('click', function() {
+                                $dateExport.find('.date-popup').hide();
+                            });
+                        }
                         populateWarrantyDropdown(response, $dropdownList);
                     } else {
-                        // alert("Không tìm thấy thông tin bảo hành.");
+                        $dateExport.empty();
                     }
                 },
                 error: function() {

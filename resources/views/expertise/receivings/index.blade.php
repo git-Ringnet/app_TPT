@@ -9,7 +9,7 @@
                 'Ngày lập phiếu',
                 'Ngày đóng phiếu',
                 'Loại phiếu',
-                'Hàng tiếp nhận',
+                // 'Hàng tiếp nhận',
                 'Tình trạng',
                 'Trạng thái',
                 'Ghi chú',
@@ -131,7 +131,7 @@
                                                 <div class="icon" id="icon-form_type"></div>
                                             </span>
                                         </th>
-                                        <th class="height-40 py-0 border-right-0" scope="col">
+                                        {{-- <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
                                                 <a href="#" class="sort-link btn-submit"
                                                     data-sort-by="branch_id" data-sort-type="DESC">
@@ -141,7 +141,7 @@
                                                 </a>
                                                 <div class="icon" id="icon-branch_id"></div>
                                             </span>
-                                        </th>
+                                        </th> --}}
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
                                                 <a href="#" class="sort-link btn-submit" data-sort-by="status"
@@ -215,14 +215,14 @@
                                                     Bảo hành dịch vụ
                                                 @endif
                                             </td>
-                                            <td
+                                            {{-- <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 @if ($item->branch_id == 1)
                                                     Nội bộ
                                                 @elseif($item->branch_id == 2)
                                                     Bên ngoài
                                                 @endif
-                                            </td>
+                                            </td> --}}
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 status-text{{ $item->id }}">
                                                 @if ($item->status == 1)
@@ -328,7 +328,7 @@
             closed_at: retrieveDateData(this, 'ngay-dong-phieu'),
             customer: getStatusData(this, 'khach-hang'),
             form_type: getStatusData(this, 'loai-phieu'),
-            brand_type: getStatusData(this, 'hang-tiep-nhan'),
+            // brand_type: getStatusData(this, 'hang-tiep-nhan'),
             status: getStatusData(this, 'tinh-trang'),
             state: getStatusData(this, 'trang-thai'),
             sort: getSortData(buttonElement)

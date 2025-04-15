@@ -157,11 +157,12 @@ $(document).on("click", ".btn-add-item", function () {
                     value="1">
             </td>
             <td
-                class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative">
+                class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative d-flex align-items-center">
                 <input type="text" autocomplete="off"
                     class="border-0 pl-1 pr-2 py-1 w-100 serial height-32 bg-input-guest-blue"
                     name="product_id[${newIndex}][serial]" data-index="${newIndex}" value="">
                 <span class="check-icon-seri"></span>
+                <span class="date-export"></span>
             </td>
             <td
                 class="border-right p-2 text-13 align-top border-bottom border-top-0 product-cell position-relative">
@@ -278,11 +279,12 @@ $(document).on("click", ".btn-copy-item", function () {
                     value="1">
             </td>
             <td
-                class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative">
+                class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative d-flex align-items-center">
                 <input type="text" autocomplete="off"
                     class="border-0 pl-1 pr-2 py-1 w-100 serial height-32 bg-input-guest-blue"
                     name="product_id[${newIndex}][serial]" data-index="${newIndex}" value="">
                 <span class="check-icon-seri"></span>
+                <span class="date-export"></span>
             </td>
             <td
                 class="border-right p-2 text-13 align-top border-bottom border-top-0 product-cell position-relative">
@@ -630,6 +632,18 @@ function checkbranchId(serials, product_id, className, checkIcon) {
 // Check for duplicate serials when input changes
 let enteredSerials = [];
 
+$(document).on('click', '.date-export i', (e) => {
+    e.stopPropagation();
+    const $dateExport = $(e.target).closest('.date-export');
+    $dateExport.find('.date-popup').toggle();
+});
+
+$(document).on('click', (e) => {
+    if (!$(e.target).closest('.date-export').length) {
+        $('.date-popup').hide();
+    }
+});
+
 $(document).on("blur", ".serial", function () {
     const currentInput = $(this);
     const currentValue = currentInput.val().trim();
@@ -669,6 +683,12 @@ $(document).on("blur", ".serial", function () {
     // Gửi request AJAX để kiểm tra serial nội bộ hoặc bên ngoài
     if (typeof checkbranchId === "function") {
         checkbranchId(currentValue, product_id, currentInput, checkIcon);
+    }
+    // Tự động click vào warranty-input sau khi blur
+    const $row = currentInput.closest("tr");
+    const $warrantyInput = $row.find(".warranty-input");
+    if ($warrantyInput.length) {
+        $warrantyInput.trigger("click");
     }
 });
 
@@ -763,17 +783,17 @@ $(document).ready(function () {
                     return;
                 }
 
-                if (allInternal) {
-                    $("#branch_id").val(1); // Nội bộ
-                } else if (allExternal) {
-                    $("#branch_id").val(2); // Bên ngoài
-                } else {
-                    showAutoToast(
-                        "warning",
-                        "Tất cả serials phải là hàng nội bộ hoặc hàng bên ngoài. Vui lòng kiểm tra lại!"
-                    );
-                    return;
-                }
+                // if (allInternal) {
+                //     $("#branch_id").val(1); // Nội bộ
+                // } else if (allExternal) {
+                //     $("#branch_id").val(2); // Bên ngoài
+                // } else {
+                //     showAutoToast(
+                //         "warning",
+                //         "Tất cả serials phải là hàng nội bộ hoặc hàng bên ngoài. Vui lòng kiểm tra lại!"
+                //     );
+                //     return;
+                // }
 
                 $("#form-submit").submit();
             },

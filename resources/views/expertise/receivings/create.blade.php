@@ -309,11 +309,12 @@
                                             value="1">
                                     </td>
                                     <td
-                                        class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative">
+                                        class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative d-flex align-items-center">
                                         <input type="text" autocomplete="off"
                                             class="border-0 pl-1 pr-2 py-1 w-100 serial height-32 bg-input-guest-blue"
                                             name="product_id[0][serial]" data-index="0" value="">
                                         <span class="check-icon-seri"></span>
+                                        <span class="date-export"></span>
                                     </td>
                                     <td
                                         class="border-right p-2 text-13 align-top border-bottom border-top-0 product-cell position-relative">
@@ -425,13 +426,31 @@
                     responseData[index] = response;
                     const $inputField = $row.find(".warranty-input");
                     const $dropdownList = $row.find(".warranty-dropdown");
-
+                    const $dateExport = $row.find(".date-export");
                     $dropdownList.empty();
-
                     if (response.warranty && response.warranty.length > 0) {
+                        const date = response.warranty[0].serial_number.exports[0].export.date_create;
+                        if (date) {
+                            const formattedDate = new Date(date).toLocaleDateString('vi-VN');
+                            $dateExport.html(`
+                                <i class="fas fa-calendar-alt" style="cursor: pointer;"></i>
+                                <div class="date-popup">${formattedDate}</div>
+                            `);
+
+                            // Thêm sự kiện click
+                            $dateExport.find('i').on('click', function(e) {
+                                e.stopPropagation();
+                                $dateExport.find('.date-popup').toggle();
+                            });
+
+                            // Đóng popup khi click ra ngoài
+                            $(document).on('click', function() {
+                                $dateExport.find('.date-popup').hide();
+                            });
+                        }
                         populateWarrantyDropdown(response, $dropdownList);
                     } else {
-                        // alert("Không tìm thấy thông tin bảo hành.");
+                        $dateExport.empty();
                     }
                 },
                 error: function() {
