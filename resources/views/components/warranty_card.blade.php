@@ -52,7 +52,7 @@
                                 <td class="border border-dark">{{ $item->product->product_code }}</td>
                                 <td class="border border-dark">{{ $item->product->brand }}</td>
                                 <td class="border border-dark">1</td>
-                                <td class="border border-dark">{{ $item->serialNumber->serial_code }}</td>
+                                <td class="border border-dark">{{ $item->serialNumber ? $item->serialNumber->serial_code : '' }}</td>
                                 <td class="border border-dark max-width180">
                                     @php
                                         // Kiểm tra nếu warranty là chuỗi và chuyển nó thành mảng

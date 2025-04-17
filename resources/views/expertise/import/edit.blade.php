@@ -24,9 +24,9 @@
                         <?php $isCheck = true; ?>
                         @foreach ($productImports as $productId => $products)
                             @foreach ($products as $item)
-                                <?php if ($item->serialNumber->status != 1) {
-                                    $isCheck = false;
-                                } ?>
+                                @if (!isset($item->serialNumber) || $item->serialNumber->status != 1)
+                                    <?php $isCheck = false; ?>
+                                @endif
                             @endforeach
                         @endforeach
                         <?php $readonly = $isCheck ? '' : 'readonly';
@@ -290,16 +290,16 @@
                                                 </td>
                                                 <td
                                                     class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                    <input type="text" autocomplete="off"
-                                                        class="border-0 pl-1 pr-2 py-1 w-100 height-32" readonly=""
-                                                        name="" value="1">
+                                                    <input type="text" autocomplete="off" {{ $readonly }}
+                                                        class="border-0 pl-1 pr-2 py-1 w-100 height-32 qty {{ $bg }}"
+                                                        name="qty" value="{{ $item->quantity }}">
                                                 </td>
                                                 <td
                                                     class="border-right p-2 text-13 align-top border-bottom border-top-0">
                                                     <input type="text" autocomplete="off"
                                                         class="border-0 pl-1 pr-2 py-1 w-100 serial height-32" readonly
                                                         name="serial[]" {{ $readonly }}
-                                                        value="{{ $item->serialNumber->serial_code }}">
+                                                        value="{{ $item->serialNumber->serial_code ?? '' }}">
                                                 </td>
                                                 <td
                                                     class="border-right p-2 text-13 align-top border-bottom border-top-0">

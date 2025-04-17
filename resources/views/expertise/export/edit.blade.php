@@ -51,9 +51,9 @@
                         <?php $isCheck = true; ?>
                         @foreach ($productExports as $productId => $products)
                             @foreach ($products as $item)
-                                <?php if ($item->serialNumber->status != 2) {
-                                    $isCheck = false;
-                                } ?>
+                                @if ($item->serialNumber && $item->serialNumber->status != 2)
+                                    @php $isCheck = false; @endphp
+                                @endif
                             @endforeach
                         @endforeach
                         <?php $readonly = $isCheck ? '' : 'readonly';
@@ -309,7 +309,7 @@
                                                         id="serials-data" data-index="{{ $index }}"
                                                         data-product-code="{{ $item->product->product_code }}"
                                                         data-product-id="{{ $item->product->id }}"
-                                                        data-serial="{{ $item->serialNumber->serial_code }}">
+                                                        data-serial="{{ $item->serialNumber ? $item->serialNumber->serial_code : '' }}">
                                                         @if ($index === 0)
                                                             <td
                                                                 class="border-right p-2 text-13 align-top border-bottom border-top-0 d-none">
@@ -340,16 +340,17 @@
                                                             </td>
                                                             <td
                                                                 class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                                <input type="text" autocomplete="off"
-                                                                    class="border-0 pl-1 pr-2 py-1 w-100 height-32"
-                                                                    readonly value="1">
+                                                                <input type="text" autocomplete="off" name="qty[]"
+                                                                    {{ $readonly }}
+                                                                    class="border-0 pl-1 pr-2 py-1 w-100 height-32 qty {{ $bg }}"
+                                                                    value="{{ $item->quantity }}">
                                                             </td>
                                                             <td
                                                                 class="border-right p-2 text-13 align-top border-bottom border-top-0">
                                                                 <input type="text" autocomplete="off"
                                                                     class="border-0 pl-1 pr-2 py-1 w-100 serial height-32"
                                                                     readonly name="serial[]"
-                                                                    value="{{ $item->serialNumber->serial_code }}">
+                                                                    value="{{ $item->serialNumber ? $item->serialNumber->serial_code : '' }}">
                                                             </td>
                                                         @else
                                                             <td
@@ -431,7 +432,7 @@
                                                 @if ($isCheck)
                                                     <tr class="add-warranty-row"
                                                         data-product-id="{{ $product->id }}"
-                                                        data-serial="{{ $item->serialNumber->serial_code }}">
+                                                        data-serial="{{ $item->serialNumber ? $item->serialNumber->serial_code : '' }}">
                                                         <td colspan="5" class="text-right border-top-0 border">
                                                             <svg class="add-warranty" width="14" height="14"
                                                                 viewBox="0 0 14 14" fill="none"

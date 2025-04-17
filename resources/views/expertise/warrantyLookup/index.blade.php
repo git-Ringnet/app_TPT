@@ -171,10 +171,11 @@
                                             $warrantyPeriod = isset($matches[0]) ? (int) $matches[0] : 0;
 
                                             $expireDate = (clone $purchaseDate)->modify("+$warrantyPeriod months");
-                                            $remainingInterval = $expireDate->diff($currentDate);
-                                            $remainingYears = floor($remainingInterval->y);
-                                            $remainingMonths = $remainingInterval->m;
-                                            $remainingDays = $remainingInterval->d;
+                                            $isExpired = $currentDate > $expireDate;
+                                            $interval = $expireDate->diff($currentDate);
+                                            $years = $interval->y;
+                                            $months = $interval->m;
+                                            $days = $interval->d;
                                         @endphp
                                         <tr class="position-relative warran-lookup-info height-40">
                                             <input type="hidden" name="id-warran-lookup" class="id-warran-lookup"
@@ -189,9 +190,12 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
-                                                <a href="{{ route('warrantyLookup.edit', $item->serialNumber->id) }}">
-                                                    {{ $item->serialNumber->serial_code }}
-                                                </a>
+                                                @if ($item->serialNumber)
+                                                    <a
+                                                        href="{{ route('warrantyLookup.edit', $item->serialNumber->id) }}">
+                                                        {{ $item->serialNumber->serial_code }}
+                                                    </a>
+                                                @endif
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
@@ -207,11 +211,16 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                                @if ($remainingYears > 0)
-                                                    {{ $remainingYears }} năm {{ $remainingMonths }} tháng
-                                                    {{ $remainingDays }} ngày
+                                                @if ($isExpired)
+                                                    <span class="text-danger">
+                                                        Hết bảo hành ({{ $years > 0 ? "$years năm" : '' }}
+                                                        {{ $months }} tháng {{ $days }} ngày trước)
+                                                    </span>
                                                 @else
-                                                    {{ $remainingMonths }} tháng {{ $remainingDays }} ngày
+                                                    <span class="text-success">
+                                                        Còn {{ $years > 0 ? "$years năm" : '' }} {{ $months }}
+                                                        tháng {{ $days }} ngày
+                                                    </span>
                                                 @endif
                                             </td>
                                             <td

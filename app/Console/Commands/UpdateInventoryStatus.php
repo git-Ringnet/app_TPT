@@ -4,7 +4,11 @@ namespace App\Console\Commands;
 
 use App\Models\InventoryLookup;
 use App\Models\Notification;
+use App\Models\ProductExport;
+use App\Models\ProductImport;
+use App\Models\SerialNumber;
 use App\Models\User;
+use App\Models\warrantyLookup;
 use App\Notifications\InventoryLookupNotification;
 use App\Notifications\ReceiNotification;
 use Carbon\Carbon;
@@ -68,6 +72,43 @@ class UpdateInventoryStatus extends Command
                 $record->save();
             }
         }
+
+        //cập nhật tồn kho và export_id bảo hành
+        // $inventoryItems = InventoryLookup::whereNotNull('sn_id')->get();
+
+        // foreach ($inventoryItems as $lookup) {
+        //     // Luôn tìm và cập nhật import_id
+        //     $import = ProductImport::where('sn_id', $lookup->sn_id)->orderByDesc('id')->first();
+        //     if ($import) {
+        //         $lookup->import_id = $import->import_id; // hoặc $import->id nếu dùng id chính
+        //     }
+
+        //     // Kiểm tra serial
+        //     $serial = SerialNumber::find($lookup->sn_id);
+        //     if (!$serial) {
+        //         continue; // Không tồn tại SN thì bỏ qua
+        //     }
+
+        //     // Nếu đã xuất rồi thì tồn kho = 0
+        //     if ($serial->status == 2) {
+        //         $lookup->remaining_quantity = 0;
+        //     } else {
+        //         $totalImport = ProductImport::where('sn_id', $lookup->sn_id)->sum('quantity');
+        //         $totalExport = ProductExport::where('sn_id', $lookup->sn_id)->sum('quantity');
+        //         $lookup->remaining_quantity = max($totalImport - $totalExport, 0);
+        //     }
+
+        //     $lookup->save();
+        // }
+
+        // $warranties = warrantyLookup::whereNotNull('sn_id')->get();
+        // foreach ($warranties as $warranty) {
+        //     $export = ProductExport::where('sn_id', $warranty->sn_id)->orderByDesc('id')->first();
+        //     if ($export) {
+        //         $warranty->export_id = $export->export_id;
+        //         $warranty->save();
+        //     }
+        // }
 
         $this->info('Đã cập nhật thời gian tồn kho cho tất cả các sản phẩm.');
     }

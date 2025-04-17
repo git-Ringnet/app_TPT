@@ -37,27 +37,29 @@
                 <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
 
             </div>
-           
-        
+
+
         </div>
     </div>
     <div class="content margin-top-127">
         <section class="content">
             <div class="container-fluided">
                 <div class="row result-filter-inven-lookup margin-left20 my-1">
-                </div>  
+                </div>
                 <div id="summaryTable" class="col-12 p-0 m-0" style="display: none;">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Tổng hợp tồn kho</h3>
                         </div>
                         <div class="outer2 table-responsive text-nowrap">
-                            <table id="summaryTableData" class="table table-hover bg-white rounded" style="font-size: 14px;">
+                            <table id="summaryTableData" class="table table-hover bg-white rounded"
+                                style="font-size: 14px;">
                                 <thead class="border-custom">
                                     <tr class="height-40 py-0 border-right-0" scope="col">
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_code" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="product_code" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Mã hàng</span>
                                                     </button>
@@ -67,7 +69,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_name" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="product_name" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Tên hàng</span>
                                                     </button>
@@ -77,7 +80,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand"
+                                                    data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Hãng</span>
                                                     </button>
@@ -103,7 +107,8 @@
                                     <tr>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_code" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="product_code" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Mã hàng</span>
                                                     </button>
@@ -113,7 +118,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="product_name" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="product_name" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Tên hàng</span>
                                                     </button>
@@ -123,7 +129,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="brand"
+                                                    data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Hãng</span>
                                                     </button>
@@ -133,7 +140,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="sericode" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="sericode" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">S/N</span>
                                                     </button>
@@ -143,7 +151,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="providername" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="providername" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Nhà cung cấp</span>
                                                     </button>
@@ -153,7 +162,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="import_date" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="import_date" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Ngày nhập hàng</span>
                                                     </button>
@@ -164,7 +174,8 @@
                                         @if (!auth()->user()->hasAnyRole(['Quản lý kho', 'Bảo hành']))
                                             <th class="height-40 py-0 border-right-0" scope="col">
                                                 <span class="d-flex justify-content-start">
-                                                    <a href="#" class="sort-link btn-submit" data-sort-by="warehouse_id" data-sort-type="DESC">
+                                                    <a href="#" class="sort-link btn-submit"
+                                                        data-sort-by="warehouse_id" data-sort-type="DESC">
                                                         <button class="btn-sort" type="submit">
                                                             <span class="text-14">Kho</span>
                                                         </button>
@@ -175,7 +186,8 @@
                                         @endif
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="storage_duration" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit"
+                                                    data-sort-by="storage_duration" data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Thời gian tồn kho</span>
                                                     </button>
@@ -185,7 +197,8 @@
                                         </th>
                                         <th class="height-40 py-0 border-right-0" scope="col">
                                             <span class="d-flex justify-content-start">
-                                                <a href="#" class="sort-link btn-submit" data-sort-by="status" data-sort-type="DESC">
+                                                <a href="#" class="sort-link btn-submit" data-sort-by="status"
+                                                    data-sort-type="DESC">
                                                     <button class="btn-sort" type="submit">
                                                         <span class="text-14">Trạng thái</span>
                                                     </button>
@@ -198,41 +211,55 @@
                                 <tbody class="tbody-inven-lookup">
                                     @foreach ($inventory as $item)
                                         <tr class="position-relative inven-lookup-info height-40">
-                                            <input type="hidden" name="id-inven-lookup" class="id-inven-lookup" id="id-inven-lookup" value="{{ $item->id }}">
-                                            <td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
+                                            <input type="hidden" name="id-inven-lookup" class="id-inven-lookup"
+                                                id="id-inven-lookup" value="{{ $item->id }}">
+                                            <td
+                                                class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->product->product_code }}
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
                                                 {{ $item->product->product_name }}
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->product->brand }}
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
-                                                <a href="{{ route('inventoryLookup.edit', $item->id) }}">
-                                                    {{ $item->serialNumber->serial_code ?? '' }}
-                                                    @if ($item->serialNumber->status == 5)
-                                                        <span class="text-13-black">(Hàng mượn)</span>
-                                                    @endif
-                                                </a>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                @if ($item->serialNumber)
+                                                    <a href="{{ route('inventoryLookup.edit', $item->id) }}">
+                                                        {{ $item->serialNumber->serial_code ?? '' }}
+                                                        @if (!empty($item->serialNumber) && $item->serialNumber->status == 5)
+                                                            <span class="text-13-black">(Hàng mượn)</span>
+                                                        @endif
+                                                    </a>
+                                                @endif
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
                                                 @if ($item->provider)
                                                     {{ $item->provider->provider_name }}
                                                 @endif
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ date_format(new DateTime($item->import_date), 'd/m/Y') }}
                                             </td>
                                             @if (!auth()->user()->hasAnyRole(['Quản lý kho', 'Bảo hành']))
-                                                <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
-                                                    {{ $item->serialNumber->warehouse->warehouse_name }}
+                                                <td
+                                                    class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                    @if ($item->warehouse)
+                                                        {{ $item->warehouse->warehouse_name }}
+                                                    @endif
                                                 </td>
                                             @endif
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 {{ $item->storage_duration }} ngày
                                             </td>
-                                            <td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
                                                 @if ($item->status == '1')
                                                     <span class="text-danger">Tới hạn bảo trì</span>
                                                 @endif
@@ -252,7 +279,7 @@
 <script src="{{ asset('js/exports_excel.js') }}"></script>
 
 <script>
-    $(document).on('click', '.btn-submit', function (e) {
+    $(document).on('click', '.btn-submit', function(e) {
         if (!$(e.target).is('input[type="checkbox"]')) e.preventDefault();
         var buttonElement = this;
         // Thu thập dữ liệu từ form
@@ -286,7 +313,7 @@
     exportTableToExcel("#exportBtn", "#example2", "ton_kho.xlsx");
 
     // Toggle bảng tổng hợp
-    $(document).on('click', '#toggleSummary', function () {
+    $(document).on('click', '#toggleSummary', function() {
         var $summaryTable = $('#summaryTable');
         var $mainTable = $('#example2').closest('.col-12');
         var formData = {
@@ -321,10 +348,10 @@
             data: formData, // Truyền dữ liệu lọc
             cache: true,
             dataType: "json",
-            beforeSend: function () {
+            beforeSend: function() {
                 $('#summaryTableBody').html('<tr><td colspan="4">Đang tải dữ liệu...</td></tr>');
             },
-            success: function (response) {
+            success: function(response) {
                 var tbody = $('#summaryTableBody');
                 tbody.empty();
 
@@ -342,7 +369,7 @@
                     tbody.append('<tr><td colspan="4">Không có dữ liệu</td></tr>');
                 }
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 console.log('Lỗi:', xhr.responseText);
                 $('#summaryTableBody').html('<tr><td colspan="4">Lỗi khi tải dữ liệu</td></tr>');
             }
@@ -352,7 +379,10 @@
     // Hàm deepeningSort để xử lý sort nếu cần (giả định)
     function deepeningSort(sortData) {
         if (sortData && sortData.sort_by && sortData.sort_type) {
-            return { sort_by: sortData.sort_by, sort_type: sortData.sort_type };
+            return {
+                sort_by: sortData.sort_by,
+                sort_type: sortData.sort_type
+            };
         }
         return {};
     }

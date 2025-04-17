@@ -21,19 +21,19 @@ class WarrantyLookupController extends Controller
     {
         $title = "Tra cứu bảo hành";
         $warranty = warrantyLookup::with(['product', 'serialNumber', 'customer', 'warrantyHistories.receiving'])->orderby('id', 'DESC')->get();
-        $grouped = $warranty->groupBy('sn_id')->map(function ($items) {
-            // Sao chép dữ liệu để tránh ảnh hưởng đến bản gốc
+        // dd($warranty);
+        $grouped = $warranty->groupBy(function ($item) {
+            return $item->sn_id . '_' . $item->export_id; // group theo cặp sn_id + export_id
+        })->map(function ($items) {
             $first = $items->first()->replicate();
-
-            // Nối name_warranty và warranty theo định dạng yêu cầu
+        
             $first->name_warranty = $items->filter(function ($item) {
                 return !empty($item->name_warranty);
             })->map(function ($item) {
                 $warrantyText = $item->warranty == 0 ? 'không bảo hành' : $item->warranty . ' tháng';
                 return $item->name_warranty . ": " . $warrantyText;
-            })->join('| ');        
-
-            // Nối status với điều kiện chuyển đổi
+            })->join('| ');
+        
             $first->status_string = $items->map(function ($item) {
                 if ($item->status == 0) {
                     $statusText = 'Còn bảo hành';
@@ -44,34 +44,30 @@ class WarrantyLookupController extends Controller
                 } else {
                     $statusText = 'Không xác định';
                 }
-            
-                // Nếu status = 2, nối với name_expire_date, ngược lại nối với name_warranty
+        
                 if (!empty($item->name_expire_date)) {
                     return $item->name_expire_date . ": " . $statusText;
                 } elseif (!empty($item->name_warranty)) {
                     return $item->name_warranty . ": " . $statusText;
                 }
-            
-                return null; // Bỏ qua nếu không có dữ liệu phù hợp
-            })->filter()->join('| '); // filter() để loại bỏ giá trị null
-            
-            
-
+        
+                return null;
+            })->filter()->join('| ');
+        
             $first->name_expire_date = $items->map(function ($item) {
                 if (!empty($item->name_expire_date)) {
                     return $item->name_expire_date . ": " . $item->warranty_extra . " tháng";
                 }
                 return null;
             })->filter()->join('| ');
-            
-
+        
             return $first;
         });
 
         // Kết quả
         $grouped = $grouped->values();
 
-        // dd($grouped);
+        //dd($grouped);
         $customers = Customers::all();
         return view('expertise.warrantyLookup.index', compact('title', 'warranty', 'customers', 'grouped'));
     }

@@ -17,25 +17,32 @@ function showAutoToast(type, message) {
     let color;
     switch (type) {
         case "success":
-            color = "#09BD3C"; // Màu xanh lá cây cho thông báo thành công
+            color = "#09BD3C";
             break;
         case "warning":
-            color = "#FF9500"; // Màu cam cho thông báo cảnh báo
+            color = "#FF9500";
             break;
         default:
-            color = "#343a40"; // Màu mặc định
+            color = "#343a40";
     }
 
+    // Tạo một div để chứa nội dung HTML
+    let messageDiv = document.createElement("div");
+    messageDiv.innerHTML = message;
+    messageDiv.style.color = "#fff";
+    messageDiv.style.padding = "8px";
+    messageDiv.style.lineHeight = "1.5";
+    messageDiv.style.maxWidth = "700px";
+    messageDiv.style.wordBreak = "break-word";
+
     Toastify({
-        text: message, // Nội dung thông báo
-        duration: 4000, // Thời gian hiển thị (ms)
-        close: true, // Cho phép đóng thông báo
-        gravity: "top", // Vị trí hiển thị (top, bottom, left, right)
+        node: messageDiv,
+        duration: 5000,
+        close: true,
+        gravity: "top",
         position: "center",
-        style: {
-            background: color, // Màu nền
-        },
-    }).showToast(); // Hiển thị thông báo toast
+        backgroundColor: color, // màu nền
+    }).showToast();
 }
 $(document).ready(function () {
     // Hàm thêm dòng
@@ -436,9 +443,11 @@ $(document).on("click", ".submit-button", function (event) {
         showAutoToast("warning", "Vui lòng nhập thông tin sản phẩm.");
         return;
     }
-    if (serialNumbers.length === 0) {
-        showAutoToast("warning", "Vui lòng nhập ít nhất một serial number");
-        return;
+    if (name_modal == "PCK" || name_modal == "CPCK") {
+        if (serialNumbers.length === 0) {
+            showAutoToast("warning", "Vui lòng nhập ít nhất một serial number");
+            return;
+        }
     }
 
     // Kiểm tra nhập S/N trùng
@@ -477,20 +486,35 @@ $(document).on("click", ".submit-button", function (event) {
         $("#modal-id").attr("data-type", "create");
     }
     // Thêm các hàng mới từ serialNumbers
-    serialNumbers.forEach(function (serial, index) {
+    if (serialNumbers.length === 0) {
+        // Trường hợp không có serialNumber → vẫn thêm 1 dòng
         let serialBorrow =
-            warehouse_id == 2 ? serialNumbersBorrow[index] || "" : "";
-
+            warehouse_id == 2 ? serialNumbersBorrow[0] || "" : "";
         let newRow = createSerialRow(
-            index,
+            0,
             product,
-            serial,
+            "",
             serialBorrow,
             name_modal,
             warranty
-        ); // Hàm tạo dòng mới
-        $tbody.append(newRow); // Thêm dòng mới vào tbody
-    });
+        );
+        $tbody.append(newRow);
+    } else {
+        serialNumbers.forEach(function (serial, index) {
+            let serialBorrow =
+                warehouse_id == 2 ? serialNumbersBorrow[index] || "" : "";
+
+            let newRow = createSerialRow(
+                index,
+                product,
+                serial,
+                serialBorrow,
+                name_modal,
+                warranty
+            ); // Hàm tạo dòng mới
+            $tbody.append(newRow); // Thêm dòng mới vào tbody
+        });
+    }
 
     // Thêm hàng cuối cùng để đếm số lượng serial
     let countRow = createCountRow(
@@ -557,9 +581,9 @@ function createSerialRow(
                     name="brand" value="${product.product_brand || ""}">
             </td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                <input type="text" autocomplete="off"
-                    class="border-0 pl-1 pr-2 py-1 w-100 height-32" readonly
-                    name="" value="1">
+                <input type="number" autocomplete="off"
+                    class="border-0 pl-1 pr-2 py-1 w-100 height-32 bg-input-guest-blue qty"
+                    name="qty[]" value="1">
             </td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative">
                 <input type="text" autocomplete="off"
@@ -587,7 +611,7 @@ function createSerialRow(
            <td class="border-right p-2 text-13 align-top border-bottom border-top-0 ${hideLastWarranty}">
     <input type="number" autocomplete="off"
         class="border-0 pl-1 pr-2 py-1 w-100 warranty height-32 bg-input-guest-blue"
-        name="warranty[]" placeholder="Tháng" value="${product.warranty || ''}"
+        name="warranty[]" placeholder="Tháng" value="${product.warranty || ""}"
         step="1"
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        onkeydown="if(event.key === '.' || event.key === ',') event.preventDefault();" >

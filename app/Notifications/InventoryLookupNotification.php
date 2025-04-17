@@ -33,6 +33,10 @@ class InventoryLookupNotification extends Notification
 
     public function toDatabase($notifiable)
     {
+        // Nếu không có serial thì không tạo thông báo
+        if (empty($this->inventoryLookup->serialNumber?->serial_code)) {
+            return null; // Laravel sẽ bỏ qua không ghi vào DB
+        }
         // Trả dữ liệu lưu trong bảng `notifications`
         return [
             'inventoryLookup_id' => $this->inventoryLookup->id,
@@ -49,9 +53,9 @@ class InventoryLookupNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('The introduction to the notification.')
+            ->action('Notification Action', url('/'))
+            ->line('Thank you for using our application!');
     }
 
     /**

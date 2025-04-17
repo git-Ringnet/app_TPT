@@ -23,6 +23,7 @@ class warrantyLookup extends Model
         'name_expire_date',
         'return_date',
         'service_warranty_expired',
+        'export_id',
     ];
     public function product()
     {

@@ -9,6 +9,7 @@ use App\Models\InventoryHistory;
 use App\Models\InventoryLookup;
 use App\Models\Notification;
 use App\Models\Product;
+use App\Models\ProductExport;
 use App\Models\ProductImport;
 use App\Models\Providers;
 use App\Models\Quotation;
@@ -98,6 +99,8 @@ class ImportsController extends Controller
 
         // Duyệt qua từng sản phẩm trong mảng
         foreach ($uniqueProductsArray as $serial) {
+            $sn_id = 0;
+            // Nếu có serial thì tạo SerialNumber
             if (isset($serial['serial']) && !empty($serial['serial'])) {
                 $newSerial = SerialNumber::create([
                     'serial_code' => str_replace(' ', '', $serial['serial']),
@@ -105,23 +108,27 @@ class ImportsController extends Controller
                     'note' => $serial['note_seri'],
                     'warehouse_id' => $warehouse_id ?? 1,
                 ]);
-                ProductImport::create([
-                    'import_id' => $import_id,
-                    'product_id' => $serial['product_id'],
-                    'quantity' => 1,
-                    'sn_id' => $newSerial->id,
-                    'note' => $serial['note_seri'],
-                ]);
-                //Tra cứu tồn kho
-                InventoryLookup::create([
-                    'product_id' => $serial['product_id'],
-                    'sn_id' => $newSerial->id,
-                    'provider_id' => $request->provider_id,
-                    'import_date' => $request->date_create,
-                    'storage_duration' => 0,
-                    'status' => 0,
-                ]);
+                $sn_id = $newSerial->id;
             }
+            ProductImport::create([
+                'import_id' => $import_id,
+                'product_id' => $serial['product_id'],
+                'quantity' => $serial['qty'],
+                'sn_id' => $sn_id,
+                'note' => $serial['note_seri'],
+            ]);
+            //Tra cứu tồn kho
+            InventoryLookup::create([
+                'product_id' => $serial['product_id'],
+                'sn_id' => $sn_id,
+                'provider_id' => $request->provider_id,
+                'import_date' => $request->date_create,
+                'storage_duration' => 0,
+                'status' => 0,
+                'remaining_quantity' => $serial['qty'],
+                'import_id' => $import_id,
+                'warehouse_id' => $warehouse_id ?? 1,
+            ]);
         }
 
         // Lấy tất cả các bản ghi trong InventoryLookup
@@ -166,6 +173,10 @@ class ImportsController extends Controller
 
     private function notifyStatusChange($record, $message)
     {
+        // Nếu không có serial thì không cần thông báo
+        if (empty($record->serialNumber?->serial_code)) {
+            return;
+        }
         // Lấy tất cả người dùng không có quyền 'dichvu'
         $users = User::whereDoesntHave('permissions', function ($query) {
             $query->where('name', 'dichvu');
@@ -310,6 +321,8 @@ class ImportsController extends Controller
                     'import_date' => $request->date_create,
                     'storage_duration' => 0,
                     'status' => 0,
+                    'remaining_quantity' => $serialData['qty'],
+                    'warehouse_id' => $warehouse_id ?? 1,
                 ]);
             }
         }
@@ -329,6 +342,20 @@ class ImportsController extends Controller
                         ],
                         [
                             'note' => $data['note_seri'] ?? '',
+                            'quantity' => $data['qty'],
+                        ]
+                    );
+
+                    InventoryLookup::updateOrCreate(
+                        [
+                            'sn_id' => $snId,
+                            'product_id' => $data['product_id'],
+                            'provider_id' => $request->provider_id,
+                            'import_date' => $request->date_create,
+                            'warehouse_id' => $warehouse_id ?? 1,
+                        ],
+                        [
+                            'remaining_quantity' => $data['qty'],
                         ]
                     );
                 }
@@ -407,30 +434,37 @@ class ImportsController extends Controller
         $import = Imports::findOrFail($id);
         $productImports = ProductImport::where('import_id', $id)->get();
 
+        // Kiểm tra sản phẩm đã được xuất chưa
         foreach ($productImports as $productImport) {
-            $exists = SerialNumber::where('id', $productImport->sn_id)
-                ->where('status', 1)
+            $exists = ProductExport::where('product_id', $productImport->product_id)
+                ->where(function ($query) use ($productImport) {
+                    if ($productImport->sn_id != 0) {
+                        $query->where('sn_id', $productImport->sn_id);
+                    }
+                })
                 ->exists();
-            if (!$exists) {
-                return redirect()->route('imports.index')->with('warning', 'Xóa thất bại: Có SerialNumber không hợp lệ.');
+
+            if ($exists) {
+                return redirect()->route('imports.index')
+                    ->with('warning', 'Xóa thất bại: do có sản phẩm đã được xuất!');
             }
         }
 
-        // Nếu tất cả SerialNumber hợp lệ, thực hiện xóa
-        foreach ($productImports as $productImport) {
-            $inventoryLookups = InventoryLookup::where('sn_id', $productImport->sn_id)->get();
-            foreach ($inventoryLookups as $inventoryLookup) {
-                Notification::whereJsonContains('data->inventoryLookup_id', $inventoryLookup->id)->delete();
-                InventoryHistory::where('inventory_lookup_id', $inventoryLookup->id)->delete();
-            }
-            InventoryLookup::where('sn_id', $productImport->sn_id)->delete();
-            SerialNumber::where('id', $productImport->sn_id)->delete();
-            $productImport->delete();
+        // Xóa các InventoryLookup theo import_id
+        $inventoryLookups = InventoryLookup::where('import_id', $id)->get();
+
+        foreach ($inventoryLookups as $inventoryLookup) {
+            Notification::whereJsonContains('data->inventoryLookup_id', $inventoryLookup->id)->delete();
+            InventoryHistory::where('inventory_lookup_id', $inventoryLookup->id)->delete();
+            $inventoryLookup->delete();
         }
 
-        if (!ProductImport::where('import_id', $id)->exists()) {
-            $import->delete();
-        }
+        // Xóa các serial (nếu có)
+        SerialNumber::whereIn('id', $productImports->pluck('sn_id')->filter()->toArray())->delete();
+
+        // Xóa chi tiết nhập và phiếu nhập
+        ProductImport::where('import_id', $id)->delete();
+        $import->delete();
 
         return redirect()->route('imports.index')->with('msg', 'Xóa thành công phiếu nhập hàng!');
     }

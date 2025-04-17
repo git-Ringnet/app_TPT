@@ -129,8 +129,8 @@
                                     </td>
                                     @if ($name == 'XH' || $name == 'CXH')
                                         <td class="text-13-black border border-bottom-0 py-0">
-                                            <input type="text" name="name_warranty" placeholder="Thông tin" id="name_warranty"
-                                                style="flex:2;"
+                                            <input type="text" name="name_warranty" placeholder="Thông tin"
+                                                id="name_warranty" style="flex:2;"
                                                 class="text-13-black w-100 border-0 bg-input-guest-blue p-2">
                                         </td>
                                         <td class="text-13-black border border-bottom-0 py-0">
@@ -455,8 +455,12 @@
         });
     });
 
+    let isProcessing = false; // Ngăn spam
     $('#btn-get-unique-products').click(function(e) {
         e.preventDefault();
+
+        if (isProcessing) return; // Nếu đang xử lý thì bỏ qua
+        isProcessing = true;
 
         let $btn = $(this);
         $btn.prop('disabled', true); // Vô hiệu hóa nút khi đang xử lý
@@ -464,12 +468,14 @@
         if (nameModal == "NH") {
             if (!validateInput("#provider_id", "Vui lòng chọn nhà cung cấp!", "#provider_name")) {
                 $btn.prop('disabled', false);
+                isProcessing = false;
                 return false;
             }
         }
         if (nameModal == "XH" || nameModal == "CXH") {
             if (!validateInput("#provider_name", "Vui lòng chọn khách hàng!", "#provider_name")) {
                 $btn.prop('disabled', false);
+                isProcessing = false;
                 return false;
             }
         }
@@ -477,6 +483,7 @@
         if ($('#tbody-product-data tr#serials-data').length === 0) {
             showAutoToast("warning", "Vui lòng thêm sản phẩm.");
             $btn.prop('disabled', false);
+            isProcessing = false;
             return false;
         }
 
@@ -486,10 +493,12 @@
             if (warehouse === "" || warehouseReceive === "") {
                 showAutoToast("warning", "Vui lòng chọn kho xuất và kho nhận");
                 $btn.prop('disabled', false);
+                isProcessing = false;
                 return false;
             } else if (warehouse === warehouseReceive) {
                 showAutoToast("warning", "Kho xuất và kho nhận không được trùng nhau");
                 $btn.prop('disabled', false);
+                isProcessing = false;
                 return false;
             }
         }
@@ -509,6 +518,7 @@
         if (duplicates.length > 0) {
             showAutoToast("warning", "Các S/N bị trùng: " + duplicates.join(", "));
             $btn.prop('disabled', false);
+            isProcessing = false;
             return false;
         }
 
@@ -520,10 +530,10 @@
         $('#tbody-product-data .row-product[data-product-id]').each(function() {
             let $row = $(this);
             let product_id = $row.find('.product_id').val();
+            let product_code = $row.find('.product_code').val();
             let serial = $row.find('.serial').val().trim();
             let serial_borrow = $row.find('.serial_borrow').val()?.trim() || "";
-
-            if (!serial) return;
+            let qty = $row.find('.qty').val();
 
             let ajaxCall = $.ajax({
                 url: '{{ route('checkSN') }}',
@@ -535,24 +545,39 @@
                     import_id,
                     warehouse_id,
                     serial_borrow,
+                    qty,
                     _token: $('meta[name="csrf-token"]').attr('content')
                 }
             }).done(function(response) {
+                console.log(response);
+                
                 if ((nameModal === "NH" || nameModal === "CNH") && response.exists) {
-                    SNExist.push(serial);
+                    SNExist.push("Serial đã tồn tại trong hệ thống: " + serial);
                 }
-                if ((nameModal === "XH" || nameModal === "CXH") && !response.exists) {
-                    SNExist.push(serial);
+                if ((nameModal === "XH" || nameModal === "CXH")) {
+                    if (serial && !response.exists) {
+                        SNExist.push("Serial không tồn tại hoặc đã xuất: " + serial);
+                    } else if (!serial && response.available_quantity !== undefined && response
+                        .available_quantity < qty) {
+                        SNExist.push("Mã hàng " + product_code +
+                            " vượt quá số lượng tồn kho (hiện còn: " + response
+                            .available_quantity + ")");
+                    } else if (serial && response.available_quantity !== undefined && response
+                        .available_quantity < qty) {
+                        SNExist.push("S/N " + serial + " vượt quá số lượng tồn kho");
+                    }
                 }
-                if (nameModal === "PCK" && !response.exists) {
+                if (nameModal === "PCK") {
                     if (warehouse_id == 1) {
-                        SNExist.push(serial);
+                        if (!response.exists) {
+                            SNExist.push("S/N không tồn tại trong kho hàng mới: " + serial);
+                        }
                     } else {
                         if (!response.existsSerial) {
-                            SNExist.push(serial);
+                            SNExist.push("S/N mới không tồn tại: " + serial);
                         }
                         if (!response.existsSerialBorrow) {
-                            SNExist.push(serial_borrow);
+                            SNExist.push("S/N mượn không hợp lệ: " + serial_borrow);
                         }
                     }
                 }
@@ -563,14 +588,7 @@
 
         $.when.apply($, ajaxCalls).done(function() {
             if (SNExist.length > 0) {
-                let message = '';
-                if (nameModal === "NH" || nameModal === "CNH") {
-                    message = `Serial này đã có trong hệ thống: ${SNExist.join(", ")}`;
-                } else if (nameModal === "XH" || nameModal === "CXH") {
-                    message = `Serial này không tồn tại hoặc đã được xuất: ${SNExist.join(", ")}`;
-                } else if (nameModal === "PCK") {
-                    message = `Serial này không tồn tại: ${SNExist.join(", ")}`;
-                }
+                let message = SNExist.join("<br>");
                 showAutoToast("warning", message);
                 $btn.prop('disabled', false);
                 return;
@@ -585,6 +603,7 @@
                 const serialBorrow = $row.find('.serial_borrow').val();
                 const note_seri = $row.find('.note_seri').val();
                 const status_recept = $row.find('.status_recept').val();
+                const qty = $row.find('.qty').val();
 
                 const warranties = [];
                 const productWarrantyName = $row.find('.name_warranty').val() || "Toàn bộ";
@@ -608,7 +627,8 @@
                     product_id,
                     serial,
                     note_seri,
-                    status_recept
+                    status_recept,
+                    qty
                 };
 
                 if (nameModal === "XH" || nameModal === "CXH") {
@@ -627,9 +647,10 @@
             $('#data-test').val(JSON.stringify(Array.from(uniqueProducts.values())));
 
             // Nếu hợp lệ, submit form
-            $('#form-submit').submit(); // Đổi thành ID form thực tế
+            $('#form-submit').submit();
         }).always(function() {
-            $btn.prop('disabled', false); // Bật lại nút sau khi xử lý xong
+            $btn.prop('disabled', false);
+            isProcessing = false;
         });
     });
 

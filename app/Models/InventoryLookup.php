@@ -22,6 +22,9 @@ class InventoryLookup extends Model
         'warranty_date',
         'note',
         'warehouse_id',
+        'remaining_quantity',
+        'import_id',
+        'warehouse_id',
     ];
 
     public function product()
@@ -35,6 +38,10 @@ class InventoryLookup extends Model
     public function provider()
     {
         return $this->belongsTo(Providers::class, 'provider_id', 'id');
+    }
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
     }
     public function inventoryHistories()
     {

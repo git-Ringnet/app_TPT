@@ -133,7 +133,9 @@ Route::resource('imports', ImportsController::class);
 //Exports
 Route::resource('exports', ExportsController::class);
 //Inventory
-Route::resource('inventoryLookup', InventoryLookupController::class);
+Route::middleware('auth')->group(function () {
+    Route::resource('inventoryLookup', InventoryLookupController::class);
+});
 Route::get('/inventory-lookup/summary', [InventoryLookupController::class, 'summary'])->name('inventoryLookup.summary');
 //Check S/N exist
 Route::get('/checkSN', [SerialNumberController::class, 'checkSN'])->name('checkSN');

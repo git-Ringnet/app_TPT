@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InventoryLookup;
 use App\Models\ProductExport;
 use App\Models\ProductImport;
 use App\Models\SerialNumber;
@@ -15,7 +16,10 @@ class SerialNumberController extends Controller
     {
         $productId = $request->input('product_id');
         $serial = $request->input('serial');
+        $qty = $request->input('qty');
+        $exists = false;
         $sn = SerialNumber::where('serial_code', $serial)->first();
+        $availableQty = 0;
         if ($request->nameModal == "CNH") {
             if ($sn) {
                 $exists = ProductImport::where('sn_id', $sn->id)
@@ -24,24 +28,69 @@ class SerialNumberController extends Controller
             }
         }
         if ($request->nameModal == "XH") {
-            // Kiểm tra trong bảng serial_numbers
-            $exists = SerialNumber::where('serial_code', $serial)
-                ->where('status', 1)
-                ->exists();
+            if ($sn) {
+                $lookup = InventoryLookup::where('product_id', $productId)
+                    ->where('sn_id', $sn->id)
+                    ->first();
+                $availableQty = $lookup?->remaining_quantity ?? 0;
+                $exists = $sn->status == 1 && $lookup && $lookup->remaining_quantity > 0;
+            } else {
+                // Không có serial: kiểm tra tồn kho tổng
+                $lookup = InventoryLookup::where('product_id', $productId)
+                    ->where('sn_id', 0)
+                    ->sum('remaining_quantity');
+                $availableQty = (int)$lookup ?? 0;
+                $exists = $availableQty >= $qty;
+            }
         }
         if ($request->nameModal == "CXH") {
-            if ($sn) {
-                $exists = ProductExport::where('product_id', $productId)
+            if ($request->serial) {
+                $sn = SerialNumber::where('serial_code', $request->serial)->first();
+
+                if (!$sn) {
+                    // SN không tồn tại trong hệ thống
+                    return response()->json([
+                        'exists' => false,
+                        'remaining_quantity' => 0,
+                        'available_quantity' => 0,
+                    ]);
+                }
+
+                // --- Sản phẩm có serial ---
+                $lookup = InventoryLookup::where('product_id', $productId)
+                    ->where('sn_id', $sn->id)
+                    ->first();
+
+                $isInExport = ProductExport::where('product_id', $productId)
                     ->where('sn_id', $sn->id)
                     ->where('export_id', $request->import_id)
                     ->exists();
-                if (!$exists) {
-                    $exists = SerialNumber::where('serial_code', $serial)
-                        ->where('status', 1)
-                        ->exists();
+
+                $alreadyExportedQty = ProductExport::where('product_id', $productId)
+                    ->where('sn_id', $sn->id)
+                    ->where('export_id', $request->import_id)
+                    ->sum('quantity');
+
+                $availableQty = ($lookup ? $lookup->remaining_quantity : 0) + $alreadyExportedQty;
+
+                if ($isInExport) {
+                    $exists = true;
+                } else {
+                    $exists = $sn->status == 1 && $availableQty > 0;
                 }
             } else {
-                $exists = false;
+                // --- Sản phẩm không serial ---
+                $lookup = InventoryLookup::where('product_id', $productId)
+                    ->where('sn_id', 0)
+                    ->first();
+
+                $exportedQty = ProductExport::where('export_id', $request->import_id)
+                    ->where('product_id', $productId)
+                    ->where('sn_id', 0)
+                    ->sum('quantity');
+
+                $availableQty = ($lookup ? $lookup->remaining_quantity : 0) + $exportedQty;
+                $exists = $availableQty > 0;
             }
         }
         if ($request->nameModal == "NH") {
@@ -72,11 +121,16 @@ class SerialNumberController extends Controller
             }
         }
 
-        return response()->json(['exists' => $exists]);
+        return response()->json([
+            'exists' => $exists,
+            'remaining_quantity' => $lookup?->remaining_quantity ?? 0,
+            'available_quantity' => $availableQty ?? 0,
+        ]);
     }
 
     public function checkSNImport(Request $request)
     {
+        $productId = $request->input('product_id');
         $serialNumber = $request->input('serial_number');
         // dd($request->all());
         // Kiểm tra số serial trong cơ sở dữ liệu
@@ -91,6 +145,7 @@ class SerialNumberController extends Controller
         if ($request->nameModal == "XH") {
             // Kiểm tra trong bảng serial_numbers
             $exists = SerialNumber::where('serial_code', $serialNumber)
+                ->where('product_id', $productId)
                 ->where('status', 1)
                 ->exists();
             if (!$exists) {
