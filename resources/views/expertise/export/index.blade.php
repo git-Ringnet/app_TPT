@@ -3,7 +3,7 @@
 <div class="content-wrapper m-0 min-height--none p-0">
     <div class="content-header-fixed px-1">
         <div class="content__header--inner">
-            <x-search-filter :keywords="request('keywords')" :filters="['Mã phiếu', 'Ngày lập phiếu', 'Khách hàng', 'Người lập phiếu', 'Ghi chú']">
+            <x-search-filter :keywords="request('keywords')" :filters="['Mã phiếu', 'Serial', 'Tên sản phẩm', 'Mã sản phẩm', 'Ngày lập phiếu', 'Khách hàng', 'Người lập phiếu', 'Ghi chú']">
                 <x-filter-text name="ma-phieu" title="Mã phiếu" />
                 <x-filter-checkbox :dataa='$users' name="nguoi-lap-phieu" title="Người lập phiếu"
                     button="nguoi-lap-phieu" namedisplay="name" />
@@ -11,6 +11,9 @@
                     namedisplay="customer_name" />
                 <x-filter-date name="ngay-lap-phieu" title="Ngày lập phiếu" />
                 <x-filter-text name="ghi-chu" title="Ghi chú" />
+                <x-filter-text name="serial" title="Serial" />
+                <x-filter-text name="ma-san-pham" title="Mã sản phẩm" />
+                <x-filter-text name="ten-san-pham" title="Tên sản phẩm" />
             </x-search-filter>
             <div class="d-flex content__heading--right">
                 <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
@@ -189,6 +192,9 @@
         var formData = {
             search: $('#search').val(),
             ma: getData('#ma-phieu', this),
+            serial: getData('#serial', this),
+            product_name: getData('#ten-san-pham', this),
+            product_code: getData('#ma-san-pham', this),
             note: getData('#ghi-chu', this),
             date: retrieveDateData(this, 'ngay-lap-phieu'),
             customer: getStatusData(this, 'khach-hang'),

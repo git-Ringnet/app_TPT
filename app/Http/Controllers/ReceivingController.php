@@ -319,8 +319,17 @@ class ReceivingController extends Controller
         if (isset($data['note']) && $data['note'] !== null) {
             $filters[] = ['value' => 'Ghi chú: ' . $data['note'], 'name' => 'ghi-chu', 'icon' => 'po'];
         }
+        if (isset($data['serial']) && $data['serial'] !== null) {
+            $filters[] = ['value' => 'S/N: ' . $data['serial'], 'name' => 'serial', 'icon' => 'po'];
+        }
+        if (isset($data['product_name']) && $data['product_name'] !== null) {
+            $filters[] = ['value' => 'Tên sản phẩm: ' . $data['product_name'], 'name' => 'ten-san-pham', 'icon' => 'po'];
+        }
+        if (isset($data['product_code']) && $data['product_code'] !== null) {
+            $filters[] = ['value' => 'Mã sản phẩm: ' . $data['product_code'], 'name' => 'ma-san-pham', 'icon' => 'po'];
+        }
         if (isset($data['customer']) && $data['customer'] !== null) {
-            $filters[] = ['value' => 'Khách hàng: ' . count($data['customer']) . ' đã chọn', 'name' => 'khách hàng', 'icon' => 'user'];
+            $filters[] = ['value' => 'Khách hàng: ' . count($data['customer']) . ' đã chọn', 'name' => 'khach-hang', 'icon' => 'user'];
         }
         if (isset($data['date']) && $data['date'][1] !== null) {
             $date_start = date("d/m/Y", strtotime($data['date'][0]));

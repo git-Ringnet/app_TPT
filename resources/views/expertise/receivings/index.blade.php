@@ -6,6 +6,9 @@
             <x-search-filter :keywords="request('keywords')" :filters="[
                 'Mã phiếu',
                 'Khách hàng',
+                'Serial',
+                'Mã sản phẩm',
+                'Tên sản phẩm',
                 'Ngày lập phiếu',
                 'Ngày đóng phiếu',
                 'Loại phiếu',
@@ -40,6 +43,9 @@
                 <x-filter-date name="ngay-lap-phieu" title="Ngày lập phiếu" />
                 <x-filter-date name="ngay-dong-phieu" title="Ngày đóng phiếu" />
                 <x-filter-text name="ghi-chu" title="Ghi chú" />
+                <x-filter-text name="serial" title="Serial" />
+                <x-filter-text name="ma-san-pham" title="Mã sản phẩm" />
+                <x-filter-text name="ten-san-pham" title="Tên sản phẩm" />
             </x-search-filter>
             <div class="d-flex content__heading--right">
                 <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
@@ -324,6 +330,9 @@
             search: $('#search').val(),
             ma: getData('#ma-phieu', this),
             note: getData('#ghi-chu', this),
+            serial: getData('#serial', this),
+            product_name: getData('#ten-san-pham', this),
+            product_code: getData('#ma-san-pham', this),
             date: retrieveDateData(this, 'ngay-lap-phieu'),
             closed_at: retrieveDateData(this, 'ngay-dong-phieu'),
             customer: getStatusData(this, 'khach-hang'),

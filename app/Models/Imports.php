@@ -69,17 +69,17 @@ class Imports extends Model
         }
 
         $arrImport = [
-            'import_code'    => $importCode,
-            'user_id'        => $data['user_id'],
-            'phone'          => $data['phone'],
-            'date_create'    => $data['date_create'],
-            'provider_id'    => $data['provider_id'],
+            'import_code' => $importCode,
+            'user_id' => $data['user_id'],
+            'phone' => $data['phone'],
+            'date_create' => $data['date_create'],
+            'provider_id' => $data['provider_id'],
             'contact_person' => $data['contact_person'],
-            'address'        => $data['address'],
-            'note'           => $data['note'],
-            'warehouse_id'   => $warehouse_id ?? 1,
-            'created_at'     => now(),
-            'updated_at'     => now(),
+            'address' => $data['address'],
+            'note' => $data['note'],
+            'warehouse_id' => $warehouse_id ?? 1,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
 
         return DB::table($this->table)->insertGetId($arrImport);
@@ -100,7 +100,7 @@ class Imports extends Model
         $newNumber = 1; // Mặc định số thứ tự là 1
         if ($lastCode) {
             $lastNumber = (int) substr($lastCode, strlen($prefix)); // Lấy phần số sau prefix
-            $newNumber  = $lastNumber + 1;
+            $newNumber = $lastNumber + 1;
         }
 
         // Định dạng số thứ tự thành chuỗi 5 chữ số (001, 002, ...)
@@ -113,27 +113,41 @@ class Imports extends Model
     {
         // Lấy dữ liệu Imports với quan hệ
         $imports = Imports::with(['user', 'provider'])
+
+            ->join('users', 'imports.user_id', '=', 'users.id') // Join với bảng users
+            ->join('providers', 'imports.provider_id', '=', 'providers.id')
+            ->leftJoin('product_import', 'product_import.import_id', '=', 'imports.id')
+            ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'product_import.sn_id')
+            ->leftJoin('products', 'products.id', '=', 'product_import.product_id')
             ->select(
                 'imports.*',
                 'users.name as username',
-                'providers.provider_name as provide_name'
-            )
-            ->join('users', 'imports.user_id', '=', 'users.id') // Join với bảng users
-            ->join(
-                'providers',
-                'imports.provider_id',
-                '=',
-                'providers.id'
+                'providers.provider_name as provide_name',
+                'serial_numbers.serial_code as serial_number',
+                'products.product_name as product_name',
+                'products.product_code as product_code'
             );
         if (!empty($data)) {
             if (!empty($data['search'])) {
                 $imports->where(function ($query) use ($data) {
                     $query->where('import_code', 'like', '%' . $data['search'] . '%')
-                        ->orWhere('imports.note', 'like', '%' . $data['search'] . '%');
+                        ->orWhere('imports.note', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('products.product_name', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('products.product_code', 'like', '%' . $data['search'] . '%');
                 });
             }
             if (!empty($data['ma'])) {
                 $imports->where('import_code', 'like', '%' . $data['ma'] . '%');
+            }
+            if (!empty($data['serial'])) {
+                $imports->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+            }
+            if (!empty($data['product_name'])) {
+                $imports->where('products.product_name', 'like', '%' . $data['product_name'] . '%');
+            }
+            if (!empty($data['product_code'])) {
+                $imports->where('products.product_code', 'like', '%' . $data['product_code'] . '%');
             }
             if (!empty($data['note'])) {
                 $imports->where('imports.note', 'like', '%' . $data['note'] . '%');
@@ -157,6 +171,7 @@ class Imports extends Model
         if (isset($data['sort']) && isset($data['sort'][0])) {
             $imports = $imports->orderBy($data['sort'][0], $data['sort'][1]);
         }
+        // dd($imports->get());
         return $imports->get();
     }
 }

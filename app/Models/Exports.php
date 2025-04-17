@@ -38,6 +38,10 @@ class Exports extends Model
     {
         return $this->belongsTo(Customers::class, 'customer_id', 'id');
     }
+    public function productExport()
+    {
+        return $this->hasMany(ProductExport::class, 'export_id', 'id');
+    }
 
     public static function generateExportCode()
     {
@@ -96,18 +100,40 @@ class Exports extends Model
     public function getExportAjax($data = null)
     {
         $exports = Exports::with(['user', 'customer'])
-            ->select('exports.*', 'users.name as username', 'customers.customer_name as customername')
             ->join('users', 'exports.user_id', '=', 'users.id') // Join với bảng users
-            ->join('customers', 'exports.customer_id', '=', 'customers.id');
+            ->join('customers', 'exports.customer_id', '=', 'customers.id')
+            ->leftJoin('product_export', 'product_export.export_id', '=', 'exports.id')
+            ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'product_export.sn_id')
+            ->leftJoin('products', 'products.id', '=', 'product_export.product_id')
+            ->select(
+                'exports.*',
+                'users.name as username',
+                'customers.customer_name as customername',
+                'serial_numbers.serial_code as serial_number',
+                'products.product_name as product_name',
+                'products.product_code as product_code'
+            );;
         if (!empty($data)) {
             if (!empty($data['search'])) {
                 $exports->where(function ($query) use ($data) {
                     $query->where('export_code', 'like', '%' . $data['search'] . '%')
-                        ->orWhere('exports.note', 'like', '%' . $data['search'] . '%');
+                        ->orWhere('exports.note', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('products.product_name', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('products.product_code', 'like', '%' . $data['search'] . '%');
                 });
             }
             if (!empty($data['ma'])) {
                 $exports->where('export_code', 'like', '%' . $data['ma'] . '%');
+            }
+            if (!empty($data['serial'])) {
+                $exports->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+            }
+            if (!empty($data['product_name'])) {
+                $exports->where('products.product_name', 'like', '%' . $data['product_name'] . '%');
+            }
+            if (!empty($data['product_code'])) {
+                $exports->where('products.product_code', 'like', '%' . $data['product_code'] . '%');
             }
             if (!empty($data['note'])) {
                 $exports->where('exports.note', 'like', '%' . $data['note'] . '%');

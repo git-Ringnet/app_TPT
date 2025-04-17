@@ -451,6 +451,16 @@ class ExportsController extends Controller
         if (isset($data['note']) && $data['note'] !== null) {
             $filters[] = ['value' => 'Ghi chú: ' . $data['note'], 'name' => 'ghi-chu', 'icon' => 'po'];
         }
+        if (isset($data['serial']) && $data['serial'] !== null) {
+            $filters[] = ['value' => 'S/N: ' . $data['serial'], 'name' => 'serial', 'icon' => 'po'];
+        }
+        if (isset($data['product_name']) && $data['product_name'] !== null) {
+            $filters[] = ['value' => 'Tên sản phẩm: ' . $data['product_name'], 'name' => 'ten-san-pham', 'icon' => 'po'];
+        }
+        if (isset($data['product_code']) && $data['product_code'] !== null) {
+            $filters[] = ['value' => 'Mã sản phẩm: ' . $data['product_code'], 'name' => 'ma-san-pham', 'icon' => 'po'];
+        }
+
         if (isset($data['user']) && $data['user'] !== null) {
             $filters[] = ['value' => 'Người lập phiếu: ' . count($data['user']) . ' đã chọn', 'name' => 'nguoi-lap-phieu', 'icon' => 'user'];
         }

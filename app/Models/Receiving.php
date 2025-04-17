@@ -68,15 +68,37 @@ class Receiving extends Model
     public function getReceiAjax($data = null)
     {
         $receivings = Receiving::with(['user', 'customer'])
-            ->select('receiving.*', 'users.name as username', 'customers.customer_name as customername')
             ->join('users', 'receiving.user_id', '=', 'users.id') // Join với bảng users
-            ->join('customers', 'receiving.customer_id', '=', 'customers.id');
+            ->join('customers', 'receiving.customer_id', '=', 'customers.id')
+            ->leftJoin('received_products', 'received_products.reception_id', '=', 'receiving.id')
+            ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'received_products.serial_id')
+            ->leftJoin('products', 'products.id', '=', 'received_products.product_id')
+            ->select(
+                'receiving.*',
+                'users.name as username',
+                'customers.customer_name as customername',
+                'serial_numbers.serial_code as serial_number',
+                'products.product_name as product_name',
+                'products.product_code as product_code'
+            );
         if (!empty($data)) {
             if (!empty($data['search'])) {
                 $receivings->where(function ($query) use ($data) {
                     $query->where('form_code_receiving', 'like', '%' . $data['search'] . '%')
-                        ->orWhere('notes', 'like', '%' . $data['search'] . '%');
+                        ->orWhere('notes', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('products.product_name', 'like', '%' . $data['search'] . '%')
+                        ->orWhere('products.product_code', 'like', '%' . $data['search'] . '%');
                 });
+            }
+            if (!empty($data['serial'])) {
+                $receivings->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+            }
+            if (!empty($data['product_name'])) {
+                $receivings->where('products.product_name', 'like', '%' . $data['product_name'] . '%');
+            }
+            if (!empty($data['product_code'])) {
+                $receivings->where('products.product_code', 'like', '%' . $data['product_code'] . '%');
             }
             if (!empty($data['ma'])) {
                 $receivings->where('form_code_receiving', 'like', '%' . $data['ma'] . '%');
