@@ -552,8 +552,12 @@ function createSerialRow(
     const hideLastColumn = name === "TN" ? "d-block" : "d-none";
     const hideLastWarranty = name === "XH" || name === "CXH" ? "" : "d-none";
     const hideSerialBorrow = $("#warehouse_id").val() == 2 ? "" : "d-none";
+    const readonly = name === "PCK" || name === "CPCK" ? "readonly" : "";
+    const bgBlue = name === "PCK" || name === "CPCK" ? "" : "bg-input-guest-blue";
     let name_modal = $("#name_modal").val();
     let rows = [];
+    console.log(name);
+    
     rows.push(`
         <tr id="serials-data" class="row-product bg-white" data-index="${
             index + 1
@@ -582,8 +586,8 @@ function createSerialRow(
             </td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
                 <input type="number" autocomplete="off"
-                    class="border-0 pl-1 pr-2 py-1 w-100 height-32 bg-input-guest-blue qty"
-                    name="qty[]" value="1">
+                    class="border-0 pl-1 pr-2 py-1 w-100 height-32 ${bgBlue} qty"
+                    name="qty[]" value="1" ${readonly}>
             </td>
             <td class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative">
                 <input type="text" autocomplete="off"

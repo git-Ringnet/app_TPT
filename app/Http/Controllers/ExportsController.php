@@ -384,41 +384,32 @@ class ExportsController extends Controller
 
                 // Bảo hành
                 if ($warehouse_id != 2) {
-                    $formWarrantyNames = [];
+                    // Xoá toàn bộ bảo hành cũ cho serial và export hiện tại
+                    WarrantyLookup::where('sn_id', $snId)
+                        ->where('product_id', $productId)
+                        ->where('export_id', $id)
+                        ->delete();
 
+                    // Tạo lại các bảo hành mới từ form
                     foreach ($warranties as $item) {
                         $nameWarranty = $item[0];
                         $months = (int) $item[1];
-                        $formWarrantyNames[] = $nameWarranty;
 
                         $startDate = Carbon::parse($request->date_create);
                         $expire = $startDate->copy()->addMonthsNoOverflow($months);
                         if ($expire->day < $startDate->day) $expire = $expire->endOfMonth();
 
-                        WarrantyLookup::updateOrCreate([
+                        WarrantyLookup::create([
                             'sn_id' => $snId,
                             'product_id' => $productId,
+                            'customer_id' => $request->customer_id,
                             'name_warranty' => $nameWarranty,
-                            'customer_id' => $request->customer_id,
-                            'export_id' => $id,
-                        ], [
-                            'product_id' => $productId,
-                            'customer_id' => $request->customer_id,
                             'export_return_date' => $request->date_create,
                             'warranty' => $months,
                             'status' => 0,
                             'warranty_expire_date' => $expire->format('Y-m-d'),
                             'export_id' => $id,
                         ]);
-                    }
-
-                    //Xoá các warranty đã bị bỏ khỏi form
-                    if (!empty($formWarrantyNames)) {
-                        WarrantyLookup::where('sn_id', $snId)
-                            ->where('export_id', $id)
-                            ->where('product_id', $productId)
-                            ->whereNotIn('name_warranty', $formWarrantyNames)
-                            ->delete();
                     }
                 }
             } else {
@@ -442,23 +433,26 @@ class ExportsController extends Controller
                 }
 
                 if ($warehouse_id != 2) {
+                    // Xoá toàn bộ bảo hành cũ cho sn_id = 0
+                    WarrantyLookup::where('sn_id', 0)
+                        ->where('product_id', $productId)
+                        ->where('export_id', $id)
+                        ->delete();
+
+                    // Tạo lại từ form
                     foreach ($warranties as $item) {
                         $nameWarranty = $item[0];
                         $months = (int) $item[1];
-                        $formWarrantyNames[] = $nameWarranty;
+
                         $startDate = Carbon::parse($request->date_create);
                         $expire = $startDate->copy()->addMonthsNoOverflow($months);
                         if ($expire->day < $startDate->day) $expire = $expire->endOfMonth();
 
-                        WarrantyLookup::updateOrCreate([
+                        WarrantyLookup::create([
                             'sn_id' => 0,
                             'product_id' => $productId,
+                            'customer_id' => $request->customer_id,
                             'name_warranty' => $nameWarranty,
-                            'customer_id' => $request->customer_id,
-                            'export_id' => $id,
-                        ], [
-                            'product_id' => $productId,
-                            'customer_id' => $request->customer_id,
                             'export_return_date' => $request->date_create,
                             'warranty' => $months,
                             'status' => 0,
@@ -466,15 +460,6 @@ class ExportsController extends Controller
                             'export_id' => $id,
                         ]);
                     }
-                }
-
-                // Xoá các warranty đã bị bỏ khỏi form
-                if (!empty($formWarrantyNames)) {
-                    WarrantyLookup::where('sn_id', 0)
-                        ->where('export_id', $id)
-                        ->where('product_id', $productId)
-                        ->whereNotIn('name_warranty', $formWarrantyNames)
-                        ->delete();
                 }
             }
         }
