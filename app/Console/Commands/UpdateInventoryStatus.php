@@ -110,6 +110,9 @@ class UpdateInventoryStatus extends Command
         //     }
         // }
 
+        //Cập nhật tồn kho khi chuyển kho
+        // InventoryLookup::where('sn_id', 1458)->update(['remaining_quantity' => 1]);
+
         $this->info('Đã cập nhật thời gian tồn kho cho tất cả các sản phẩm.');
     }
     private function notifyStatusChange($record, $message)

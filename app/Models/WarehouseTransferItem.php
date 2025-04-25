@@ -52,6 +52,7 @@ class WarehouseTransferItem extends Model
                     'import_date' => $data['transfer_date'],
                     'storage_duration' => 0,
                     'status' => 0,
+                    'remaining_quantity' => 1,
                 ]);
                 $snBr = SerialNumber::where("serial_code", $serial['serialBorrow'])->first();
                 if ($snBr) {
