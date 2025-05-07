@@ -504,23 +504,23 @@
         }
 
         // Kiểm tra nhập S/N trùng
-        let duplicates = [];
-        let seen = new Set();
-        $('input[name="serial[]"]').each(function() {
-            let value = $(this).val().trim().toLowerCase();
-            if (seen.has(value) && value !== "") {
-                duplicates.push(value);
-            } else {
-                seen.add(value);
-            }
-        });
+        // let duplicates = [];
+        // let seen = new Set();
+        // $('input[name="serial[]"]').each(function() {
+        //     let value = $(this).val().trim().toLowerCase();
+        //     if (seen.has(value) && value !== "") {
+        //         duplicates.push(value);
+        //     } else {
+        //         seen.add(value);
+        //     }
+        // });
 
-        if (duplicates.length > 0) {
-            showAutoToast("warning", "Các S/N bị trùng: " + duplicates.join(", "));
-            $btn.prop('disabled', false);
-            isProcessing = false;
-            return false;
-        }
+        // if (duplicates.length > 0) {
+        //     showAutoToast("warning", "Các S/N bị trùng: " + duplicates.join(", "));
+        //     $btn.prop('disabled', false);
+        //     isProcessing = false;
+        //     return false;
+        // }
 
         // Kiểm tra S/N tồn tại
         let SNExist = [];
@@ -550,11 +550,11 @@
                 }
             }).done(function(response) {
                 console.log(response);
-                
+
                 if ((nameModal === "NH" || nameModal === "CNH") && response.exists) {
                     SNExist.push("Serial đã tồn tại trong hệ thống: " + serial);
                 }
-                if ((nameModal === "XH" || nameModal === "CXH")) {
+                if (nameModal === "CXH") {
                     if (serial && !response.exists) {
                         SNExist.push("Serial không tồn tại hoặc đã xuất: " + serial);
                     } else if (!serial && response.available_quantity !== undefined && response
@@ -565,6 +565,20 @@
                     } else if (serial && response.available_quantity !== undefined && response
                         .available_quantity < qty) {
                         SNExist.push("S/N " + serial + " vượt quá số lượng tồn kho");
+                    }
+                }
+                if (nameModal === "XH") {
+                    if (serial && !response.serial_exists) {
+                        SNExist.push("Serial không tồn tại: " + serial);
+                    } else if (!response.enough_stock) {
+                        if (serial) {
+                            SNExist.push("S/N " + serial + " vượt quá số lượng tồn kho (còn: " +
+                                response.available_quantity + ")");
+                        } else {
+                            SNExist.push("Mã hàng " + product_code +
+                                " vượt quá tồn kho (còn: " + response.available_quantity +
+                                ")");
+                        }
                     }
                 }
                 if (nameModal === "PCK") {

@@ -24,14 +24,22 @@
                         <?php $isCheck = true; ?>
                         @foreach ($productImports as $productId => $products)
                             @foreach ($products as $item)
-                                @if (!isset($item->serialNumber) || $item->serialNumber->status != 1)
+                                <?php
+                                // Kiểm tra đã được xuất chưa
+                                $hasExported = \App\Models\ProductExport::where('product_id', $item->product_id)->where('sn_id', $item->sn_id)->exists();
+                                ?>
+
+                                @if ($hasExported)
                                     <?php $isCheck = false; ?>
                                 @endif
                             @endforeach
                         @endforeach
-                        <?php $readonly = $isCheck ? '' : 'readonly';
+
+                        <?php
+                        $readonly = $isCheck ? '' : 'readonly';
                         $bg = $isCheck ? 'bg-input-guest-blue' : '';
-                        $placeholder = $isCheck ? 'Nhập thông tin' : ''; ?>
+                        $placeholder = $isCheck ? 'Nhập thông tin' : '';
+                        ?>
                         @if ($isCheck)
                             @unlessrole('Kế toán')
                                 <button type="submit" class="custom-btn d-flex align-items-center h-100 mx-1 mr-4"

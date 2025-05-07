@@ -102,13 +102,22 @@ class ImportsController extends Controller
             $sn_id = 0;
             // Nếu có serial thì tạo SerialNumber
             if (isset($serial['serial']) && !empty($serial['serial'])) {
-                $newSerial = SerialNumber::create([
-                    'serial_code' => str_replace(' ', '', $serial['serial']),
-                    'product_id' => $serial['product_id'],
-                    'note' => $serial['note_seri'],
-                    'warehouse_id' => $warehouse_id ?? 1,
-                ]);
-                $sn_id = $newSerial->id;
+                $serialCode = str_replace(' ', '', $serial['serial']);
+                // Tìm serial đã có với product_id này
+                $existingSerial = SerialNumber::where('serial_code', $serialCode)
+                    ->where('product_id', $serial['product_id'])
+                    ->first();
+                if ($existingSerial) {
+                    $sn_id = $existingSerial->id;
+                } else {
+                    $newSerial = SerialNumber::create([
+                        'serial_code' => str_replace(' ', '', $serial['serial']),
+                        'product_id' => $serial['product_id'],
+                        'note' => $serial['note_seri'],
+                        'warehouse_id' => $warehouse_id ?? 1,
+                    ]);
+                    $sn_id = $newSerial->id;
+                }
             }
             ProductImport::create([
                 'import_id' => $import_id,
@@ -129,6 +138,12 @@ class ImportsController extends Controller
                 'import_id' => $import_id,
                 'warehouse_id' => $warehouse_id ?? 1,
             ]);
+            if ($sn_id) {
+                $totalRemaining = InventoryLookup::where('sn_id', $sn_id)->sum('remaining_quantity');
+                SerialNumber::where('id', $sn_id)->update([
+                    'status' => $totalRemaining > 0 ? 1 : 2,
+                ]);
+            }
         }
 
         // Lấy tất cả các bản ghi trong InventoryLookup
@@ -285,19 +300,21 @@ class ImportsController extends Controller
         }, array_column($dataTest, 'serial'));
 
         // Chuẩn hóa serial trong database
-        $existingSerials = SerialNumber::whereIn('serial_code', $formSerials)->get();
+        $existingSerials = SerialNumber::whereIn('serial_code', $formSerials)->whereIn('product_id', array_column($dataTest, 'product_id'))->get();
         $existingSerialCodes = $existingSerials->pluck('serial_code')->map(function ($serial) {
             return strtolower(trim(str_replace(' ', '', $serial)));
         })->toArray();
 
-        $serialIds = $existingSerials->pluck('id', 'serial_code')->mapWithKeys(function ($id, $serial) {
-            return [strtolower(trim(str_replace(' ', '', $serial))) => $id];
+        $serialIds = $existingSerials->mapWithKeys(function ($serial) {
+            $normalizedSerial = strtolower(trim(str_replace(' ', '', $serial->serial_code)));
+            return [$normalizedSerial . '_' . $serial->product_id => $serial->id];
         })->toArray();
 
         // Lọc các serial cần thêm mới
-        $newSerials = array_filter($dataTest, function ($data) use ($existingSerialCodes) {
+        $newSerials = array_filter($dataTest, function ($data) use ($serialIds) {
             $normalizedSerial = strtolower(trim(str_replace(' ', '', $data['serial'] ?? '')));
-            return isset($data['serial']) && !empty($data['serial']) && !in_array($normalizedSerial, $existingSerialCodes);
+            $key = $normalizedSerial . '_' . $data['product_id'];
+            return isset($data['serial']) && !empty($data['serial']) && !isset($serialIds[$key]);
         });
 
         // Thêm mới các serial
@@ -305,25 +322,33 @@ class ImportsController extends Controller
             if (isset($serialData['serial']) && !empty($serialData['serial'])) {
                 $normalizedSerial = trim(str_replace(' ', '', $serialData['serial']));
 
-                $newSerial = SerialNumber::create([
-                    'serial_code' => $normalizedSerial,
-                    'product_id' => $serialData['product_id'],
-                ]);
+                // Kiểm tra serial_code và product_id kết hợp
+                $existingSerial = SerialNumber::where('serial_code', $normalizedSerial)
+                    ->where('product_id', $serialData['product_id'])
+                    ->first();
 
-                $normalizedSerial = strtolower(trim(str_replace(' ', '', $serialData['serial'])));
-                $serialIds[$normalizedSerial] = $newSerial->id;
+                if (!$existingSerial) {
+                    $newSerial = SerialNumber::create([
+                        'serial_code' => $normalizedSerial,
+                        'product_id' => $serialData['product_id'],
+                    ]);
 
-                // Thêm vào InventoryLookup
-                InventoryLookup::create([
-                    'product_id' => $serialData['product_id'],
-                    'sn_id' => $newSerial->id,
-                    'provider_id' => $request->provider_id,
-                    'import_date' => $request->date_create,
-                    'storage_duration' => 0,
-                    'status' => 0,
-                    'remaining_quantity' => $serialData['qty'],
-                    'warehouse_id' => $warehouse_id ?? 1,
-                ]);
+                    $normalizedSerialKey = strtolower(trim(str_replace(' ', '', $serialData['serial']))) . '_' . $serialData['product_id'];
+                    $serialIds[$normalizedSerialKey] = $newSerial->id;
+
+                    // Thêm vào InventoryLookup
+                    InventoryLookup::create([
+                        'product_id' => $serialData['product_id'],
+                        'sn_id' => $newSerial->id,
+                        'provider_id' => $request->provider_id,
+                        'import_date' => $request->date_create,
+                        'storage_duration' => 0,
+                        'status' => 0,
+                        'remaining_quantity' => $serialData['qty'],
+                        'warehouse_id' => $warehouse_id ?? 1,
+                        'import_id' => $id,
+                    ]);
+                }
             }
         }
 
@@ -331,8 +356,10 @@ class ImportsController extends Controller
         foreach ($dataTest as $data) {
             if (isset($data['serial']) && !empty($data['serial'])) {
                 $normalizedSerial = strtolower(trim(str_replace(' ', '', $data['serial'])));
-                if (isset($serialIds[$normalizedSerial])) {
-                    $snId = $serialIds[$normalizedSerial];
+                $key = $normalizedSerial . '_' . $data['product_id'];
+
+                if (isset($serialIds[$key])) {
+                    $snId = $serialIds[$key];
 
                     ProductImport::updateOrCreate(
                         [
@@ -353,9 +380,12 @@ class ImportsController extends Controller
                             'provider_id' => $request->provider_id,
                             'import_date' => $request->date_create,
                             'warehouse_id' => $warehouse_id ?? 1,
+                            'import_id' => $id,
                         ],
                         [
                             'remaining_quantity' => $data['qty'],
+                            'storage_duration' => 0,
+                            'status' => 0,
                         ]
                     );
                 }
@@ -365,7 +395,8 @@ class ImportsController extends Controller
         // Lấy danh sách sn_id từ form
         $formSerialIds = array_filter(array_map(function ($data) use ($serialIds) {
             $normalizedSerial = strtolower(trim(str_replace(' ', '', $data['serial'] ?? '')));
-            return isset($data['serial']) && !empty($data['serial']) ? $serialIds[$normalizedSerial] ?? null : null;
+            $key = $normalizedSerial . '_' . $data['product_id'];
+            return isset($data['serial']) && !empty($data['serial']) ? $serialIds[$key] ?? null : null;
         }, $dataTest));
 
         // Tìm các serial bị xóa khỏi form

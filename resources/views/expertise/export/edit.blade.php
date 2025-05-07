@@ -51,7 +51,7 @@
                         <?php $isCheck = true; ?>
                         @foreach ($productExports as $productId => $products)
                             @foreach ($products as $item)
-                                @if ($item->serialNumber && $item->serialNumber->status != 2)
+                                @if ($item->sn_id == 0 || ($item->serialNumber && $item->serialNumber->status != 2))
                                     @php $isCheck = false; @endphp
                                 @endif
                             @endforeach
@@ -340,8 +340,8 @@
                                                             </td>
                                                             <td
                                                                 class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                                <input type="text" autocomplete="off" name="qty[]"
-                                                                    {{ $readonly }}
+                                                                <input type="text" autocomplete="off"
+                                                                    name="qty[]" {{ $readonly }}
                                                                     class="border-0 pl-1 pr-2 py-1 w-100 height-32 qty {{ $bg }}"
                                                                     value="{{ $item->quantity }}">
                                                             </td>

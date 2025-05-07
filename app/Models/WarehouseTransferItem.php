@@ -62,7 +62,8 @@ class WarehouseTransferItem extends Model
                 }
             } else {
                 // Nếu chuyển từ kho mới sang kho bảo hành => Cập nhật Serial cũ
-                $sn = SerialNumber::where("serial_code", $trimmedSerial)->first();
+                $sn = SerialNumber::where("serial_code", $trimmedSerial)
+                    ->where('product_id', $serial['product_id'])->first();
                 if ($sn) {
                     $sn->update([
                         'status' => 5, // Đánh dấu "Đang mượn"

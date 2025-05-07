@@ -80,72 +80,87 @@ class ExportsController extends Controller
 
             if (!empty($trimmedSerial)) {
                 // Có serial
-                $sn = SerialNumber::where('serial_code', $trimmedSerial)->first();
+                $sn = SerialNumber::where('serial_code', $trimmedSerial)
+                    ->where('product_id', $productId)
+                    ->first();
 
                 if (!$sn) {
                     continue; // bỏ qua nếu serial không tồn tại
                 }
 
                 $snId = $sn->id;
+                $qtyToExport = $qty;
+                $totalExported = 0;
 
-                // Lấy thông tin tồn kho
-                $lookup = InventoryLookup::where('product_id', $productId)
+                // Lấy các dòng tồn kho có serial theo FIFO
+                $lookupItems = InventoryLookup::where('product_id', $productId)
                     ->where('sn_id', $snId)
-                    ->first();
+                    ->where('remaining_quantity', '>', 0)
+                    ->orderBy('created_at') // FIFO
+                    ->get();
 
-                if (!$lookup || $lookup->remaining_quantity <= 0) {
-                    continue; // Không còn hàng để xuất
+                foreach ($lookupItems as $item) {
+                    if ($qtyToExport <= 0) break;
+
+                    $available = $item->remaining_quantity;
+                    $exportQty = min($qtyToExport, $available);
+
+                    $item->remaining_quantity -= $exportQty;
+                    $item->save();
+
+                    $qtyToExport -= $exportQty;
+                    $totalExported += $exportQty;
                 }
 
-                // Kiểm tra số lượng xuất yêu cầu không vượt quá tồn kho
-                $qtyToExport = $qty;  // Số lượng cần xuất
-                $availableQuantity = $lookup->remaining_quantity;
+                // Nếu có xuất được thì tạo bản ghi
+                if ($totalExported > 0) {
+                    // Tạo bản ghi xuất
+                    ProductExport::create([
+                        'export_id' => $export_id,
+                        'product_id' => $productId,
+                        'quantity' => $totalExported,
+                        'sn_id' => $snId,
+                        'warranty' => json_encode($warranties),
+                        'note' => $note,
+                    ]);
 
-                // Nếu tồn kho đủ
-                $lookup->remaining_quantity -= $qtyToExport;
-                $lookup->save();
+                    // Chỉ cập nhật status = 2 nếu tồn kho thực tế còn lại là 0
+                    $remainingQtyAfter = InventoryLookup::where('product_id', $productId)
+                        ->where('sn_id', $snId)
+                        ->sum('remaining_quantity');
 
-                // Cập nhật trạng thái nếu hết tồn kho
-                if ($lookup->remaining_quantity == 0) {
-                    $sn->status = 2; // Đã xuất hết
-                    $sn->save();
-                }
+                    if ($remainingQtyAfter <= 0 && $sn->status != 2) {
+                        $sn->status = 2;
+                        $sn->save();
+                    }
 
-                // Tạo bản ghi xuất
-                ProductExport::create([
-                    'export_id' => $export_id,
-                    'product_id' => $productId,
-                    'quantity' => $qtyToExport,  // Lưu số lượng đã xuất
-                    'sn_id' => $snId,
-                    'warranty' => json_encode($warranties),
-                    'note' => $note,
-                ]);
+                    // Tạo bản ghi bảo hành nếu có
+                    if ($warehouse_id != 2 && !empty($warranties)) {
+                        foreach ($warranties as $warranty) {
+                            $warrantyName = $warranty[0] ?? 'Trọn bộ';
+                            $warrantyMonth = (int)($warranty[1] ?? 0);
 
-                // Tạo bản ghi bảo hành nếu có
-                if ($warehouse_id != 2 && !empty($warranties)) {
-                    foreach ($warranties as $warranty) {
-                        $warrantyName = $warranty[0] ?? 'Trọn bộ';
-                        $warrantyMonth = (int)($warranty[1] ?? 0);
+                            $date = new DateTime($request->date_create);
+                            $day = (int)$date->format('d');
+                            $date->modify("+$warrantyMonth months");
 
-                        $date = new DateTime($request->date_create);
-                        $day = (int)$date->format('d');
-                        $date->modify("+$warrantyMonth months");
+                            // Nếu ngày bị trôi (do tháng thiếu ngày đó), lùi lại cuối tháng trước
+                            if ((int)$date->format('d') !== $day) {
+                                $date->modify('last day of last month');
+                            }
 
-                        if ((int)$date->format('d') !== $day) {
-                            $date->modify('last day of last month');
+                            WarrantyLookup::create([
+                                'product_id' => $productId,
+                                'sn_id' => $snId,
+                                'customer_id' => $request->customer_id,
+                                'export_return_date' => $request->date_create,
+                                'warranty' => $warrantyMonth,
+                                'name_warranty' => $warrantyName,
+                                'status' => 0,
+                                'warranty_expire_date' => $date->format('Y-m-d'),
+                                'export_id' => $export_id,
+                            ]);
                         }
-
-                        WarrantyLookup::create([
-                            'product_id' => $productId,
-                            'sn_id' => $snId,
-                            'customer_id' => $request->customer_id,
-                            'export_return_date' => $request->date_create,
-                            'warranty' => $warrantyMonth,
-                            'name_warranty' => $warrantyName,
-                            'status' => 0,
-                            'warranty_expire_date' => $date->format('Y-m-d'),
-                            'export_id' => $export_id,
-                        ]);
                     }
                 }
             } else {
@@ -318,9 +333,10 @@ class ExportsController extends Controller
 
         $dataTest = json_decode($request->input('data-test'), true);
         $formSerials = array_map(fn($s) => strtolower(str_replace(' ', '', $s)), array_column($dataTest, 'serial'));
-        $existingSerials = SerialNumber::all()->mapWithKeys(fn($serial) => [
-            strtolower(str_replace(' ', '', $serial->serial_code)) => $serial->id
-        ]);
+        $existingSerials = SerialNumber::all()->mapWithKeys(function ($serial) {
+            $key = strtolower(str_replace(' ', '', $serial->serial_code)) . '_' . $serial->product_id;
+            return [$key => $serial->id];
+        });
 
         $currentExports = ProductExport::where('export_id', $id)->get();
         $currentSnIds = $currentExports->pluck('sn_id')->filter()->toArray(); // bỏ sn_id = 0
@@ -328,8 +344,8 @@ class ExportsController extends Controller
         // Tạo danh sách sn_id từ form: cả serial thật và sn_id = 0
         $formSnIds = collect($dataTest)->map(function ($data) use ($existingSerials) {
             if (!empty($data['serial'])) {
-                $normalized = strtolower(str_replace(' ', '', $data['serial']));
-                return $existingSerials[$normalized] ?? null;
+                $key = strtolower(str_replace(' ', '', $data['serial'])) . '_' . $data['product_id'];
+                return $existingSerials[$key] ?? null;
             }
             return 0;
         })->filter(fn($id) => is_numeric($id))->unique()->values()->toArray();
@@ -340,9 +356,9 @@ class ExportsController extends Controller
         // PHẦN 1: Reset tồn kho các dòng cũ
         foreach ($currentExports as $exported) {
             $lookup = InventoryLookup::where('product_id', $exported->product_id)
-                ->when($exported->sn_id, fn($q) => $q->where('sn_id', $exported->sn_id))
+                ->where('sn_id', $exported->sn_id) // luôn so sánh, kể cả sn_id = 0
                 ->first();
-
+        
             if ($lookup) {
                 $lookup->increment('remaining_quantity', $exported->quantity);
             }
@@ -358,7 +374,7 @@ class ExportsController extends Controller
             $warranties = $data['warranty'] ?? [];
 
             if (!empty($data['serial'])) {
-                $normalizedSerial = strtolower(str_replace(' ', '', $data['serial']));
+                $normalizedSerial = strtolower(str_replace(' ', '', $data['serial'])) . '_' . $data['product_id'];
                 if (!isset($existingSerials[$normalizedSerial])) continue;
 
                 $snId = $existingSerials[$normalizedSerial];
@@ -380,6 +396,12 @@ class ExportsController extends Controller
 
                 if ($lookup && $lookup->remaining_quantity >= $qty) {
                     $lookup->decrement('remaining_quantity', $qty);
+                }
+
+                if ($snId > 0) {
+                    // Cập nhật lại trạng thái serial: nếu còn tồn thì status = 1, hết thì status = 2
+                    $remaining = InventoryLookup::where('sn_id', $snId)->sum('remaining_quantity');
+                    SerialNumber::where('id', $snId)->update(['status' => $remaining > 0 ? 1 : 2]);
                 }
 
                 // Bảo hành
@@ -538,8 +560,17 @@ class ExportsController extends Controller
         }
 
         // Cập nhật lại serial (nếu có)
-        SerialNumber::whereIn('id', $productExports->pluck('sn_id')->filter()->toArray())
-            ->update(['status' => 1]);
+        $snIds = $productExports->pluck('sn_id')->filter()->unique();
+
+        foreach ($snIds as $snId) {
+            $lookup = InventoryLookup::where('sn_id', $snId)->first();
+
+            if ($lookup && $lookup->remaining_quantity > 0) {
+                SerialNumber::where('id', $snId)->update(['status' => 1]); // Còn hàng
+            } else {
+                SerialNumber::where('id', $snId)->update(['status' => 2]); // Hết hàng
+            }
+        }
 
         // Xóa ProductExport
         ProductExport::where('export_id', $id)->delete();

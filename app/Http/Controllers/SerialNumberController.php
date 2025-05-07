@@ -18,22 +18,16 @@ class SerialNumberController extends Controller
         $serial = $request->input('serial');
         $qty = $request->input('qty');
         $exists = false;
-        $sn = SerialNumber::where('serial_code', $serial)->first();
+        $sn = SerialNumber::where('serial_code', $serial)
+            ->where('product_id', $productId)->first();
         $availableQty = 0;
-        if ($request->nameModal == "CNH") {
-            if ($sn) {
-                $exists = ProductImport::where('sn_id', $sn->id)
-                    ->where('import_id', '!=', $request->import_id)
-                    ->exists();
-            }
-        }
         if ($request->nameModal == "XH") {
             if ($sn) {
-                $lookup = InventoryLookup::where('product_id', $productId)
+                $availableQty = InventoryLookup::where('product_id', $productId)
                     ->where('sn_id', $sn->id)
-                    ->first();
-                $availableQty = $lookup?->remaining_quantity ?? 0;
-                $exists = $sn->status == 1 && $lookup && $lookup->remaining_quantity > 0;
+                    ->sum('remaining_quantity');
+
+                $exists = $sn->status == 1 && $availableQty >= ($request->qty ?? 1);
             } else {
                 // Không có serial: kiểm tra tồn kho tổng
                 $lookup = InventoryLookup::where('product_id', $productId)
@@ -45,7 +39,8 @@ class SerialNumberController extends Controller
         }
         if ($request->nameModal == "CXH") {
             if ($request->serial) {
-                $sn = SerialNumber::where('serial_code', $request->serial)->first();
+                $sn = SerialNumber::where('serial_code', $request->serial)
+                    ->where('product_id', $productId)->first();
 
                 if (!$sn) {
                     // SN không tồn tại trong hệ thống
@@ -80,23 +75,17 @@ class SerialNumberController extends Controller
                 }
             } else {
                 // --- Sản phẩm không serial ---
-                $lookup = InventoryLookup::where('product_id', $productId)
+                $lookupQty = InventoryLookup::where('product_id', $productId)
                     ->where('sn_id', 0)
-                    ->first();
+                    ->sum('remaining_quantity');
 
                 $exportedQty = ProductExport::where('export_id', $request->import_id)
                     ->where('product_id', $productId)
                     ->where('sn_id', 0)
                     ->sum('quantity');
 
-                $availableQty = ($lookup ? $lookup->remaining_quantity : 0) + $exportedQty;
-                $exists = $availableQty > 0;
+                $availableQty = $lookupQty + $exportedQty;
             }
-        }
-        if ($request->nameModal == "NH") {
-            // Kiểm tra trong bảng serial_numbers
-            $exists = SerialNumber::where('serial_code', $serial)
-                ->exists();
         }
         if ($request->nameModal == "PCK") {
             if ($request->warehouse_id == 1) {
@@ -125,6 +114,8 @@ class SerialNumberController extends Controller
             'exists' => $exists,
             'remaining_quantity' => $lookup?->remaining_quantity ?? 0,
             'available_quantity' => $availableQty ?? 0,
+            'serial_exists' => $sn ? true : false,
+            'enough_stock' => $availableQty >= ($qty ?? 1),
         ]);
     }
 
@@ -134,14 +125,6 @@ class SerialNumberController extends Controller
         $serialNumber = $request->input('serial_number');
         // dd($request->all());
         // Kiểm tra số serial trong cơ sở dữ liệu
-        if ($request->nameModal == "NH") {
-            $exists = DB::table('serial_numbers')->where('serial_code', $serialNumber)->exists();
-            if ($exists) {
-                return response()->json(['status' => 'error', 'message' => 'Số serial đã tồn tại.']);
-            } else {
-                return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
-            }
-        }
         if ($request->nameModal == "XH") {
             // Kiểm tra trong bảng serial_numbers
             $exists = SerialNumber::where('serial_code', $serialNumber)
