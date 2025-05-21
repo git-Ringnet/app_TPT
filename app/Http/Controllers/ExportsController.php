@@ -231,7 +231,7 @@ class ExportsController extends Controller
         $today = Carbon::now();
         $records = WarrantyLookup::all();
         foreach ($records as $record) {
-            if ($today->greaterThanOrEqualTo($record->warranty_expire_date)) {
+            if (!empty($record->warranty_expire_date) && $today->greaterThanOrEqualTo($record->warranty_expire_date)) {
                 $record->update(['status' => 1]); // Cập nhật trạng thái thành "hết bảo hành"
             } else {
                 $record->update(['status' => 0]);
@@ -245,7 +245,7 @@ class ExportsController extends Controller
 
             // Duyệt qua các bản ghi có cùng sn_id
             foreach ($snIdRecords as $snIdRecord) {
-                if ($today->greaterThanOrEqualTo($snIdRecord->warranty_expire_date)) {
+                if (!empty($snIdRecord->warranty_expire_date) && $today->greaterThanOrEqualTo($snIdRecord->warranty_expire_date)) {
                     // Nếu bảo hành hết hạn, thêm tên bảo hành vào mảng và đánh dấu hết hạn
                     $expired = true;
                     $warranties[] = $snIdRecord->name_warranty;
@@ -358,7 +358,7 @@ class ExportsController extends Controller
             $lookup = InventoryLookup::where('product_id', $exported->product_id)
                 ->where('sn_id', $exported->sn_id) // luôn so sánh, kể cả sn_id = 0
                 ->first();
-        
+
             if ($lookup) {
                 $lookup->increment('remaining_quantity', $exported->quantity);
             }
@@ -499,12 +499,14 @@ class ExportsController extends Controller
         $records = WarrantyLookup::all();
 
         foreach ($records as $record) {
-            $isExpired = $today->greaterThanOrEqualTo($record->warranty_expire_date);
+            $isExpired = !empty($record->warranty_expire_date) && $today->greaterThanOrEqualTo($record->warranty_expire_date);
             $record->update(['status' => $isExpired ? 1 : 0]);
 
             $snIdRecords = WarrantyLookup::where('sn_id', $record->sn_id)->get();
-            $expiredNames = $snIdRecords->filter(fn($r) => $today->greaterThanOrEqualTo($r->warranty_expire_date))
-                ->pluck('name_warranty')->toArray();
+            $expiredNames = $snIdRecords->filter(
+                fn($r) =>
+                !empty($r->warranty_expire_date) && $today->greaterThanOrEqualTo($r->warranty_expire_date)
+            )->pluck('name_warranty')->toArray();
 
             $record->update([
                 'name_status' => empty($expiredNames) ? 'Còn bảo hành' : implode(', ', $expiredNames) . ' hết bảo hành'
