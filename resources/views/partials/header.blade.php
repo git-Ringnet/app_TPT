@@ -75,19 +75,23 @@
                 </div>
                 <div class="d-flex content__heading--right flex-grow-1 justify-content-center">
 
-                        <div class="dropdown">
-                            <a class="text-white justify-content-center align-items-center mx-3 px-1 font-weight-600 navbar-head @if (!empty($activeGroup) && $activeGroup == 'systemFirst') active-navbar @endif"
-                                href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                                THIẾT LẬP
-                            </a>
-                            @hasanyrole('Admin|Quản lý kho|Bảo hành')
+                    <div class="dropdown">
+                        <a class="text-white justify-content-center align-items-center mx-3 px-1 font-weight-600 navbar-head @if (!empty($activeGroup) && $activeGroup == 'systemFirst') active-navbar @endif"
+                            href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                            THIẾT LẬP
+                        </a>
+                        @hasanyrole('Admin|Quản lý kho|Bảo hành')
                             <div class="dropdown-menu" style="">
                                 @can('admin')
                                     <a class="dropdown-item text-13" href="{{ route('groups.index') }}">Nhóm
                                         đối tượng</a>
                                 @endcan
                                 @hasanyrole('Admin|Quản lý kho')
-                                <a class="dropdown-item text-13" href="{{ route('customers.index') }}">Khách hàng</a>
+                                    <a class="dropdown-item text-13" href="{{ route('customers.index') }}">Khách hàng</a>
+                                @else
+                                    @if (auth()->user()->id == 9)
+                                        <a class="dropdown-item text-13" href="{{ route('customers.index') }}">Khách hàng</a>
+                                    @endif
                                 @endhasanyrole
                                 <a class="dropdown-item text-13" href="{{ route('providers.index') }}">Nhà cung
                                     cấp</a>
