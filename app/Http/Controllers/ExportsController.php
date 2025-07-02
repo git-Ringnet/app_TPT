@@ -227,43 +227,6 @@ class ExportsController extends Controller
                 }
             }
         }
-        //Cập nhật trạng thái bảo hành
-        $today = Carbon::now();
-        $records = WarrantyLookup::all();
-        foreach ($records as $record) {
-            if (!empty($record->warranty_expire_date) && $today->greaterThanOrEqualTo($record->warranty_expire_date)) {
-                $record->update(['status' => 1]); // Cập nhật trạng thái thành "hết bảo hành"
-            } else {
-                $record->update(['status' => 0]);
-            }
-            // Lọc ra các bản ghi có cùng sn_id
-            $snIdRecords = WarrantyLookup::where('sn_id', $record->sn_id)->get();
-
-            // Kiểm tra nếu có bất kỳ bản ghi nào hết hạn bảo hành
-            $expired = false;
-            $warranties = []; // Mảng để lưu các tên bảo hành hết hạn
-
-            // Duyệt qua các bản ghi có cùng sn_id
-            foreach ($snIdRecords as $snIdRecord) {
-                if (!empty($snIdRecord->warranty_expire_date) && $today->greaterThanOrEqualTo($snIdRecord->warranty_expire_date)) {
-                    // Nếu bảo hành hết hạn, thêm tên bảo hành vào mảng và đánh dấu hết hạn
-                    $expired = true;
-                    $warranties[] = $snIdRecord->name_warranty;
-                }
-            }
-
-            // Nối tên bảo hành hết hạn
-            $status = implode(', ', $warranties) . ' hết bảo hành';
-
-            // Nếu có bảo hành hết hạn, cập nhật trạng thái của tất cả bản ghi có cùng sn_id
-            if ($expired) {
-                WarrantyLookup::where('sn_id', $record->sn_id)
-                    ->update(['name_status' => $status]);
-            } else {
-                // Nếu không có bảo hành hết hạn, thì cập nhật trạng thái là "Còn bảo hành"
-                $record->update(['name_status' => "Còn bảo hành"]);
-            }
-        }
         return redirect()->route('exports.index')->with('msg', 'Tạo phiếu xuất hàng thành công!');
     }
 
