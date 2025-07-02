@@ -457,25 +457,6 @@ class ExportsController extends Controller
             WarrantyLookup::whereIn('sn_id', $removedSnIds)->where('export_id', $id)->delete();
         }
 
-        // PHẦN 4: Cập nhật trạng thái bảo hành
-        $today = Carbon::now();
-        $records = WarrantyLookup::all();
-
-        foreach ($records as $record) {
-            $isExpired = !empty($record->warranty_expire_date) && $today->greaterThanOrEqualTo($record->warranty_expire_date);
-            $record->update(['status' => $isExpired ? 1 : 0]);
-
-            $snIdRecords = WarrantyLookup::where('sn_id', $record->sn_id)->get();
-            $expiredNames = $snIdRecords->filter(
-                fn($r) =>
-                !empty($r->warranty_expire_date) && $today->greaterThanOrEqualTo($r->warranty_expire_date)
-            )->pluck('name_warranty')->toArray();
-
-            $record->update([
-                'name_status' => empty($expiredNames) ? 'Còn bảo hành' : implode(', ', $expiredNames) . ' hết bảo hành'
-            ]);
-        }
-
         return redirect()->route('exports.index')->with('msg', 'Cập nhật thành công phiếu xuất hàng!');
     }
 
