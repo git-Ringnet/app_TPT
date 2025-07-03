@@ -104,6 +104,7 @@ class ReturnFormController extends Controller
                         ->where('product_id', $replacement_code)
                         ->whereIn('status', [1, 5])
                         ->where('warehouse_id', 2)
+                        ->orWhere('warehouse_id', 1)
                         ->first();
                 }
                 $stateRecei = $validated['status'] == 1 ? 3 : 4;

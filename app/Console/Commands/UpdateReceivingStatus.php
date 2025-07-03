@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Receiving;
+use App\Models\SerialNumber;
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -61,7 +62,7 @@ class UpdateReceivingStatus extends Command
                 // Gửi thông báo
                 $this->notifyStateChange($receiving, $newState, $message);
             });
-            Receiving::where('status', 2)
+        Receiving::where('status', 2)
             ->where('date_created', '<', $today->copy()->subDays(3))
             ->where('date_created', '>=', $today->copy()->subDays(21))
             ->get()
@@ -90,6 +91,21 @@ class UpdateReceivingStatus extends Command
         // Hoàn thành hoặc khách không đồng ý
         Receiving::whereIn('status', [3, 4])
             ->update(['state' => 0]);
+
+        // $ids = [2646, 2645, 2644, 2643];
+        // $updated = SerialNumber::whereIn('id', $ids)
+        //     ->update(['status' => 4]);
+        // $productReturns = \App\Models\ProductReturn::where('return_form_id', 12)
+        //     ->take(count($ids))
+        //     ->get();
+        // if ($productReturns->count() < count($ids)) {
+        //     $this->error('Không đủ dòng product_returns để cập nhật.');
+        //     return;
+        // }
+        // foreach ($productReturns as $index => $return) {
+        //     $return->replacement_serial_number_id = $ids[$index];
+        //     $return->save();
+        // }
 
         $this->info('Receiving statuses updated successfully.');
         return Command::SUCCESS;
