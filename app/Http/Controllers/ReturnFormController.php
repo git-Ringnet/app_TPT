@@ -103,8 +103,7 @@ class ReturnFormController extends Controller
                     $replacementSerialId = SerialNumber::where('serial_code', $replacement_serial_number_id)
                         ->where('product_id', $replacement_code)
                         ->whereIn('status', [1, 5])
-                        ->where('warehouse_id', 2)
-                        ->orWhere('warehouse_id', 1)
+                        ->select('serial_numbers.id')
                         ->first();
                 }
                 $stateRecei = $validated['status'] == 1 ? 3 : 4;
