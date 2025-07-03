@@ -38,7 +38,7 @@ class InventoryLookupController extends Controller
             ->groupBy('product_id', 'provider_id', 'storage_duration', 'warehouse_id');
 
         // Áp điều kiện kho nếu cần
-        if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho'])) {
+        if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho']) && !Auth::user()->id == 9) {
             if ($warehouse_id) {
                 $withSerial = $withSerial->whereHas('serialNumber', function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
