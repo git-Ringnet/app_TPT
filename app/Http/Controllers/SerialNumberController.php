@@ -421,6 +421,7 @@ class SerialNumberController extends Controller
         $seriRecord = SerialNumber::where('serial_code', $request->serialNumber)
             ->where('product_id', $request->product_id)
             ->whereIn('status', [1, 5])->where('warehouse_id', 2)
+            ->orWhere('warehouse_id', 1)
             ->first();
 
         if ($seriRecord) {
