@@ -83,6 +83,7 @@ class ReturnFormController extends Controller
             'return.*.warranty.*.name_warranty' => ['required', 'string'],
             'return.*.warranty.*.extra_warranty' => ['nullable', 'integer'],
             'return.*.warranty.*.note' => ['nullable', 'string'],
+            'return.*.note' => 'nullable|string',
         ]);
         // dd($request->all());
         DB::beginTransaction();

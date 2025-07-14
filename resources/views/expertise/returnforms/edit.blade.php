@@ -390,11 +390,15 @@
                                                     <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                         readonly value="{{ $item->extra_warranty ?? '' }}">
                                                 </td>
+                                                @if ($index == 0)
                                                 <td class="border-right p-2 text-13 align-top border-bottom">
                                                     <input type="text"
                                                         class="border-0 pl-1 pr-2 py-1 w-100 bg-input-guest-blue"
                                                         value="{{ $item->notes ?? '' }}">
                                                 </td>
+                                                @else
+                                                    <td class="border-right p-2 text-13 align-top border-bottom"></td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     @endforeach
