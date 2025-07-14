@@ -107,7 +107,8 @@
                                     <span class="text-table text-13-black font-weight-bold">Thông tin</span>
                                 </th>
                                 <th class="border-right px-2 p-0">
-                                    <span class="text-table text-13-black font-weight-bold">Bảo hành dịch vụ (tháng)</span>
+                                    <span class="text-table text-13-black font-weight-bold">Bảo hành dịch vụ
+                                        (tháng)</span>
                                 </th>
                                 <th class="border-right px-2 p-0">
                                     <span class="text-table text-13-black font-weight-bold">Ghi chú</span>
@@ -115,54 +116,82 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($warrantyHistory as $item)
-                                <tr class="position-relative inven-lookup-info height-40">
-                                    <input type="hidden" name="id-inven-lookup" class="id-inven-lookup"
-                                        id="id-inven-lookup" value="{{ $item->id }}">
-                                    <td class="text-13-black border-right border-bottom border-top-0 py-0">
-                                        <a href="{{ route('receivings.edit', $item->receiving->id) }}">
-                                            {{ $item->receiving->form_code_receiving }}
-                                        </a>
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ date_format(new DateTime($item->receiving->date_created), 'd/m/Y') }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        <a href="{{ route('returnforms.edit', $item->returnForm->id) }}">
-                                            {{ $item->returnForm->return_code }}
-                                        </a>
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ date_format(new DateTime($item->returnForm->date_created), 'd/m/Y') }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        @if ($item->receiving->form_type == 1)
-                                            Bảo hành
-                                        @elseif($item->receiving->form_type == 2)
-                                            Dịch vụ
-                                        @elseif($item->receiving->form_type == 3)
-                                            Bảo hành dịch vụ
+                            @php
+                                $groupedHistories = $warrantyHistory->groupBy(function ($item) {
+                                    return $item->return_id .
+                                        '-' .
+                                        $item->warrantyLookup->sn_id .
+                                        '-' .
+                                        $item->productReturn->replacement_code;
+                                });
+                            @endphp
+                            @foreach ($groupedHistories as $group)
+                                @foreach ($group as $index => $item)
+                                    <tr class="position-relative inven-lookup-info height-40">
+                                        <input type="hidden" name="id-inven-lookup" class="id-inven-lookup"
+                                            id="id-inven-lookup" value="{{ $item->id }}">
+                                        @if ($index === 0)
+                                            <td class="text-13-black border-right border-bottom border-top-0 py-0">
+                                                <a href="{{ route('receivings.edit', $item->receiving->id) }}">
+                                                    {{ $item->receiving->form_code_receiving }}
+                                                </a>
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                                {{ date_format(new DateTime($item->receiving->date_created), 'd/m/Y') }}
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                                <a href="{{ route('returnforms.edit', $item->returnForm->id) }}">
+                                                    {{ $item->returnForm->return_code }}
+                                                </a>
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                                {{ date_format(new DateTime($item->returnForm->date_created), 'd/m/Y') }}
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                                @if ($item->receiving->form_type == 1)
+                                                    Bảo hành
+                                                @elseif($item->receiving->form_type == 2)
+                                                    Dịch vụ
+                                                @elseif($item->receiving->form_type == 3)
+                                                    Bảo hành dịch vụ
+                                                @endif
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                                {{ $item->productReturn->serialNumber->serial_code ?? '' }}
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                                {{ $item->productReturn->product_replace->product_code ?? '' }}
+                                            </td>
+                                        @else
+                                            {{-- Dòng sau: để trống các cột trùng --}}
+                                            <td class="border-right border-bottom border-top-0 py-0"></td>
+                                            <td class="border border-left-0 border-bottom border-top-0 py-0"></td>
+                                            <td class="border border-left-0 border-bottom border-top-0 py-0"></td>
+                                            <td class="border border-left-0 border-bottom border-top-0 py-0"></td>
+                                            <td class="border border-left-0 border-bottom border-top-0 py-0"></td>
+                                            <td class="border border-left-0 border-bottom border-top-0 py-0"></td>
+                                            <td class="border border-left-0 border-bottom border-top-0 py-0"></td>
                                         @endif
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ $item->productReturn->serialNumber->serial_code ?? '' }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ $item->productReturn->product_replace->product_code ?? '' }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ $item->productReturn->replacementSerialNumber->serial_code ?? '' }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ $item->productReturn->warranties->name_warranty ?? null }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ $item->productReturn->extra_warranty ?? '' }}
-                                    </td>
-                                    <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
-                                        {{ $item->productReturn->notes ?? '' }}
-                                    </td>
-                                </tr>
+                                        <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                            {{ $item->productReturn->replacementSerialNumber->serial_code ?? '' }}
+                                        </td>
+                                        <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                            {{ $item->productReturn->warranties->name_warranty ?? null }}
+                                        </td>
+                                        <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                            {{ $item->productReturn->extra_warranty ?? '' }}
+                                        </td>
+                                        <td class="text-13-black border border-left-0 border-bottom border-top-0 py-0">
+                                            {{ $item->productReturn->notes ?? '' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @endforeach
                         </tbody>
                     </table>

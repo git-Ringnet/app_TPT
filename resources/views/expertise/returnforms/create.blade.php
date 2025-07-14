@@ -88,73 +88,76 @@
             {{-- Thông tin khách hàng --}}
             <div class="" id="main" style="margin-right: 10px !important;">
 
-            <div class="border">
-                <div class="info-form">
-                    <div class="bg-filter-search border-0 text-center">
-                        <p class="font-weight-bold text-uppercase info-chung--heading text-center">
-                            THÔNG TIN PHIẾU TRẢ HÀNG
-                        </p>
-                    </div>
-                    <div class="d-flex w-100">
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3 required-label" style="width: 180px;">Mã
-                                phiếu</span>
-                            <input type="text" id="return_code" name="return_code" style="flex:2;"
-                                placeholder="Nhập thông tin" value="{{ $quoteNumber }}"
-                                class="text-13-black w-50 border-0 bg-input-guest date_picker bg-input-guest-blue py-2 px-2">
+                <div class="border">
+                    <div class="info-form">
+                        <div class="bg-filter-search border-0 text-center">
+                            <p class="font-weight-bold text-uppercase info-chung--heading text-center">
+                                THÔNG TIN PHIẾU TRẢ HÀNG
+                            </p>
                         </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black btn-click font-weight-bold" style="width: 180px;">Khách
-                                hàng</span>
-                            <input placeholder="Nhập thông tin" autocomplete="off" required id="customer_name"
-                                readonly class="text-13-black w-100 border-0 bg-input-guest py-2 px-2"
-                                style="flex:2;" />
-                            <input type="hidden" name="customer_id" id="customer_id">
+                        <div class="d-flex w-100">
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3 required-label" style="width: 180px;">Mã
+                                    phiếu</span>
+                                <input type="text" id="return_code" name="return_code" style="flex:2;"
+                                    placeholder="Nhập thông tin" value="{{ $quoteNumber }}"
+                                    class="text-13-black w-50 border-0 bg-input-guest date_picker bg-input-guest-blue py-2 px-2">
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black btn-click font-weight-bold" style="width: 180px;">Khách
+                                    hàng</span>
+                                <input placeholder="Nhập thông tin" autocomplete="off" required id="customer_name"
+                                    readonly class="text-13-black w-100 border-0 bg-input-guest py-2 px-2"
+                                    style="flex:2;" />
+                                <input type="hidden" name="customer_id" id="customer_id">
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập
+                                    phiếu</span>
+                                <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                                <input class="text-13-black w-50 border-0 bg-input-guest py-2 px-2" autocomplete="off"
+                                    placeholder="Nhập thông tin" style="flex:2;" name=""
+                                    value="{{ Auth::user()->name }}" readonly />
+                            </div>
                         </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập phiếu</span>
-                            <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
-                            <input class="text-13-black w-50 border-0 bg-input-guest py-2 px-2" autocomplete="off"
-                                placeholder="Nhập thông tin" style="flex:2;" name=""
-                                value="{{ Auth::user()->name }}" readonly />
-                        </div>
-                    </div>
-                    <div class="d-flex w-100">
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3 required-label" style="width: 180px;">Ngày lập
-                                phiếu</span>
-                            <input placeholder="Nhập thông tin" autocomplete="off" type="date" id="dateCreate"
-                                class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
-                                style=" flex:2;" />
-                            <input type="hidden" value="{{ now()->format('Y-m-d') }}" name="date_created"
-                                id="hiddenDateCreate">
-                        </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black btn-click" style="width: 180px;"> Người liên hệ </span>
-                            <input name="contact_person" id="contact_person" placeholder="Nhập thông tin"
-                                autocomplete="off"
-                                class="text-13-black w-100 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
-                                style="flex:2;" />
-                            <div class="">
-                                <div id="myUL"
-                                    class="bg-white position-absolute rounded list-guest shadow p-1 z-index-block"
-                                    style="z-index: 99;display: none;">
-                                    <div class="p-1">
-                                        <div class="position-relative">
-                                            <input type="text" placeholder="Nhập công ty"
-                                                class="pr-4 w-100 input-search bg-input-guest" id="companyFilter">
-                                            <span id="search-icon" class="search-icon">
-                                                <i class="fas fa-search text-table" aria-hidden="true"></i>
-                                            </span>
+                        <div class="d-flex w-100">
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3 required-label" style="width: 180px;">Ngày
+                                    lập
+                                    phiếu</span>
+                                <input placeholder="Nhập thông tin" autocomplete="off" type="date"
+                                    id="dateCreate"
+                                    class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
+                                    style=" flex:2;" />
+                                <input type="hidden" value="{{ now()->format('Y-m-d') }}" name="date_created"
+                                    id="hiddenDateCreate">
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black btn-click" style="width: 180px;"> Người liên hệ </span>
+                                <input name="contact_person" id="contact_person" placeholder="Nhập thông tin"
+                                    autocomplete="off"
+                                    class="text-13-black w-100 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
+                                    style="flex:2;" />
+                                <div class="">
+                                    <div id="myUL"
+                                        class="bg-white position-absolute rounded list-guest shadow p-1 z-index-block"
+                                        style="z-index: 99;display: none;">
+                                        <div class="p-1">
+                                            <div class="position-relative">
+                                                <input type="text" placeholder="Nhập công ty"
+                                                    class="pr-4 w-100 input-search bg-input-guest" id="companyFilter">
+                                                <span id="search-icon" class="search-icon">
+                                                    <i class="fas fa-search text-table" aria-hidden="true"></i>
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <ul class="m-0 p-0 scroll-data">
-                                        {{-- @foreach ($guest as $guest_value)
+                                        <ul class="m-0 p-0 scroll-data">
+                                            {{-- @foreach ($guest as $guest_value)
                                             <li class="p-2 align-items-center text-wrap border-top"
                                                 data-id="{{ $guest_value->id }}">
                                                 <a href="#" title="{{ $guest_value->guest_name_display }}"
@@ -165,57 +168,58 @@
                                                 </a>
                                             </li>
                                         @endforeach --}}
-                                    </ul>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3" style="width: 180px;">SĐT liên hệ</span>
-                            <input class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
-                                autocomplete="off" placeholder="Nhập thông tin" style="flex:2;" name="phone_number"
-                                id="phone_number" />
-                        </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">SĐT liên hệ</span>
+                                <input class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
+                                    autocomplete="off" placeholder="Nhập thông tin" style="flex:2;"
+                                    name="phone_number" id="phone_number" />
+                            </div>
 
-                    </div>
-                    <div class="d-flex w-100">
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3" style="width: 100px;">Địa chỉ</span>
-                            <input placeholder="Nhập thông tin" name="address" id="address"
-                                class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"style="flex:2;" />
                         </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                        <div class="d-flex w-100">
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3" style="width: 100px;">Địa chỉ</span>
+                                <input placeholder="Nhập thông tin" name="address" id="address"
+                                    class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"style="flex:2;" />
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Phương thức trả
+                                    hàng</span>
+                                <select
+                                    class="text-13-black w-50 border-0 addr bg-input-guest addr bg-input-guest-blue py-2 px-2"
+                                    style="flex:2;" name="return_method" id="return_method">
+                                    <option value="1">Khách nhận trực tiếp</option>
+                                    <option value="2">Chuyển phát nhanh</option>
+                                    <option value="3">Gửi chành xe</option>
+                                </select>
+                            </div>
                         </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Phương thức trả hàng</span>
-                            <select
-                                class="text-13-black w-50 border-0 addr bg-input-guest addr bg-input-guest-blue py-2 px-2"
-                                style="flex:2;" name="return_method" id="return_method">
-                                <option value="1">Khách nhận trực tiếp</option>
-                                <option value="2">Chuyển phát nhanh</option>
-                                <option value="3">Gửi chành xe</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-flex w-100">
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                            <span class="text-13-black text-nowrap mr-3" style="width: 100px;">Ghi chú</span>
-                            <input name="notes" placeholder="Nhập thông tin" autocomplete="off" id="notes"
-                                class="text-13-black w-50 border-0 addr bg-input-guest addr bg-input-guest-blue py-2 px-2"style="flex:2;" />
-                        </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                        </div>
-                        <div
-                            class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                        <div class="d-flex w-100">
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                                <span class="text-13-black text-nowrap mr-3" style="width: 100px;">Ghi chú</span>
+                                <input name="notes" placeholder="Nhập thông tin" autocomplete="off" id="notes"
+                                    class="text-13-black w-50 border-0 addr bg-input-guest addr bg-input-guest-blue py-2 px-2"style="flex:2;" />
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                            </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             </div>
             @if ($errors->any())
                 <ul>
@@ -335,86 +339,152 @@
             },
         });
     });
-    $(document).ready(function () {
-    let isChecking = false; // Biến kiểm soát việc kiểm tra số serial
+    $(document).ready(function() {
+        let isChecking = false;
 
-    $("#btn-get-unique-products").click(function (e) {
-        if (isChecking) {
-            e.preventDefault();
-            showAutoToast("warning", "Vui lòng chờ kiểm tra số serial...");
-            return;
-        }
+        $("#btn-get-unique-products").click(function(e) {
+            let isValid = true;
+            let isCheckingAny = false;
 
-        let isValid = true;
-        $("#tbody-data .check-icon").each(function () {
-            if ($(this).text().trim() === "✖") {
-                isValid = false;
-                return false; // Dừng vòng lặp nếu phát hiện lỗi
+            $("#tbody-data .replacement_serial_number_id").each(function() {
+                const $input = $(this);
+                const checking = $input.data("checking");
+                const $checkIcon = $input.siblings(".check-icon");
+                const iconText = $checkIcon.text().trim();
+
+                if (checking === true) {
+                    isCheckingAny = true;
+                    return false;
+                }
+
+                if (iconText === "✖") {
+                    isValid = false;
+                    return false;
+                }
+            });
+
+            if (isCheckingAny) {
+                e.preventDefault();
+                showAutoToast("warning", "Vui lòng chờ kiểm tra số serial...");
+                return;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                showAutoToast("warning", "Dữ liệu không hợp lệ!");
+                return;
             }
         });
 
-        if (!isValid) {
-            e.preventDefault();
-            showAutoToast("warning", "Dữ liệu không hợp lệ!");
-        }
-    });
+        function checkSerial($input) {
+            const serialNumber = $input.val().trim();
 
-    $(document).on('change click', '.replacement_serial_number_id, .search-item', function (event) {
-        const $input = $(this);
-        const $row = $input.closest('tr');
-        const $serialInput = $row.find('.replacement_serial_number_id');
-        const replacementCode = $row.find('input.replacement_code').val();
-        const $checkIcon = $row.find('.check-icon');
-        const serialNumber = $serialInput.val().trim();
-
-        console.log('Serial Number:', serialNumber);
-        console.log('Replacement Code:', replacementCode);
-
-        // Kiểm tra trùng lặp trong các ô nhập liệu khác
-        let isDuplicate = false;
-        $('.replacement_serial_number_id').each(function () {
-            const otherValue = $(this).val().trim();
-            if ($(this)[0] !== $serialInput[0] && otherValue === serialNumber && serialNumber !== '') {
-                isDuplicate = true;
-                return false; // Thoát khỏi vòng lặp nếu tìm thấy trùng lặp
+            // Nếu chưa nhập gì thì không kiểm tra
+            if (serialNumber === "") {
+                const $checkIcon = $input.siblings(".check-icon");
+                $checkIcon.text("").css("color", "").attr("title", "");
+                $input.data("checking", false);
+                return;
             }
-        });
 
-        if (isDuplicate) {
-            $checkIcon.text('✖').css('color', 'red');
-            return; // Không thực hiện kiểm tra AJAX nếu trùng lặp
-        }
+            const $row = $input.closest("tr");
+            const replacementCode = $row.find("input.replacement_code").val();
+            const $checkIcon = $input.siblings(".check-icon");
 
-        if (serialNumber !== "" && replacementCode !== "") {
-            isChecking = true; 
+            $input.data("checking", true);
+            isChecking = true;
+
+            // Kiểm tra trùng lặp
+            let isDuplicate = false;
+            $(".replacement_serial_number_id").each(function() {
+                const otherValue = $(this).val().trim();
+                if ($(this)[0] !== $input[0] && otherValue === serialNumber && serialNumber !== "") {
+                    isDuplicate = true;
+                    return false;
+                }
+            });
+
+            if (isDuplicate) {
+                $checkIcon.text("✖").css("color", "red").attr("title", "Serial bị trùng lặp");
+                $input.data("checking", false);
+                isChecking = false;
+                return;
+            }
+
+            if (!replacementCode) {
+                $checkIcon.text("✖").css("color", "red").attr("title", "Chưa chọn mã sản phẩm thay thế");
+                $input.data("checking", false);
+                isChecking = false;
+                return;
+            }
+
+            // Gọi AJAX kiểm tra
             $.ajax({
                 url: '{{ route('checkSNReplace') }}',
-                type: 'GET',
+                type: "GET",
                 data: {
                     serialNumber: serialNumber,
                     product_id: replacementCode,
-                    _token: $('meta[name="csrf-token"]').attr('content')
+                    _token: $('meta[name="csrf-token"]').attr("content"),
                 },
-                success: function (response) {
-                    console.log(response);
-                    if (response.status === 'success') {
-                        $checkIcon.text('✔').css('color', 'green').attr('title', response.message);
-                    } else if (response.status === 'error') {
-                        $checkIcon.text('✖').css('color', 'red').attr('title', response.message);
+                success: function(response) {
+                    if (response.status === "success") {
+                        $checkIcon.text("✔").css("color", "green").attr("title", response.message);
+                    } else {
+                        $checkIcon.text("✖").css("color", "red").attr("title", response.message);
                     }
                 },
-                error: function () {
-                    $checkIcon.text('?').css('color', 'orange');
-                    console.error('Có lỗi xảy ra khi kiểm tra số serial.');
+                error: function() {
+                    $checkIcon.text("?").css("color", "orange").attr("title", "Lỗi kết nối server");
                 },
-                complete: function () {
-                    isChecking = false; // Hoàn tất kiểm tra
+                complete: function() {
+                    $input.data("checking", false);
+                    isChecking = false;
+                },
+            });
+        }
+
+        // Sự kiện paste
+        $(document).on("paste", ".replacement_serial_number_id", function() {
+            const $input = $(this);
+            setTimeout(() => {
+                $input.val($input.val().trim());
+                checkSerial($input);
+            }, 0);
+        });
+
+        // Sự kiện change / click / blur (KHÔNG dùng search-item!)
+        $(document).on("change click blur", ".replacement_serial_number_id", function() {
+            checkSerial($(this));
+        });
+
+        // Sự kiện click vào item trong danh sách
+        $(document).on("mousedown", ".search-item", function(e) {
+            const $item = $(this);
+            const $container = $item.closest(".search-container");
+            const $input = $container.find(".search-input");
+            const $row = $item.closest("tr");
+
+            const code = $item.data("code");
+            const replace_id = $item.data("replace_id");
+
+            $input.val(code);
+            $row.find("input.replacement_code").val(replace_id);
+
+            $container.find(".search-list").removeClass("active");
+
+            // Bắt buộc kiểm tra lại các serial khi mã đổi thay đổi
+            $row.find(".replacement_serial_number_id").each(function() {
+                const $serialInput = $(this);
+                const $checkIcon = $serialInput.siblings(".check-icon");
+
+                $checkIcon.text("").css("color", "transparent");
+                $serialInput.data("checking", false);
+
+                if ($serialInput.val().trim() !== "") {
+                    checkSerial($serialInput);
                 }
             });
-        } else {
-            $checkIcon.text('').css('color', 'transparent');
-        }
+        });
     });
-});
-
 </script>

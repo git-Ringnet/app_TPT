@@ -105,8 +105,8 @@
                             </button>
                         @endcan
                         <button id="sideGuest" type="button" class="btn-option border-0 mx-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                     d="M6.375 3C3.68262 3 1.5 5.18262 1.5 7.875V16.1248C1.5 18.8173 3.68262 20.9998 6.375 20.9998H17.625C20.3174 20.9998 22.5 18.8173 22.5 16.1248V7.875C22.5 5.18262 20.3174 3 17.625 3H6.375ZM3.75 15.7498C3.75 17.4067 5.09314 18.7498 6.75 18.7498H17.625C19.0748 18.7498 20.25 17.5746 20.25 16.1248V7.875C20.25 6.42527 19.0748 5.25 17.625 5.25H6.75C5.09314 5.25 3.75 6.59314 3.75 8.25V15.7498Z"
                                     fill="#151516" />
@@ -140,7 +140,7 @@
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                 <span class="text-13-black btn-click required-label font-weight-bold"
-                                style="width: 180px;">Khách
+                                    style="width: 180px;">Khách
                                     hàng</span>
                                 <input placeholder="Nhập thông tin" autocomplete="off" required id="customer_name"
                                     class="text-13-black w-100 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"
@@ -167,7 +167,8 @@
                             </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập phiếu</span>
+                                <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Người lập
+                                    phiếu</span>
                                 <input type="hidden" name="user_id" value="{{ $returnForm->user_id }}">
                                 <input class="text-13-black w-50 border-0 bg-input-guest py-2 px-2" autocomplete="off"
                                     placeholder="Nhập thông tin" style="flex:2;" name=""
@@ -211,8 +212,9 @@
                                     value="{{ $returnForm->address }}" id="address"
                                     class="text-13-black w-50 border-0 bg-input-guest bg-input-guest-blue py-2 px-2"style="flex:2;" />
                             </div>
-                            <div class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                        </div>
+                            <div
+                                class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
+                            </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
                                 <span class="text-13-black text-nowrap mr-3" style="width: 180px;">Phương thức trả
@@ -275,6 +277,13 @@
                                         $returnForm->reception->form_type == 1 || $returnForm->reception->form_type == 3
                                             ? 'd-none'
                                             : '';
+                                    $groupedReturns = $returnForm->productReturns->groupBy(function ($item) {
+                                        return $item->product_id .
+                                            '-' .
+                                            $item->serial_number_id .
+                                            '-' .
+                                            $item->replacement_code;
+                                    });
                                 @endphp
                                 <thead>
                                     <tr style="height:44px;">
@@ -316,98 +325,78 @@
 
                                 </thead>
                                 <tbody id="tbody-data">
-                                    @foreach ($returnProducts as $id => $item)
-                                        <tr class="row-product bg-white">
-                                            <td
-                                                class="border-right p-2 text-13 align-top border-bottom border-top-0 pl-4">
-                                                <input type="hidden" name="return[{{ $id }}][product_id]"
-                                                    value="{{ $item->product_id }}">
-                                                <input type="text" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 product_code height-32"
-                                                    readonly name="return[{{ $id }}][product_code]"
-                                                    value="{{ $item->product->product_code }}">
-                                            </td>
-                                            <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                <input type="text" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 product_name height-32"
-                                                    readonly name="return[{{ $id }}][product_name]"
-                                                    value="{{ $item->product->product_name }}">
-                                            </td>
-                                            <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                <input type="text" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 brand height-32" readonly
-                                                    name="return[{{ $id }}][brand]"
-                                                    value="{{ $item->product->brand }}">
-                                            </td>
-                                            <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                <input type="text" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 quantity height-32" readonly
-                                                    name="return[{{ $id }}][quantity]"
-                                                    value="{{ $item->quantity }}">
-                                            </td>
-                                            <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                <input type="hidden" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 serial_id height-32" readonly
-                                                    name="return[{{ $id }}][serial_id]"
-                                                    value="{{ $item->serialNumber->id }}">
-                                                <input type="text" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 serial_code height-32"
-                                                    readonly name="return[{{ $id }}][serial_code]"
-                                                    value="{{ $item->serialNumber->serial_code }}">
-                                            </td>
-                                            <td
-                                                class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative {{ $hideReplacement }}">
-                                                <input type="hidden" min="0" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 replacement_code height-32"
-                                                    id="replacement_code_{{ $id }}"
-                                                    name="return[{{ $id }}][replacement_code]"
-                                                    value="{{ $item->product_replace->id ?? null }}" readonly>
-                                                <div class="search-container">
+                                    @foreach ($groupedReturns as $group)
+                                        @foreach ($group as $index => $item)
+                                            <tr class="row-product bg-white">
+                                                {{-- Dòng đầu tiên hiển thị đầy đủ --}}
+                                                @if ($index == 0)
+                                                    <td class="border-right p-2 text-13 align-top pl-4 border-bottom">
+                                                        <input type="hidden"
+                                                            name="return[{{ $item->id }}][product_id]"
+                                                            value="{{ $item->product_id }}">
+                                                        <input type="text"
+                                                            class="border-0 pl-1 pr-2 py-1 w-100 product_code" readonly
+                                                            value="{{ $item->product->product_code }}">
+                                                    </td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom">
+                                                        <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                            readonly value="{{ $item->product->product_name }}">
+                                                    </td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom">
+                                                        <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                            readonly value="{{ $item->product->brand }}">
+                                                    </td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom">
+                                                        <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                            readonly value="{{ $item->quantity }}">
+                                                    </td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom">
+                                                        <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                            readonly value="{{ $item->serialNumber->serial_code }}">
+                                                    </td>
+                                                    <td
+                                                        class="border-right p-2 text-13 align-top border-bottom {{ $hideReplacement }}">
+                                                        <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                            readonly
+                                                            value="{{ $item->product_replace->product_code ?? '' }}">
+                                                    </td>
+                                                @else
+                                                    {{-- Các dòng sau chỉ hiển thị Serial Number thay thế --}}
+                                                    <td class="border-right p-2 text-13 align-top pl-4 border-bottom"></td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom"></td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom"></td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom"></td>
+                                                    <td class="border-right p-2 text-13 align-top border-bottom"></td>
+                                                    <td
+                                                        class="border-right p-2 text-13 align-top border-bottom {{ $hideReplacement }}">
+                                                    </td>
+                                                @endif
+
+                                                {{-- Serial đổi (luôn hiển thị) --}}
+                                                <td class="border-right p-2 text-13 align-top border-bottom {{ $hideReplacement }}">
+                                                    <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                        readonly
+                                                        value="{{ $item->replacementSerialNumber->serial_code ?? '' }}">
+                                                </td>
+
+                                                {{-- Extra Warranty & Ghi chú (nếu cần) --}}
+                                                <td
+                                                    class="border-right p-2 text-13 align-top {{ $hideExtraWarranty }}">
+                                                    <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                        readonly value="{{ $item->warranties->name_warranty ?? '' }}">
+                                                </td>
+                                                <td
+                                                    class="border-right p-2 text-13 align-top {{ $hideExtraWarranty }}">
+                                                    <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
+                                                        readonly value="{{ $item->extra_warranty ?? '' }}">
+                                                </td>
+                                                <td class="border-right p-2 text-13 align-top border-bottom">
                                                     <input type="text"
-                                                        class="search border-0 pl-1 pr-2 py-1 w-100 serial_code height-32"
-                                                        value="{{ $item->product_replace->product_code ?? '' }}" readonly
-                                                        placeholder="" />
-                                                    <ul class="search-list border rounded">
-                                                        @foreach ($dataProduct as $product)
-                                                            <li class="search-item p-2 border-bottom"
-                                                                data-id="{{ $id }}"
-                                                                data-replace_id="{{ $product->id }}"
-                                                                data-code="{{ $product->product_code }}">
-                                                                {{ $product->product_code }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                            <td
-                                                class="border-right p-2 text-13 align-top border-bottom border-top-0 {{ $hideReplacement }}">
-                                                <input type="text" min="0" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 replacement_serial_number_id height-32"
-                                                    name="return[{{ $id }}][replacement_serial_number_id]"
-                                                    value="{{ $item->replacementSerialNumber->serial_code ?? '' }}" readonly>
-                                            </td>
-                                            <td
-                                                class="border-right p-2 text-13 align-top border-bottom border-top-0 {{ $hideExtraWarranty }}">
-                                                <input type="text" min="0" max="100"
-                                                    autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 name_warranty height-32"
-                                                    readonly name="return[{{ $id }}][name_warranty]"
-                                                    value="{{ $item->warranties->name_warranty ?? '' }}">
-                                            </td>
-                                            <td
-                                                class="border-right p-2 text-13 align-top border-bottom border-top-0 {{ $hideExtraWarranty }}">
-                                                <input type="number" min="0" max="100"
-                                                    autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 extra_warranty height-32"
-                                                    name="return[{{ $id }}][extra_warranty]"
-                                                    value="{{ $item->extra_warranty ?? '' }}" readonly>
-                                            </td>
-                                            <td class="border-right p-2 text-13 align-top border-bottom border-top-0">
-                                                <input type="text" autocomplete="off"
-                                                    class="border-0 pl-1 pr-2 py-1 w-100 note height-32 bg-input-guest-blue"
-                                                    name="return[{{ $id }}][note]"
-                                                    value="{{ $item->notes ?? '' }}">
-                                            </td>
-                                        </tr>
+                                                        class="border-0 pl-1 pr-2 py-1 w-100 bg-input-guest-blue"
+                                                        value="{{ $item->notes ?? '' }}">
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @endforeach
                                 </tbody>
                             </table>

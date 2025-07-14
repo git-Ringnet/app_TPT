@@ -3800,3 +3800,7 @@ tbody .bg-input-guest-blue {
     padding: 8px;
     line-height: 1.5;
 }
+
+.right-45{
+    right: 45px !important;
+}

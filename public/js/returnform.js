@@ -196,8 +196,14 @@ function populateTableRows(products, tableSelector, dataProduct, type) {
                     </div>
                 </td>
                 <td class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative ${hideReplacement}">
-                    <input onpaste="setTimeout(() => { this.value = this.value.trim(); }, 0)" type="text" min="0" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 replacement_serial_number_id height-32 bg-input-guest-blue" name="return[${index}][replacement_serial_number_id]">
-                    <span class="check-icon"></span>
+                    <div class="replacement-list">
+                        <div class="replacement-item d-flex align-items-center mb-1 position-relative">
+                            <input required type="text" min="0" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 replacement_serial_number_id height-32 bg-input-guest-blue" name="return[${index}][replacement_serial_number_id][]">
+                            <span class="check-icon right-45"></span>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-replacement ml-2">×</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary add-replacement">+ Thêm serial</button>
                 </td>
                 <td class="border-right p-2 text-13 align-top border-bottom border-top-0 ${hideExtraWarranty}">
                     <input type="number" min="0" max="100" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 extra_warranty height-32 bg-input-guest-blue" name="return[${index}][extra_warranty]">
@@ -227,7 +233,6 @@ $(document).ready(function () {
         }
     });
 
-    // Ẩn danh sách khi input mất focus
     $(document).on("blur", ".search-input", function () {
         const $searchList = $(this).next(".search-list");
         // Đợi 100ms để không ảnh hưởng click
@@ -264,18 +269,37 @@ $(document).ready(function () {
         }
     });
 
-    // Sự kiện click vào item trong danh sách
-    $(document).on("click", ".search-item", function () {
-        const $item = $(this);
-        const $input = $item.closest(".search-container").find(".search-input");
-        var code = $item.data("code");
-        var id = $item.data("id");
-        var replace_id = $item.data("replace_id");
-        // Gán giá trị của item vào input
-        $input.val(code);
-        $(`#replacement_code_${id}`).val(replace_id);
-        // Ẩn danh sách
-        $item.closest(".search-list").removeClass("active");
+    // Bắt sự kiện thêm mới
+    $(document).on("click", ".add-replacement", function () {
+        const $td = $(this).closest("td");
+        const $template = $td.find(".replacement-item").first().clone();
+
+        // Reset lại input và icon
+        $template.find("input").val("");
+        $template
+            .find(".check-icon")
+            .text("")
+            .css("color", "")
+            .attr("title", ""); // XÓA title nếu có
+
+        // Append vào danh sách
+        $td.find(".replacement-list").append($template);
+
+        // Cập nhật lại trạng thái nút xoá
+        updateRemoveButtons($td.find(".replacement-list"));
+    });
+
+    // Bắt sự kiện xóa
+    $(document).on("click", ".remove-replacement", function () {
+        const $item = $(this).closest(".replacement-item");
+        // Nếu chỉ còn 1 thì không xóa (bạn muốn luôn có ít nhất 1 ô)
+        if ($item.siblings(".replacement-item").length > 0) {
+            $item.remove();
+        } else {
+            // Nếu muốn clear luôn ô cuối cùng
+            $item.find("input").val("");
+            $item.find(".check-icon").text("").css("color", "");
+        }
     });
 });
 // $(document).ready(function () {
