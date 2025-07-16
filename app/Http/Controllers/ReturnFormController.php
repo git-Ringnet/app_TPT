@@ -78,7 +78,6 @@ class ReturnFormController extends Controller
             'return.*.serial_id' => 'required',
             'return.*.replacement_code' => 'nullable|integer',
             'return.*.replacement_serial_number_id' => 'array',
-            'return.*.replacement_serial_number_id.*' => 'string',
             'return.*.warranty' => ['nullable', 'array'],
             'return.*.warranty.*.name_warranty' => ['required', 'string'],
             'return.*.warranty.*.extra_warranty' => ['nullable', 'integer'],
@@ -108,62 +107,34 @@ class ReturnFormController extends Controller
                 ]);
 
                 if ($returnForm->reception->form_type != 2) {
-                    foreach ($replacement_serial_codes as $replacement_serial_code) {
-                        $replacementSerial = SerialNumber::where('serial_code', $replacement_serial_code)
-                            ->where('product_id', $replacement_codes)
-                            ->whereIn('status', [1, 5])
-                            ->first();
-
-                        if (!$replacementSerial) continue;
-
-                        // Tạo product_return
+                    // Trường hợp không có serial thay thế (ví dụ chỉ sửa chữa)
+                    if (empty(array_filter($replacement_serial_codes))) {
                         $productReturn = ProductReturn::createProductReturn([
                             'return_form_id' => $return_form_id,
                             'product_id' => $product_id,
                             'quantity' => 1,
                             'serial_number_id' => $serial_number_id,
-                            'replacement_code' => $replacement_codes,
-                            'replacement_serial_number_id' => $replacementSerial->id,
+                            'replacement_code' => null,
+                            'replacement_serial_number_id' => null,
                             'extra_warranty' => $returnItem['extra_warranty'] ?? null,
                             'notes' => $note,
                         ]);
 
-                        // Sao chép bảo hành
-                        $warranty_lookups = warrantyLookup::where('sn_id', $serial_number_id)->get();
-                        foreach ($warranty_lookups as $warranty) {
-                            warrantyLookup::create([
+                        // Clone hoặc tạo mới warrantyLookup cũ
+                        $oldWarrantyLookup = warrantyLookup::firstOrCreate(
+                            ['sn_id' => $serial_number_id],
+                            [
                                 'product_id' => $product_id,
-                                'sn_id' => $replacementSerial->id,
-                                'customer_id' => $validated['customer_id'],
-                                'name_warranty' => $warranty->name_warranty,
-                                'name_status' => $warranty->name_status,
-                                'export_return_date' => $warranty->export_return_date,
-                                'warranty' => $warranty->warranty,
-                                'warranty_expire_date' => $warranty->warranty_expire_date,
-                                'status' => 0,
-                            ]);
-                        }
-
-                        // Cập nhật trạng thái Serial
-                        SerialNumber::find($serial_number_id)->update(['status' => 1, 'warehouse_id' => 2]);
-                        $replacementSerial->update(['status' => 2]);
-
-                        // Ghi lịch sử bảo hành
-                        $oldWarrantyLookup = warrantyLookup::where('sn_id', $serial_number_id)->first();
-                        if (!$oldWarrantyLookup) {
-                            $oldWarrantyLookup = warrantyLookup::create([
-                                'product_id' => $product_id,
-                                'sn_id' => $serial_number_id,
                                 'customer_id' => $validated['customer_id'],
                                 'name_warranty' => 'Hàng bên ngoài',
-                                'name_status' => null,
                                 'export_return_date' => $validated['date_created'],
                                 'warranty' => 0,
                                 'warranty_expire_date' => $validated['date_created'],
                                 'status' => 0,
-                            ]);
-                        }
+                            ]
+                        );
 
+                        // Ghi lịch sử bảo hành
                         warrantyHistory::create([
                             'warranty_lookup_id' => $oldWarrantyLookup->id,
                             'receiving_id' => $validated['reception_id'],
@@ -171,6 +142,75 @@ class ReturnFormController extends Controller
                             'product_return_id' => $productReturn->id,
                             'note' => $note,
                         ]);
+
+                        // Cập nhật trạng thái serial gốc nếu cần
+                        SerialNumber::find($serial_number_id)
+                            ->update(['status' => 1, 'warehouse_id' => 2]);
+                    } else {
+                        foreach ($replacement_serial_codes as $replacement_serial_code) {
+                            $replacementSerial = SerialNumber::where('serial_code', $replacement_serial_code)
+                                ->where('product_id', $replacement_codes)
+                                ->whereIn('status', [1, 5])
+                                ->first();
+
+                            if (!$replacementSerial) continue;
+
+                            // Tạo product_return
+                            $productReturn = ProductReturn::createProductReturn([
+                                'return_form_id' => $return_form_id,
+                                'product_id' => $product_id,
+                                'quantity' => 1,
+                                'serial_number_id' => $serial_number_id,
+                                'replacement_code' => $replacement_codes,
+                                'replacement_serial_number_id' => $replacementSerial->id,
+                                'extra_warranty' => $returnItem['extra_warranty'] ?? null,
+                                'notes' => $note,
+                            ]);
+
+                            // Sao chép bảo hành
+                            $warranty_lookups = warrantyLookup::where('sn_id', $serial_number_id)->get();
+                            foreach ($warranty_lookups as $warranty) {
+                                warrantyLookup::create([
+                                    'product_id' => $product_id,
+                                    'sn_id' => $replacementSerial->id,
+                                    'customer_id' => $validated['customer_id'],
+                                    'name_warranty' => $warranty->name_warranty,
+                                    'name_status' => $warranty->name_status,
+                                    'export_return_date' => $warranty->export_return_date,
+                                    'warranty' => $warranty->warranty,
+                                    'warranty_expire_date' => $warranty->warranty_expire_date,
+                                    'status' => 0,
+                                ]);
+                            }
+
+                            // Cập nhật trạng thái Serial
+                            SerialNumber::find($serial_number_id)->update(['status' => 1, 'warehouse_id' => 2]);
+                            $replacementSerial->update(['status' => 2]);
+
+                            // Ghi lịch sử bảo hành
+                            $oldWarrantyLookup = warrantyLookup::where('sn_id', $serial_number_id)->first();
+                            if (!$oldWarrantyLookup) {
+                                $oldWarrantyLookup = warrantyLookup::create([
+                                    'product_id' => $product_id,
+                                    'sn_id' => $serial_number_id,
+                                    'customer_id' => $validated['customer_id'],
+                                    'name_warranty' => 'Hàng bên ngoài',
+                                    'name_status' => null,
+                                    'export_return_date' => $validated['date_created'],
+                                    'warranty' => 0,
+                                    'warranty_expire_date' => $validated['date_created'],
+                                    'status' => 0,
+                                ]);
+                            }
+
+                            warrantyHistory::create([
+                                'warranty_lookup_id' => $oldWarrantyLookup->id,
+                                'receiving_id' => $validated['reception_id'],
+                                'return_id' => $return_form_id,
+                                'product_return_id' => $productReturn->id,
+                                'note' => $note,
+                            ]);
+                        }
                     }
                 }
 

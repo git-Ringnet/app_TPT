@@ -198,7 +198,7 @@ function populateTableRows(products, tableSelector, dataProduct, type) {
                 <td class="border-right p-2 text-13 align-top border-bottom border-top-0 position-relative ${hideReplacement}">
                     <div class="replacement-list">
                         <div class="replacement-item d-flex align-items-center mb-1 position-relative">
-                            <input required type="text" min="0" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 replacement_serial_number_id height-32 bg-input-guest-blue" name="return[${index}][replacement_serial_number_id][]">
+                            <input type="text" min="0" autocomplete="off" class="border-0 pl-1 pr-2 py-1 w-100 replacement_serial_number_id height-32 bg-input-guest-blue" name="return[${index}][replacement_serial_number_id][]">
                             <span class="check-icon right-45"></span>
                             <button type="button" class="btn btn-sm btn-outline-danger remove-replacement ml-2">×</button>
                         </div>
