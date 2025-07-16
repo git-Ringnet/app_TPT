@@ -252,9 +252,16 @@ class ReceivingController extends Controller
 
             // Xóa tất cả sản phẩm tiếp nhận và bảo hành liên quan
             foreach ($receiving->receivedProducts as $receivedProduct) {
-                // if ($receiving->branch_id == 2) {
-                // SerialNumber::find($receivedProduct->serial_id)?->delete();
-                // }
+                if ($receivedProduct->serial_id) {
+                    // Kiểm tra xem serial có tồn tại trong phiếu xuất hàng không
+                    $hasExport = \App\Models\ProductExport::where('sn_id', $receivedProduct->serial_id)->exists();
+                    
+                    // Chỉ xóa serial nếu không có trong phiếu xuất hàng
+                    if (!$hasExport) {
+                        SerialNumber::find($receivedProduct->serial_id)?->delete();
+                    }
+                }
+                
                 $receivedProduct->warrantyReceived()->delete();
                 $receivedProduct->delete();
             }

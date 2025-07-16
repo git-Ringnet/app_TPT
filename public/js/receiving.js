@@ -779,7 +779,7 @@ $(document).ready(function () {
                 });
 
                 if (hasEmptyWarranty) {
-                    showAutoToast("warning", "Vui lòng nhập thông tin bảo hành cho hàng nội bộ");
+                    showAutoToast("warning", "Vui lòng nhập thông tin bảo hành");
                     return;
                 }
 
