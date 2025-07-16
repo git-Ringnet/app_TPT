@@ -114,9 +114,9 @@ class UpdateInventoryStatus extends Command
         // InventoryLookup::where('sn_id', 1458)->update(['remaining_quantity' => 1]);
 
         //xóa serial
-        $ids = [2861, 2860, 2859, 2858];
+        // $ids = [2857];
 
-        $count = SerialNumber::whereIn('id', $ids)->delete();
+        // $count = SerialNumber::whereIn('id', $ids)->delete();
 
         $this->info('Đã cập nhật thời gian tồn kho cho tất cả các sản phẩm.');
     }
