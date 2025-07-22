@@ -21,39 +21,56 @@ class InventoryLookupController extends Controller
     {
         $this->inventoryLookup = $inventoryLookup;
     }
-    public function index()
+    public function index(Request $request)
     {
         $title = "Tra cứu tồn kho";
         $warehouse_id = GlobalHelper::getWarehouseId();
-        // Lấy danh sách serial (sn_id != 0)
+        $perPage = 20;
+        $page = $request->input('page', 1);
+
+        // Lấy danh sách serial
         $withSerial = InventoryLookup::with(['product', 'serialNumber', 'provider'])
             ->whereHas('serialNumber', function ($q) {
                 $q->whereIn('status', [1, 5]);
-            });
+            })
+            ->orderByDesc('id') // Sắp xếp trong DB
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
 
-        // Lấy danh sách không serial (sn_id = 0) và gom nhóm
-        $noSerial = InventoryLookup::with(['product', 'provider']) // không cần serialNumber vì sn_id = 0
+        // Không serial
+        $noSerial = InventoryLookup::with(['product', 'provider'])
             ->where('sn_id', 0)
-            ->selectRaw('product_id, provider_id, storage_duration, warehouse_id, SUM(remaining_quantity) as remaining_quantity')
-            ->groupBy('product_id', 'provider_id', 'storage_duration', 'warehouse_id');
+            ->selectRaw('product_id, provider_id, storage_duration, warehouse_id, SUM(remaining_quantity) as remaining_quantity, MAX(id) as id') // thêm MAX(id) để sắp
+            ->groupBy('product_id', 'provider_id', 'storage_duration', 'warehouse_id')
+            ->orderByDesc('id') // sắp theo id đại diện
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
 
-        // Áp điều kiện kho nếu cần
+        // Lọc theo kho
         if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho']) && !Auth::user()->id == 9) {
             if ($warehouse_id) {
                 $withSerial = $withSerial->whereHas('serialNumber', function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
                 });
-
-                $noSerial = $noSerial->where('warehouse_id', $warehouse_id); // nếu có trường này
+                $noSerial = $noSerial->where('warehouse_id', $warehouse_id);
             }
         }
 
-        // Lấy kết quả
-        $withSerial = $withSerial->get();
-        $noSerial = $noSerial->get();
-
         // Gộp lại
         $inventory = $withSerial->concat($noSerial)->sortByDesc('id')->values();
+
+        // Nếu là request AJAX thì trả về HTML để append
+        if ($request->ajax()) {
+            $html = view('expertise.inventoryLookup._inventory_rows', compact('inventory'))->render();
+            return response()->json([
+                'html' => $html,
+                'has_more' => $inventory->count() >= $perPage,
+                'next_page' => $page + 1,
+            ]);
+        }
+
         $providers = Providers::all();
         return view('expertise.inventoryLookup.index', compact('title', 'inventory', 'providers'));
     }
