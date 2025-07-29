@@ -525,26 +525,51 @@ class SerialNumberController extends Controller
                 $sericheck = SerialNumber::where('serial_code', $serial)->first();
 
                 if ($sericheck) {
-                    $result[$serial] = ['status' => 'success', 'message' => 'Số serial nội bộ.'];
+                    if ($sericheck->status == 1) {
+                        // Kiểm tra xem serial có trong product_import không
+                        $existsInImport = ProductImport::where('sn_id', $sericheck->id)->exists();
+                        
+                        if (!$existsInImport) {
+                            $result[$serial] = ['status' => 'external', 'message' => 'Số serial bên ngoài và hợp lệ.'];
+                        } else {
+                            $result[$serial] = ['status' => 'success', 'message' => 'Số serial nội bộ.'];
+                        }
+                    } else {
+                        $result[$serial] = ['status' => 'success', 'message' => 'Số serial nội bộ.'];
+                    }
                 } else {
                     $result[$serial] = ['status' => 'external', 'message' => 'Số serial bên ngoài.'];
                 }
             }
-            // dd($product_id);
             return response()->json($result);
         }
         // Kiểm tra với một serial duy nhất
         $sericheck = SerialNumber::where('serial_code', $serialData)->first();
-        if ($sericheck) {
-            if ($sericheck->status == 1 || $sericheck->status == 5) {
-                return response()->json(['status' => 'error', 'message' => 'Serial tồn tại trong kho.']);
-            } elseif ($sericheck->product_id == $product_id) {
-                return response()->json(['status' => 'success', 'message' => 'Số serial nội bộ.']);
-            } else {
-                return response()->json(['status' => 'error', 'message' => 'Serial không thuộc sản phẩm này.']);
-            }
-        } else {
+        if (!$sericheck) {
             return response()->json(['status' => 'external', 'message' => 'Số serial bên ngoài.']);
         }
+
+        // Kiểm tra status = 1
+        if ($sericheck->status == 1) {
+            // Kiểm tra xem serial có trong product_import không
+            $existsInImport = ProductImport::where('sn_id', $sericheck->id)->exists();
+            
+            if (!$existsInImport) {
+                return response()->json(['status' => 'external', 'message' => 'Số serial bên ngoài và hợp lệ.']);
+            }
+            return response()->json(['status' => 'error', 'message' => 'Serial tồn tại trong kho.']);
+        }
+        
+        // Kiểm tra status = 5
+        if ($sericheck->status == 5) {
+            return response()->json(['status' => 'error', 'message' => 'Serial tồn tại trong kho.']);
+        }
+        
+        // Kiểm tra product_id
+        if ($sericheck->product_id == $product_id) {
+            return response()->json(['status' => 'success', 'message' => 'Số serial nội bộ.']);
+        }
+        
+        return response()->json(['status' => 'error', 'message' => 'Serial không thuộc sản phẩm này.']);
     }
 }

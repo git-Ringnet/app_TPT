@@ -256,8 +256,13 @@ class ReceivingController extends Controller
                     // Kiểm tra xem serial có tồn tại trong phiếu xuất hàng không
                     $hasExport = \App\Models\ProductExport::where('sn_id', $receivedProduct->serial_id)->exists();
                     
-                    // Chỉ xóa serial nếu không có trong phiếu xuất hàng
-                    if (!$hasExport) {
+                    // Kiểm tra xem serial có tồn tại trong phiếu tiếp nhận khác không
+                    $hasOtherReceiving = ReceivedProduct::where('serial_id', $receivedProduct->serial_id)
+                        ->where('id', '!=', $receivedProduct->id)
+                        ->exists();
+                    
+                    // Chỉ xóa serial nếu không có trong phiếu xuất hàng và không có trong phiếu tiếp nhận khác
+                    if (!$hasExport && !$hasOtherReceiving) {
                         SerialNumber::find($receivedProduct->serial_id)?->delete();
                     }
                 }
