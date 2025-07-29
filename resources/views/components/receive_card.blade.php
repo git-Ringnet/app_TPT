@@ -84,7 +84,7 @@
                         {{ $receiving->form_type == 3 ? 'checked' : '' }}>
                 </div>
             </div>
-            <p class="info font-italic font-weight-bold py-2">
+            <p class="info font-italic font-weight-bold pt-2">
                 Ghi chú: Khi nhận UPS gửi bảo hành, sửa chữa, quý khách cần đem theo phiếu tiếp nhận này. Các trường hợp
                 làm
                 mất, làm rách phiếu sẽ không được giải quyết. Xin cảm ơn.
