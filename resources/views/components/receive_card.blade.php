@@ -34,7 +34,7 @@
                 {{ $receiving->address }}
             </p>
             <p class="info">
-                <span class="mr-6 pr-6">Người liên hệ:</span>
+                <span class="mr-1">Người liên hệ:</span>
                 {{ $receiving->contact_person }}
                 <span class="ml-6 pl-6">
                     SĐT liên hệ: {{ $receiving->phone }}
