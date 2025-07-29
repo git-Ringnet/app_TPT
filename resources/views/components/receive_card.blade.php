@@ -63,8 +63,8 @@
                                 <td class="border border-dark">{{ $item->product->brand }}</td>
                                 <td class="border border-dark">1</td>
                                 <td class="border border-dark">{{ $item->serial->serial_code ?? '' }}</td>
-                                <td class="border border-dark">{{ $item->status }}</td>
-                                <td class="border border-dark">{{ $item->note }}</td>
+                                <td class="border border-dark">{{ $item->warrantyReceived[0]->state_recei ?? '' }}</td>
+                                <td class="border border-dark">{{ $item->warrantyReceived[0]->note ?? '' }}</td>
                             </tr>
                         @endforeach
                     @endforeach
@@ -89,7 +89,7 @@
                 làm
                 mất, làm rách phiếu sẽ không được giải quyết. Xin cảm ơn.
             </p>
-            <div class="footer d-flex justify-content-between">
+            <div class="footer d-flex justify-content-between" style="padding-left: 5rem; padding-right: 5rem;">
                 <div class="sign text-center">
                     <p class="font-weight-bold m-0">Khách hàng</p>
                     <span class="d-block">(Ký và ghi rõ họ tên)</span>
