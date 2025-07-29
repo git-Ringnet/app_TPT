@@ -89,7 +89,7 @@
                 làm
                 mất, làm rách phiếu sẽ không được giải quyết. Xin cảm ơn.
             </p>
-            <div class="footer d-flex justify-content-between" style="padding-left: 5rem; padding-right: 5rem;">
+            <div class="footer d-flex justify-content-between" style="padding-left: 6rem; padding-right: 6rem;">
                 <div class="sign text-center">
                     <p class="font-weight-bold m-0">Khách hàng</p>
                     <span class="d-block">(Ký và ghi rõ họ tên)</span>
