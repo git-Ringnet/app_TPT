@@ -43,6 +43,22 @@ function showAutoToast(type, message) {
         },
     }).showToast(); // Hiển thị thông báo toast
 }
+function filterCheckboxList(input, name) {
+    const filter = input.value.toUpperCase();
+    const ul = document.querySelector(`.ks-cboxtags-${name}`);
+    const items = ul.getElementsByTagName('li');
+
+    for (let i = 0; i < items.length; i++) {
+        const label = items[i].getElementsByTagName('label')[0];
+        const txtValue = label.textContent || label.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            items[i].style.display = '';
+        } else {
+            items[i].style.display = 'none';
+        }
+    }
+}
+
 $(document).on("click", function (event) {
     if (
         !$(event.target).closest(".dropdown-menu,.block-options,.item-filter")

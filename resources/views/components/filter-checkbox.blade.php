@@ -6,7 +6,7 @@
         </div>
         <div class="search-container px-2 mt-2">
             <input type="text" placeholder="Tìm kiếm" id="myInput-{{ $name }}" class="pr-4 w-100 input-search"
-                onkeyup="filter{{ $name }}()">
+                onkeyup="filterCheckboxList(this, '{{ $name }}')">
             <span class="search-icon mr-2"><i class="fas fa-search"></i></span>
         </div>
         <div class="select-checkbox text-right pb-2 px-2">

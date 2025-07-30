@@ -208,13 +208,66 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="tbody-inven-lookup" id="inventory-table">
-                                    @include('expertise.inventoryLookup._inventory_rows')
+                                <tbody class="tbody-inven-lookup">
+                                    @foreach ($inventory as $item)
+                                        <tr class="position-relative inven-lookup-info height-40">
+                                            <input type="hidden" name="id-inven-lookup" class="id-inven-lookup"
+                                                id="id-inven-lookup" value="{{ $item->id }}">
+                                            <td
+                                                class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">
+                                                {{ $item->product->product_code }}
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                                {{ $item->product->product_name }}
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                {{ $item->product->brand }}
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                @if ($item->serialNumber)
+                                                    <a href="{{ route('inventoryLookup.edit', $item->id) }}">
+                                                        {{ $item->serialNumber->serial_code ?? '' }}
+                                                        @if (!empty($item->serialNumber) && $item->serialNumber->status == 5)
+                                                            <span class="text-13-black">(Hàng mượn)</span>
+                                                        @endif
+                                                    </a>
+                                                @endif
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                                @if ($item->provider)
+                                                    {{ $item->provider->provider_name }}
+                                                @endif
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                {{ date_format(new DateTime($item->import_date), 'd/m/Y') }}
+                                            </td>
+                                            @if (!auth()->user()->hasAnyRole(['Quản lý kho', 'Bảo hành']))
+                                                <td
+                                                    class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                    @if ($item->warehouse)
+                                                        {{ $item->warehouse->warehouse_name }}
+                                                    @endif
+                                                </td>
+                                            @endif
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                {{ $item->storage_duration }} ngày
+                                            </td>
+                                            <td
+                                                class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
+                                                @if ($item->status == '1')
+                                                    <span class="text-danger">Tới hạn bảo trì</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
-                            <div class="text-center my-2">
-                                <button id="load-more" class="btn btn-outline-primary">Tải thêm</button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -333,30 +386,4 @@
         }
         return {};
     }
-
-    //Load more
-    let page = 2;
-    let loading = false;
-    document.getElementById('load-more').addEventListener('click', function() {
-        if (loading) return;
-        loading = true;
-        fetch(`?page=${page}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(res => res.json())
-            .then(res => {
-                document.getElementById('inventory-table').insertAdjacentHTML('beforeend', res.html);
-                if (!res.has_more) {
-                    document.getElementById('load-more').style.display = 'none';
-                }
-                page = res.next_page;
-                loading = false;
-            })
-            .catch(error => {
-                console.error('Load thêm thất bại:', error);
-                loading = false;
-            });
-    });
 </script>
