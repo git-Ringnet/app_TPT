@@ -91,7 +91,9 @@ Route::get('/filter-users', [UserController::class, 'filterData'])->name('filter
 Route::get('/filter-warehouse1', [WarehouseController::class, 'filterData'])->name('filter-warehouse');
 Route::get('/filter-warehouse', [WarehouseTransferController::class, 'filterData'])->name('filter-warehouseTranfer');
 Route::get('/filter-imports', [ImportsController::class, 'filterData'])->name('filter-imports');
+Route::get('/imports-export', [ImportsController::class, 'export'])->name('imports.export');
 Route::get('/filter-exports', [ExportsController::class, 'filterData'])->name('filter-exports');
+Route::get('/exports-export', [ExportsController::class, 'export'])->name('exports.export');
 Route::get('/filter-receivings', [ReceivingController::class, 'filterData'])->name('filter-receivings');
 Route::get('/filter-quotations', [QuotationController::class, 'filterData'])->name('filter-quotations');
 Route::get('/filter-returnforms', [ReturnFormController::class, 'filterData'])->name('filter-returnforms');

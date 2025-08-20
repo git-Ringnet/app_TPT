@@ -39,11 +39,45 @@ class ImportsController extends Controller
     public function index()
     {
         $title = "Phiếu nhập hàng";
-        $imports = $this->imports->getAllImports();
+        // Hỗ trợ phân trang và lọc qua query params để tìm kiếm giữa các trang
+        $imports = $this->imports->paginateForIndex(request()->all(), 25);
         // Chỉ lấy các cột cần thiết để giảm tải
         $users = User::select('id','name')->get();
         $providers = Providers::select('id','provider_name')->get();
         return view('expertise.import.index', compact('title', 'imports', 'users', 'providers'));
+    }
+
+    public function export(Request $request)
+    {
+        // Lấy toàn bộ theo filter hiện tại để export
+        $rows = $this->imports->getForExport($request->all());
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="phieu_nhap_hang.csv"',
+        ];
+
+        $callback = function () use ($rows) {
+            $file = fopen('php://output', 'w');
+            // BOM để Excel mở UTF-8 chuẩn
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($file, [
+                'Mã phiếu', 'Ngày lập phiếu', 'Nhà cung cấp', 'Kho', 'Người lập phiếu', 'Ghi chú',
+            ]);
+            foreach ($rows as $item) {
+                fputcsv($file, [
+                    $item->import_code,
+                    Carbon::parse($item->date_create)->format('d/m/Y'),
+                    $item->provider_name,
+                    optional($item->warehouse)->warehouse_name,
+                    $item->name,
+                    $item->note,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -194,7 +228,7 @@ class ImportsController extends Controller
             $productImports = ProductImport::where("import_id", $id)
                 ->get()->groupBy('product_id');
             $productAll = Product::all();
-            $data = $this->imports->getAllImports();
+            $data = $this->imports->getRecentImports();
             return view('expertise.import.edit', compact('title', 'import', 'users', 'providers', 'productAll', 'productImports', 'data'));
         } else {
             abort(404);
@@ -640,9 +674,13 @@ class ImportsController extends Controller
             $filters[] = ['value' => 'Ngày lập phiếu: từ ' . $date_start . ' đến ' . $date_end, 'name' => 'ngay-lap-phieu', 'icon' => 'date'];
         }
         if ($request->ajax()) {
-            $imports = $this->imports->getImportAjax($data);
+            // Trả về danh sách id để front-end ẩn/hiện phù hợp
+            $paginator = $this->imports->paginateForIndex($data, 25);
+            $ids = $paginator->getCollection()->map(function ($row) {
+                return ['id' => $row->id];
+            });
             return response()->json([
-                'data' => $imports,
+                'data' => $ids,
                 'filters' => $filters,
             ]);
         }

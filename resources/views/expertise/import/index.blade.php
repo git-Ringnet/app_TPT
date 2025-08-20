@@ -198,6 +198,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-12 p-0 m-0">
+                    <div class="d-flex justify-content-end px-2 py-2">
+                        {{ $imports->appends(request()->query())->links() }}
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -226,11 +231,28 @@
         if (!$(e.target).closest('li, input[type="checkbox"]').length) {
             $('#' + $(this).data('button-name') + '-options').hide();
         }
-        // Gọi hàm AJAX
-        var route = "{{ route('filter-imports') }}"; // Thay route phù hợp
-        var nametable = 'import'; // Thay tên bảng phù hợp
-        handleAjaxRequest(formData, route, nametable);
+        // Điều hướng kèm query để server phân trang/tìm kiếm trên tất cả trang
+        var routeIndex = "{{ route('imports.index') }}";
+        var queryString = $.param(formData);
+        window.location = routeIndex + '?' + queryString;
     });
-    exportTableToExcel("#exportBtn", "#example2", "phieu_nhap_hang.xlsx");
+    $('#exportBtn').on('click', function(e) {
+        e.preventDefault();
+        var formData = {
+            search: $('#search').val(),
+            ma: $('#ma-phieu').val(),
+            note: $('#ghi-chu').val(),
+            serial: $('#serial').val(),
+            product_name: $('#ten-san-pham').val(),
+            product_code: $('#ma-san-pham').val(),
+            date: retrieveDateData(this, 'ngay-lap-phieu'),
+            provider: getStatusData(this, 'nha-cung-cap'),
+            user: getStatusData(this, 'nguoi-lap-phieu'),
+            sort: ['id','DESC']
+        };
+        var exportRoute = "{{ route('imports.export') }}";
+        var queryString = $.param(formData);
+        window.open(exportRoute + '?' + queryString, '_blank');
+    });
 
 </script>

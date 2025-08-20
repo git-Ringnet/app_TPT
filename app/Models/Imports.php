@@ -54,7 +54,8 @@ class Imports extends Model
         if ($warehouse_id) {
             $imports = $imports->where('imports.warehouse_id', $warehouse_id);
         }
-        return $imports->get();
+        // Paginate to avoid loading the entire dataset into memory
+        return $imports->paginate(25);
     }
 
     public function addImport($data)
@@ -109,6 +110,20 @@ class Imports extends Model
 
         // Kết hợp thành mã mới
         return "{$prefix}{$formattedNumber}";
+    }
+    
+    public function getRecentImports(int $limit = 25)
+    {
+        $warehouse_id = GlobalHelper::getWarehouseId();
+        $imports = Imports::with(['warehouse:id,warehouse_name'])
+            ->leftJoin("providers", "providers.id", "imports.provider_id")
+            ->leftJoin("users", "users.id", "imports.user_id")
+            ->select("providers.provider_name", "users.name", "imports.*")
+            ->orderBy('id', 'desc');
+        if ($warehouse_id) {
+            $imports = $imports->where('imports.warehouse_id', $warehouse_id);
+        }
+        return $imports->limit($limit)->get();
     }
     public function getImportAjax($data = null)
     {
@@ -174,5 +189,125 @@ class Imports extends Model
         }
         // dd($imports->get());
         return $imports->get();
+    }
+
+    private function buildIndexQuery(array $data)
+    {
+        $warehouse_id = GlobalHelper::getWarehouseId();
+        $imports = Imports::with(['warehouse:id,warehouse_name'])
+            ->leftJoin('providers', 'providers.id', '=', 'imports.provider_id')
+            ->leftJoin('users', 'users.id', '=', 'imports.user_id')
+            ->select(
+                'imports.*',
+                'providers.provider_name as provider_name',
+                'users.name as name'
+            );
+
+        if ($warehouse_id) {
+            $imports->where('imports.warehouse_id', $warehouse_id);
+        }
+
+        // Text search across imports and existence in related tables without joining them
+        if (!empty($data['search'])) {
+            $search = $data['search'];
+            $imports->where(function ($query) use ($search) {
+                $query->where('imports.import_code', 'like', "%{$search}%")
+                    ->orWhere('imports.note', 'like', "%{$search}%")
+                    ->orWhereExists(function ($sub) use ($search) {
+                        $sub->from('product_import')
+                            ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'product_import.sn_id')
+                            ->whereColumn('product_import.import_id', 'imports.id')
+                            ->where('serial_numbers.serial_code', 'like', "%{$search}%");
+                    })
+                    ->orWhereExists(function ($sub) use ($search) {
+                        $sub->from('product_import')
+                            ->leftJoin('products', 'products.id', '=', 'product_import.product_id')
+                            ->whereColumn('product_import.import_id', 'imports.id')
+                            ->where('products.product_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereExists(function ($sub) use ($search) {
+                        $sub->from('product_import')
+                            ->leftJoin('products', 'products.id', '=', 'product_import.product_id')
+                            ->whereColumn('product_import.import_id', 'imports.id')
+                            ->where('products.product_code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Individual filters using EXISTS
+        if (!empty($data['ma'])) {
+            $imports->where('imports.import_code', 'like', "%{$data['ma']}%");
+        }
+        if (!empty($data['serial'])) {
+            $serial = $data['serial'];
+            $imports->whereExists(function ($sub) use ($serial) {
+                $sub->from('product_import')
+                    ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'product_import.sn_id')
+                    ->whereColumn('product_import.import_id', 'imports.id')
+                    ->where('serial_numbers.serial_code', 'like', "%{$serial}%");
+            });
+        }
+        if (!empty($data['product_name'])) {
+            $productName = $data['product_name'];
+            $imports->whereExists(function ($sub) use ($productName) {
+                $sub->from('product_import')
+                    ->leftJoin('products', 'products.id', '=', 'product_import.product_id')
+                    ->whereColumn('product_import.import_id', 'imports.id')
+                    ->where('products.product_name', 'like', "%{$productName}%");
+            });
+        }
+        if (!empty($data['product_code'])) {
+            $productCode = $data['product_code'];
+            $imports->whereExists(function ($sub) use ($productCode) {
+                $sub->from('product_import')
+                    ->leftJoin('products', 'products.id', '=', 'product_import.product_id')
+                    ->whereColumn('product_import.import_id', 'imports.id')
+                    ->where('products.product_code', 'like', "%{$productCode}%");
+            });
+        }
+        if (!empty($data['note'])) {
+            $imports->where('imports.note', 'like', "%{$data['note']}%");
+        }
+        if (!empty($data['date'][0]) && !empty($data['date'][1])) {
+            $dateStart = Carbon::parse($data['date'][0]);
+            $dateEnd = Carbon::parse($data['date'][1])->endOfDay();
+            $imports->whereBetween('imports.date_create', [$dateStart, $dateEnd]);
+        }
+        if (!empty($data['provider']) && is_array($data['provider'])) {
+            $imports->whereIn('imports.provider_id', $data['provider']);
+        }
+        if (!empty($data['user']) && is_array($data['user'])) {
+            $imports->whereIn('imports.user_id', $data['user']);
+        }
+
+        // Sorting mapping
+        if (!empty($data['sort'][0])) {
+            $sortBy = $data['sort'][0];
+            $sortDir = !empty($data['sort'][1]) ? $data['sort'][1] : 'DESC';
+            $sortMap = [
+                'import_code' => 'imports.import_code',
+                'date_create' => 'imports.date_create',
+                'provide_name' => 'providers.provider_name',
+                'warehouse_id' => 'imports.warehouse_id',
+                'username' => 'users.name',
+                'note' => 'imports.note',
+            ];
+            $column = $sortMap[$sortBy] ?? 'imports.id';
+            $imports->orderBy($column, $sortDir);
+        } else {
+            $imports->orderBy('imports.id', 'desc');
+        }
+
+        return $imports;
+    }
+
+    public function paginateForIndex(array $data, int $perPage = 50)
+    {
+        return $this->buildIndexQuery($data)->paginate($perPage);
+    }
+
+    public function getForExport(array $data)
+    {
+        return $this->buildIndexQuery($data)->get();
     }
 }

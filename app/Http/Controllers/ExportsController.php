@@ -33,14 +33,11 @@ class ExportsController extends Controller
     public function index()
     {
         $title = "Phiếu xuất hàng";
-        $warehouse_id = GlobalHelper::getWarehouseId();
-        $exports = Exports::with(['user', 'customer'])->orderBy('id', 'desc');
-        if ($warehouse_id) {
-            $exports = $exports->where('warehouse_id', $warehouse_id);
-        }
-        $exports = $exports->get();
-        $users = User::all();
-        $customers = Customers::all();
+        // Hỗ trợ phân trang và lọc qua query params để tìm kiếm giữa các trang
+        $exports = $this->exports->paginateForIndex(request()->all(), 25);
+        // Chỉ lấy các cột cần thiết để giảm tải
+        $users = User::select('id','name')->get();
+        $customers = Customers::select('id','customer_name')->get();
         return view('expertise.export.index', compact('title', 'exports', 'users', 'customers'));
     }
 
@@ -256,7 +253,8 @@ class ExportsController extends Controller
             $productExports = ProductExport::where("export_id", $id)
                 ->get()->groupBy('product_id');
             $productAll = Product::all();
-            $exports = Exports::with(['user', 'customer'])->orderBy('id', 'DESC')->get();
+            // Lấy danh sách gần đây, không phân trang để phục vụ view mini
+            $exports = $this->exports->getRecentExports(50);
             $productWarranty = ProductWarranties::all();
             return view('expertise.export.edit', compact('title', 'export', 'users', 'customers', 'productExports', 'productAll', 'exports', 'productWarranty'));
         } else {
@@ -558,12 +556,48 @@ class ExportsController extends Controller
             $filters[] = ['value' => 'Ngày lập phiếu: từ ' . $date_start . ' đến ' . $date_end, 'name' => 'ngay-lap-phieu', 'icon' => 'date'];
         }
         if ($request->ajax()) {
-            $exports = $this->exports->getExportAjax($data);
+            // Trả về danh sách id để front-end ẩn/hiện phù hợp
+            $paginator = $this->exports->paginateForIndex($data, 25);
+            $ids = $paginator->getCollection()->map(function ($row) {
+                return ['id' => $row->id];
+            });
             return response()->json([
-                'data' => $exports,
+                'data' => $ids,
                 'filters' => $filters,
             ]);
         }
         return false;
+    }
+
+    public function export(Request $request)
+    {
+        // Lấy toàn bộ theo filter hiện tại để export
+        $rows = $this->exports->getForExport($request->all());
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="phieu_xuat_hang.csv"',
+        ];
+
+        $callback = function () use ($rows) {
+            $file = fopen('php://output', 'w');
+            // BOM để Excel mở UTF-8 chuẩn
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($file, [
+                'Mã phiếu', 'Ngày lập phiếu', 'Khách hàng', 'Người lập phiếu', 'Ghi chú',
+            ]);
+            foreach ($rows as $item) {
+                fputcsv($file, [
+                    $item->export_code,
+                    Carbon::parse($item->date_create)->format('d/m/Y'),
+                    $item->customername,
+                    $item->username,
+                    $item->note,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

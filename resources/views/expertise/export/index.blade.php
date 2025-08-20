@@ -3,7 +3,16 @@
 <div class="content-wrapper m-0 min-height--none p-0">
     <div class="content-header-fixed px-1">
         <div class="content__header--inner">
-            <x-search-filter :keywords="request('keywords')" :filters="['Mã phiếu', 'Serial', 'Tên sản phẩm', 'Mã sản phẩm', 'Ngày lập phiếu', 'Khách hàng', 'Người lập phiếu', 'Ghi chú']">
+            <x-search-filter :keywords="request('keywords')" :filters="[
+                'Mã phiếu',
+                'Serial',
+                'Tên sản phẩm',
+                'Mã sản phẩm',
+                'Ngày lập phiếu',
+                'Khách hàng',
+                'Người lập phiếu',
+                'Ghi chú',
+            ]">
                 <x-filter-text name="ma-phieu" title="Mã phiếu" />
                 <x-filter-checkbox :dataa='$users' name="nguoi-lap-phieu" title="Người lập phiếu"
                     button="nguoi-lap-phieu" namedisplay="name" />
@@ -18,22 +27,22 @@
             <div class="d-flex content__heading--right">
                 <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
                 @unlessrole('Kế toán')
-                <div class="row m-0">
-                    <a href="{{ route('exports.create') }}" class="activity mr-3" data-name1="KH" data-des="Tạo mới">
-                        <button type="button" class="custom-btn mx-1 d-flex align-items-center h-100">
-                            <svg class="mr-1" width="12" height="12" viewBox="0 0 18 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 0C9.58186 -2.96028e-08 10.0536 0.471694 10.0536 1.05356L10.0536 16.9464C10.0536 17.5283 9.58186 18 9 18C8.41814 18 7.94644 17.5283 7.94644 16.9464V1.05356C7.94644 0.471694 8.41814 -2.96028e-08 9 0Z"
-                                    fill="white" />
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M18 9C18 9.58187 17.5283 10.0536 16.9464 10.0536H1.05356C0.471694 10.0536 -2.07219e-07 9.58187 0 9C-7.69672e-07 8.41814 0.471695 7.94644 1.05356 7.94644H16.9464C17.5283 7.94644 18 8.41814 18 9Z"
-                                    fill="white" />
-                            </svg>
-                            <p class="m-0 ml-1">Tạo mới</p>
-                        </button>
-                    </a>
-                </div>
+                    <div class="row m-0">
+                        <a href="{{ route('exports.create') }}" class="activity mr-3" data-name1="KH" data-des="Tạo mới">
+                            <button type="button" class="custom-btn mx-1 d-flex align-items-center h-100">
+                                <svg class="mr-1" width="12" height="12" viewBox="0 0 18 18" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M9 0C9.58186 -2.96028e-08 10.0536 0.471694 10.0536 1.05356L10.0536 16.9464C10.0536 17.5283 9.58186 18 9 18C8.41814 18 7.94644 17.5283 7.94644 16.9464V1.05356C7.94644 0.471694 8.41814 -2.96028e-08 9 0Z"
+                                        fill="white" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M18 9C18 9.58187 17.5283 10.0536 16.9464 10.0536H1.05356C0.471694 10.0536 -2.07219e-07 9.58187 0 9C-7.69672e-07 8.41814 0.471695 7.94644 1.05356 7.94644H16.9464C17.5283 7.94644 18 8.41814 18 9Z"
+                                        fill="white" />
+                                </svg>
+                                <p class="m-0 ml-1">Tạo mới</p>
+                            </button>
+                        </a>
+                    </div>
                 @endunlessrole
             </div>
         </div>
@@ -124,7 +133,8 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                                <span class="truncate-1line">{{ $item->customer->customer_name ?? ""}}</span>
+                                                <span
+                                                    class="truncate-1line">{{ $item->customer->customer_name ?? '' }}</span>
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">
@@ -134,7 +144,8 @@
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 note-text">
                                                 {{ $item->note }}
                                             </td>
-                                            <td class="position-absolute m-0 p-0 bg-hover-icon icon-center border-top-0">
+                                            <td
+                                                class="position-absolute m-0 p-0 bg-hover-icon icon-center border-top-0">
                                                 <div class="d-flex w-100">
                                                     <a href="#">
                                                         <div class="rounded">
@@ -182,6 +193,16 @@
         </section>
     </div>
 </div>
+<div class="col-12 p-0 m-0">
+    <div class="d-flex justify-content-end px-2 py-2">
+        {{ $exports->appends(request()->query())->links() }}
+    </div>
+</div>
+</div>
+</section>
+</div>
+</div>
+
 <script src="{{ asset('js/filter.js') }}"></script>
 <script src="{{ asset('js/exports_excel.js') }}"></script>
 <script>
@@ -205,10 +226,27 @@
         if (!$(e.target).closest('li, input[type="checkbox"]').length) {
             $('#' + $(this).data('button-name') + '-options').hide();
         }
-        // Gọi hàm AJAX
-        var route = "{{ route('filter-exports') }}"; // Thay route phù hợp
-        var nametable = 'export'; // Thay tên bảng phù hợp
-        handleAjaxRequest(formData, route, nametable);
+        // Điều hướng kèm query để server phân trang/tìm kiếm trên tất cả trang
+        var routeIndex = "{{ route('exports.index') }}";
+        var queryString = $.param(formData);
+        window.location = routeIndex + '?' + queryString;
     });
-    exportTableToExcel("#exportBtn", "#example2", "phieu_xuat_hang.xlsx");
+    $('#exportBtn').on('click', function(e) {
+        e.preventDefault();
+        var formData = {
+            search: $('#search').val(),
+            ma: $('#ma-phieu').val(),
+            note: $('#ghi-chu').val(),
+            serial: $('#serial').val(),
+            product_name: $('#ten-san-pham').val(),
+            product_code: $('#ma-san-pham').val(),
+            date: retrieveDateData(this, 'ngay-lap-phieu'),
+            customer: getStatusData(this, 'khach-hang'),
+            user: getStatusData(this, 'nguoi-lap-phieu'),
+            sort: ['id', 'DESC']
+        };
+        var exportRoute = "{{ route('exports.export') }}";
+        var queryString = $.param(formData);
+        window.open(exportRoute + '?' + queryString, '_blank');
+    });
 </script>
