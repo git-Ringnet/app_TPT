@@ -137,7 +137,7 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                                {{ $item->provider_name }}
+                                                <span class="truncate-1line" title="{{ $item->provider_name }}">{{ $item->provider_name }}</span>
                                             </td>
                                             @can('admin')
                                                 <td

@@ -67,6 +67,7 @@ Route::get('/checkSNImportBorrow', [SerialNumberController::class, 'checkSNImpor
 Route::post('/check-serial', [SerialNumberController::class, 'checkSerial']);
 Route::get('/check-serial-replace', [SerialNumberController::class, 'checkSNReplace'])->name('checkSNReplace');
 Route::post('/check-serial-numbers', [SerialNumberController::class, 'checkSerialNumbers'])->name('check.serial.numbers');
+Route::post('/check-serial-batch', [SerialNumberController::class, 'checkSNBatch'])->name('checkSNBatch');
 
 Route::post('/check-serials', [SerialNumberController::class, 'checkSerials'])->name('check.serials');
 Route::post('/check-all-warranty', [SerialNumberController::class, 'checkAllWarranty'])->name('check.warranty');

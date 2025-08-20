@@ -572,4 +572,198 @@ class SerialNumberController extends Controller
         
         return response()->json(['status' => 'error', 'message' => 'Serial không thuộc sản phẩm này.']);
     }
+
+    /**
+     * Kiểm tra batch serial numbers thay vì từng cái một
+     */
+    public function checkSNBatch(Request $request)
+    {
+        try {
+            $nameModal = $request->input('nameModal');
+            $warehouse_id = $request->input('warehouse_id');
+            $import_id = $request->input('import_id');
+            $serials = $request->input('serials', []);
+            $products = $request->input('products', []);
+            
+            $errors = [];
+            
+            // Gom nhóm theo nameModal để xử lý hiệu quả
+            if ($nameModal === "CXH" || $nameModal === "XH") {
+                // Kiểm tra phiếu xuất hàng
+                $errors = $this->checkExportBatch($serials, $products, $warehouse_id, $import_id, $nameModal);
+            } elseif ($nameModal === "PCK" || $nameModal === "CPCK") {
+                // Kiểm tra phiếu chuyển kho
+                $errors = $this->checkTransferBatch($serials, $warehouse_id);
+            }
+            
+            return response()->json([
+                'success' => empty($errors),
+                'errors' => $errors
+            ]);
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Lỗi khi kiểm tra batch serial: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'errors' => ['Có lỗi xảy ra khi kiểm tra dữ liệu']
+            ], 500);
+        }
+    }
+    
+    /**
+     * Kiểm tra batch cho phiếu xuất hàng (XH, CXH) giống logic checkSN
+     */
+    private function checkExportBatch($serials, $products, $warehouse_id, $import_id, $nameModal)
+    {
+        $errors = [];
+        foreach ($products as $productData) {
+            $productId = $productData['product_id'];
+            $qty = intval($productData['qty']);
+            $serial = $productData['serial'];
+
+            if ($serial) {
+                // Có serial
+                $sn = SerialNumber::where('serial_code', $serial)
+                    ->where('product_id', $productId)
+                    ->first();
+                if (!$sn) {
+                    $errors[] = "Serial {$serial} không tồn tại";
+                    continue;
+                }
+                $inventoryQty = InventoryLookup::where('product_id', $productId)
+                    ->where('sn_id', $sn->id)
+                    ->sum('remaining_quantity');
+                if ($nameModal == "CXH") {
+                    $exportedQty = ProductExport::where('product_id', $productId)
+                        ->where('sn_id', $sn->id)
+                        ->where('export_id', $import_id)
+                        ->sum('quantity');
+                    $availableQty = $inventoryQty + $exportedQty;
+                    $requiredQty = max(1, $qty);
+                    $enough = $availableQty >= $requiredQty;
+                    if (!$enough) $errors[] = "S/N {$serial} không có sẵn để xuất (còn: {$availableQty}, cần: {$requiredQty})";
+                } else { // XH
+                    $availableQty = $inventoryQty;
+                    $enough = ($sn->status == 1 && $availableQty >= $qty);
+                    if (!$enough) $errors[] = "S/N {$serial} vượt quá số lượng tồn kho (còn: {$availableQty}, cần: {$qty})";
+                }
+            } else {
+                // Không serial
+                $inventoryQty = InventoryLookup::where('product_id', $productId)
+                    ->where('sn_id', 0)
+                    ->sum('remaining_quantity');
+                $availableQty = $inventoryQty;
+                if ($nameModal == "CXH") {
+                    $exportedQty = ProductExport::where('export_id', $import_id)
+                        ->where('product_id', $productId)
+                        ->where('sn_id', 0)
+                        ->sum('quantity');
+                    $availableQty += $exportedQty;
+                }
+                if ($availableQty < $qty) {
+                    $errors[] = "Mã hàng {$productData['product_code']} vượt quá số lượng tồn kho (hiện còn: {$availableQty}, cần: {$qty})";
+                }
+            }
+        }
+        return $errors;
+    }
+    
+    /**
+     * Kiểm tra batch cho phiếu chuyển kho
+     */
+    private function checkTransferBatch($serials, $warehouse_id)
+    {
+        $errors = [];
+        
+        if (empty($serials)) {
+            return $errors;
+        }
+        
+        $serialCodes = collect($serials)->pluck('serial')->filter()->toArray();
+        $serialBorrowCodes = collect($serials)->pluck('serial_borrow')->filter()->toArray();
+        
+        if (!empty($serialCodes)) {
+            if ($warehouse_id == 1) {
+                // Kho hàng mới - kiểm tra serial có tồn tại và status = 1
+                $existingSerials = SerialNumber::whereIn('serial_code', $serialCodes)
+                    ->where('status', 1)
+                    ->select('serial_code')
+                    ->get()
+                    ->pluck('serial_code')
+                    ->toArray();
+                
+                foreach ($serialCodes as $serialCode) {
+                    if (!in_array($serialCode, $existingSerials)) {
+                        $errors[] = "S/N {$serialCode} không tồn tại trong kho hàng mới hoặc không có sẵn";
+                    }
+                }
+            } else {
+                // Kho bảo hành
+                $existingSerials = SerialNumber::whereIn('serial_code', $serialCodes)
+                    ->select('serial_code')
+                    ->get()
+                    ->pluck('serial_code')
+                    ->toArray();
+                
+                $existingBorrowSerials = SerialNumber::whereIn('serial_code', $serialBorrowCodes)
+                    ->where('status', 5)
+                    ->select('serial_code')
+                    ->get()
+                    ->pluck('serial_code')
+                    ->toArray();
+                
+                foreach ($serialCodes as $serialCode) {
+                    if (!in_array($serialCode, $existingSerials)) {
+                        $errors[] = "S/N {$serialCode} mới không tồn tại";
+                    }
+                }
+                
+                foreach ($serialBorrowCodes as $borrowCode) {
+                    if (!in_array($borrowCode, $existingBorrowSerials)) {
+                        $errors[] = "S/N {$borrowCode} mượn không hợp lệ hoặc không có sẵn";
+                    }
+                }
+            }
+        }
+        
+        return $errors;
+    }
+
+    /**
+     * Test method để kiểm tra logic tính toán tồn kho
+     */
+    public function testInventoryCalculation(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $serial = $request->input('serial');
+        $warehouseId = $request->input('warehouse_id', 1);
+        
+        // Lấy dữ liệu tồn kho
+        $inventoryData = InventoryLookup::where('product_id', $productId)
+            ->where('warehouse_id', $warehouseId)
+            ->select('product_id', 'sn_id', 'remaining_quantity')
+            ->get();
+        
+        $result = [
+            'product_id' => $productId,
+            'serial' => $serial,
+            'warehouse_id' => $warehouseId,
+            'total_inventory' => $inventoryData->sum('remaining_quantity'),
+            'inventory_details' => $inventoryData->toArray()
+        ];
+        
+        if ($serial) {
+            $sn = SerialNumber::where('serial_code', $serial)->first();
+            if ($sn) {
+                $serialInventory = $inventoryData->where('sn_id', $sn->id)->sum('remaining_quantity');
+                $result['serial_inventory'] = $serialInventory;
+                $result['sn_id'] = $sn->id;
+            }
+        } else {
+            $nonSerialInventory = $inventoryData->where('sn_id', 0)->sum('remaining_quantity');
+            $result['non_serial_inventory'] = $nonSerialInventory;
+        }
+        
+        return response()->json($result);
+    }
 }

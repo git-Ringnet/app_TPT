@@ -40,8 +40,9 @@ class ImportsController extends Controller
     {
         $title = "Phiếu nhập hàng";
         $imports = $this->imports->getAllImports();
-        $users = User::get();
-        $providers = Providers::get();
+        // Chỉ lấy các cột cần thiết để giảm tải
+        $users = User::select('id','name')->get();
+        $providers = Providers::select('id','provider_name')->get();
         return view('expertise.import.index', compact('title', 'imports', 'users', 'providers'));
     }
 
@@ -65,31 +66,9 @@ class ImportsController extends Controller
      */
     public function store(Request $request)
     {
-        // $validatedData = $request->validate(
-        //     [
-        //         'import_code' => 'required|string|max:255|unique:imports,import_code',
-        //         'user_id'     => 'required|integer|exists:users,id',
-        //         'phone'       => 'nullable|string|max:15',
-        //         'date_create' => 'required|date',
-        //         'provider_id' => 'required|integer|exists:providers,id',
-        //         'address'     => 'nullable|string|max:255',
-        //         'note'        => 'nullable|string|max:500',
-        //     ],
-        //     [
-        //         'import_code.required' => 'Mã nhập kho là bắt buộc.',
-        //         'import_code.unique'   => 'Mã nhập kho đã tồn tại.',
-        //         'user_id.required'     => 'Người nhập là bắt buộc.',
-        //         'date_create.required' => 'Ngày tạo là bắt buộc.',
-        //         'provider_id.required'     => 'Nhà cung cấp là bắt buộc.',
-        //     ]
-        // );
-
-        // $import = Imports::create($validatedData);
-        // dd($request->all());
-
         // Phân biệt kho hàng mới và bảo hành qua role
-        $roleUser = Auth::user()->roles()->first()->id;
-        $warehouse_id = $roleUser == 2 ? 1 : ($roleUser == 3 ? 2 : null);
+        $roleUser = Auth::user()->roles->first()->id ?? 1;
+        $warehouse_id = $roleUser == 2 ? 1 : ($roleUser == 3 ? 2 : 1);
 
         $import_id = $this->imports->addImport($request->all());
         $dataTest = $request->input('data-test');
@@ -251,7 +230,8 @@ class ImportsController extends Controller
         $import->update($validatedData);
 
         // Cập nhật import_date của InventoryLookup
-        InventoryLookup::whereIn('sn_id', ProductImport::where('import_id', $id)->pluck('sn_id'))
+        InventoryLookup::where('import_id', $id)
+            ->whereIn('sn_id', ProductImport::where('import_id', $id)->pluck('sn_id'))
             ->update(['import_date' => $request->date_create, 'provider_id' => $request->provider_id]);
 
         // Lấy dữ liệu từ form gửi lên
@@ -373,10 +353,48 @@ class ImportsController extends Controller
             ->delete();
 
         if ($removedSnIds->isNotEmpty()) {
-            SerialNumber::whereIn('id', $removedSnIds)->delete();
-            $deletedInventoryLookupIds = InventoryLookup::whereIn('sn_id', $removedSnIds)->pluck('id')->toArray();
-            InventoryLookup::whereIn('sn_id', $removedSnIds)->delete();
-            Notification::whereIn('data->inventoryLookup_id', $deletedInventoryLookupIds)->delete();
+            // Luôn xóa InventoryLookup thuộc phiếu hiện tại cho các sn đã bị gỡ khỏi form
+            $removedSnIdsNonZero = $removedSnIds->filter(function ($snId) {
+                return !empty($snId) && (int) $snId !== 0;
+            })->unique()->values();
+
+            if ($removedSnIdsNonZero->isNotEmpty()) {
+                $lookupIdsToDelete = InventoryLookup::where('import_id', $id)
+                    ->whereIn('sn_id', $removedSnIdsNonZero->toArray())
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($lookupIdsToDelete)) {
+                    Notification::whereIn('data->inventoryLookup_id', $lookupIdsToDelete)->delete();
+                    InventoryHistory::whereIn('inventory_lookup_id', $lookupIdsToDelete)->delete();
+                    InventoryLookup::whereIn('id', $lookupIdsToDelete)->delete();
+                }
+            }
+
+            // Không xóa các serial vẫn còn được tham chiếu ở phiếu nhập khác
+            $snIdsUsedElsewhere = ProductImport::whereIn('sn_id', $removedSnIds->toArray())
+                ->where('import_id', '!=', $id)
+                ->pluck('sn_id')
+                ->unique()
+                ->toArray();
+
+            $snIdsToMaybeDelete = array_diff($removedSnIds->toArray(), $snIdsUsedElsewhere);
+
+            // Không xóa các serial đã được xuất hàng
+            if (!empty($snIdsToMaybeDelete)) {
+                $snIdsWithExports = ProductExport::whereIn('sn_id', $snIdsToMaybeDelete)
+                    ->pluck('sn_id')
+                    ->unique()
+                    ->toArray();
+                $snIdsSafeToDelete = array_diff($snIdsToMaybeDelete, $snIdsWithExports);
+            } else {
+                $snIdsSafeToDelete = [];
+            }
+
+            if (!empty($snIdsSafeToDelete)) {
+                // Sau cùng xóa SerialNumber an toàn
+                SerialNumber::whereIn('id', $snIdsSafeToDelete)->delete();
+            }
         }
 
         return redirect()->route('imports.index')->with('msg', 'Cập nhật thành công phiếu nhập hàng!');
@@ -416,11 +434,39 @@ class ImportsController extends Controller
             $inventoryLookup->delete();
         }
 
-        // Xóa các serial (nếu có)
-        SerialNumber::whereIn('id', $productImports->pluck('sn_id')->filter()->toArray())->delete();
+        // Xác định các serial thuộc phiếu nhập này
+        $snIdsInImport = $productImports->pluck('sn_id')->filter()->unique()->values()->toArray();
 
-        // Xóa chi tiết nhập và phiếu nhập
+        // Tìm các serial vẫn còn được tham chiếu ở phiếu nhập khác
+        $snIdsUsedElsewhere = ProductImport::whereIn('sn_id', $snIdsInImport)
+            ->where('import_id', '!=', $id)
+            ->pluck('sn_id')
+            ->unique()
+            ->toArray();
+
+        // Chỉ giữ lại các serial không còn được tham chiếu ở nơi khác
+        $snIdsToMaybeDelete = array_diff($snIdsInImport, $snIdsUsedElsewhere);
+
+        // An toàn bổ sung: không xóa serial nếu còn xuất hàng tham chiếu
+        if (!empty($snIdsToMaybeDelete)) {
+            $snIdsWithExports = ProductExport::whereIn('sn_id', $snIdsToMaybeDelete)
+                ->pluck('sn_id')
+                ->unique()
+                ->toArray();
+            $snIdsSafeToDelete = array_diff($snIdsToMaybeDelete, $snIdsWithExports);
+        } else {
+            $snIdsSafeToDelete = [];
+        }
+
+        // Xóa chi tiết nhập trước
         ProductImport::where('import_id', $id)->delete();
+
+        // Sau đó xóa các serial an toàn (nếu có)
+        if (!empty($snIdsSafeToDelete)) {
+            SerialNumber::whereIn('id', $snIdsSafeToDelete)->delete();
+        }
+
+        // Cuối cùng xóa phiếu nhập
         $import->delete();
 
         return redirect()->route('imports.index')->with('msg', 'Xóa thành công phiếu nhập hàng!');
