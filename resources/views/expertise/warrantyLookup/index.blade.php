@@ -199,7 +199,7 @@
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
-                                                <span class="truncate-1line">{{ $item->customer->customer_name ?? '' }}</span>
+                                                <span class="truncate-1line" title="{{ $item->customer->customer_name ?? '' }}">{{ $item->customer->customer_name ?? '' }}</span>
                                             </td>
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">

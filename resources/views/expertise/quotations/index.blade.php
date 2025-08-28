@@ -150,7 +150,7 @@
                                                     href="{{ route('quotations.edit', $item->id) }}">{{ $item->quotation_code }}</a>
                                             </td>
                                             <td
-                                                class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180">
+                                                class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180" title="{{ $item->customer->customer_name }}">
                                                 {{ $item->customer->customer_name }}
                                             </td>
                                             <td

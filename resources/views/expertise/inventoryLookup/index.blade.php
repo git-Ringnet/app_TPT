@@ -239,7 +239,7 @@
                                             <td
                                                 class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">
                                                 @if ($item->provider)
-                                                <span class="truncate-1line">{{ $item->provider->provider_name }}</span>
+                                                <span class="truncate-1line" title="{{ $item->provider->provider_name }}">{{ $item->provider->provider_name }}</span>
                                                 @endif
                                             </td>
                                             <td
