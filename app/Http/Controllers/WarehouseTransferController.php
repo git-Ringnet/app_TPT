@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductImport;
 use App\Models\SerialNumber;
 use App\Models\Warehouse;
 use App\Models\WarehouseTransfer;
 use App\Models\WarehouseTransferItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WarehouseTransferController extends Controller
 {
@@ -107,7 +109,21 @@ class WarehouseTransferController extends Controller
                     $item->delete();
                 } else {
                     $serial = SerialNumber::where('id', $item->serial_number_id)->first();
-                    $serial->delete();
+                    // Chỉ xóa Serial nếu KHÔNG tồn tại trong ProductImport
+                    $existsInImport = ProductImport::where('sn_id', $serial->id)->exists();
+                    if (!$existsInImport) {
+                        $serial->delete();
+                    } else {
+                        // Nếu đã có trong import, khôi phục về kho nguồn và trạng thái mượn
+                        $serial->status = 1;
+                        $serial->warehouse_id = $warehouseTransfer->from_warehouse_id;
+                        $serial->save();
+
+                        //Cập nhật tra cứu tồn kho
+                        DB::table('inventory_lookup')
+                            ->where('sn_id', $serial->id)
+                            ->update(['warehouse_id' => $warehouseTransfer->from_warehouse_id]);
+                    }
                     $borrow = SerialNumber::where('id', $item->sn_id_borrow)->first();
                     $borrow->status = 5;
                     $borrow->warehouse_id = $warehouseTransfer->from_warehouse_id;
