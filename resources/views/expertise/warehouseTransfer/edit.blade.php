@@ -21,7 +21,7 @@
                                 <p class="m-0 p-0 text-dark">Hủy</p>
                             </button>
                         </a>
-                        @unlessrole('Kế toán')
+                        {{-- @unlessrole('Kế toán')
                         <button type="submit" class="custom-btn d-flex align-items-center h-100 mx-1 mr-4"
                             id="btn-get-unique-products">
                             <svg class="mx-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -32,7 +32,7 @@
                             </svg>
                             <p class="m-0 p-0">Xác nhận</p>
                         </button>
-                        @endunlessrole
+                        @endunlessrole --}}
                     </div>
                 </div>
             </div>
