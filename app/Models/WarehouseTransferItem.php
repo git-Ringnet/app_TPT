@@ -37,28 +37,45 @@ class WarehouseTransferItem extends Model
             $sn = null;
 
             if ($data['from_warehouse_id'] == 2) {
-                // Nếu chuyển từ kho bảo hành về kho mới => Tạo Serial mới
-                $sn = SerialNumber::create([
-                    'serial_code' => $trimmedSerial,
-                    'product_id' => $serial['product_id'],
-                    'note' => $serial['note_seri'],
-                    'warehouse_id' => $data['to_warehouse_id'],
-                ]);
-                //Tra cứu tồn kho
-                InventoryLookup::create([
-                    'product_id' => $serial['product_id'],
-                    'sn_id' => $sn->id,
-                    'provider_id' => 0,
-                    'import_date' => $data['transfer_date'],
-                    'storage_duration' => 0,
-                    'status' => 0,
-                    'remaining_quantity' => 1,
-                ]);
-                $snBr = SerialNumber::where("serial_code", $serial['serialBorrow'])->first();
-                if ($snBr) {
-                    $snBr->update([
-                        'status' => 6, // Đánh dấu "Đã đổi cho khách hàng"
+                // Nếu serial đã tồn tại trong DB và đang ở kho Bảo hành (2) -> chỉ cập nhật kho nhận
+                $existingSerial = SerialNumber::where('serial_code', $trimmedSerial)
+                    ->where('product_id', $serial['product_id'])
+                    ->first();
+
+                if ($existingSerial) {
+                    if ((int)$existingSerial->warehouse_id !== 2) {
+                        return response()->json([
+                            'error' => 'Serial đã tồn tại nhưng không nằm trong kho Bảo hành'], 400);
+                    }
+
+                    $existingSerial->update([
+                        'warehouse_id' => $data['to_warehouse_id'],
                     ]);
+                    $sn = $existingSerial;
+                } else {
+                    // Serial chưa tồn tại -> tạo mới ở kho nhận
+                    $sn = SerialNumber::create([
+                        'serial_code' => $trimmedSerial,
+                        'product_id' => $serial['product_id'],
+                        'note' => $serial['note_seri'],
+                        'warehouse_id' => $data['to_warehouse_id'],
+                    ]);
+                    //Tra cứu tồn kho cho serial mới
+                    InventoryLookup::create([
+                        'product_id' => $serial['product_id'],
+                        'sn_id' => $sn->id,
+                        'provider_id' => 0,
+                        'import_date' => $data['transfer_date'],
+                        'storage_duration' => 0,
+                        'status' => 0,
+                        'remaining_quantity' => 1,
+                    ]);
+                }
+
+                // Nếu có serialBorrow -> cập nhật trạng thái sang 6 (đã đổi cho khách hàng)
+                $snBr = isset($serial['serialBorrow']) ? SerialNumber::where('serial_code', trim($serial['serialBorrow']))->first() : null;
+                if ($snBr) {
+                    $snBr->update(['status' => 6]);
                 }
             } else {
                 // Nếu chuyển từ kho mới sang kho bảo hành => Cập nhật Serial cũ

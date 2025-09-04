@@ -95,8 +95,9 @@ class SerialNumberController extends Controller
             }
             if ($request->warehouse_id == 2) {
                 $serial_borrow = $request->input('serial_borrow');
-                $existsSerial = SerialNumber::where('serial_code', $serial)
-                    ->doesntExist();
+                // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2)
+                $serialRecord = SerialNumber::where('serial_code', $serial)->first();
+                $existsSerial = !$serialRecord || ((int)$serialRecord->warehouse_id === 2);
 
                 $existsSerialBorrow = SerialNumber::where('serial_code', $serial_borrow)
                     ->where('status', 5)
@@ -179,14 +180,12 @@ class SerialNumberController extends Controller
                     return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
                 }
             } else if ($request->warehouse == 2) {
-                // Kiểm tra trong bảng serial_numbers
-                $exists = SerialNumber::where('serial_code', $serialNumber)
-                    ->exists();
-                if ($exists) {
-                    return response()->json(['status' => 'error', 'message' => 'Số serial không hợp lệ.']);
-                } else {
+                // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2)
+                $serialRecord = SerialNumber::where('serial_code', $serialNumber)->first();
+                if (!$serialRecord || ((int)$serialRecord->warehouse_id === 2)) {
                     return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
                 }
+                return response()->json(['status' => 'error', 'message' => 'Số serial tồn tại nhưng không nằm trong kho Bảo hành.']);
             }
         }
         if ($request->nameModal == "CPCK") {
@@ -698,28 +697,28 @@ class SerialNumberController extends Controller
                     }
                 }
             } else {
-                // Kho bảo hành
-                $existingSerials = SerialNumber::whereIn('serial_code', $serialCodes)
-                    ->select('serial_code')
+                // Kho bảo hành: Serial hợp lệ nếu không tồn tại hoặc tồn tại ở kho bảo hành (2)
+                $serialRecords = SerialNumber::whereIn('serial_code', $serialCodes)
+                    ->select('serial_code', 'warehouse_id')
                     ->get()
-                    ->pluck('serial_code')
-                    ->toArray();
-                
-                $existingBorrowSerials = SerialNumber::whereIn('serial_code', $serialBorrowCodes)
+                    ->keyBy('serial_code');
+
+                $borrowSerialRecords = SerialNumber::whereIn('serial_code', $serialBorrowCodes)
                     ->where('status', 5)
                     ->select('serial_code')
                     ->get()
                     ->pluck('serial_code')
                     ->toArray();
-                
+
                 foreach ($serialCodes as $serialCode) {
-                    if (!in_array($serialCode, $existingSerials)) {
-                        $errors[] = "S/N {$serialCode} mới không tồn tại";
+                    $record = $serialRecords->get($serialCode);
+                    if ($record && (int)$record->warehouse_id !== 2) {
+                        $errors[] = "S/N {$serialCode} tồn tại nhưng không nằm trong kho Bảo hành";
                     }
                 }
-                
+
                 foreach ($serialBorrowCodes as $borrowCode) {
-                    if (!in_array($borrowCode, $existingBorrowSerials)) {
+                    if (!in_array($borrowCode, $borrowSerialRecords)) {
                         $errors[] = "S/N {$borrowCode} mượn không hợp lệ hoặc không có sẵn";
                     }
                 }

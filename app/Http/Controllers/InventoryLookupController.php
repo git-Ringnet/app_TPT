@@ -25,6 +25,7 @@ class InventoryLookupController extends Controller
     {
         $title = "Tra cứu tồn kho";
         $warehouse_id = GlobalHelper::getWarehouseId();
+
         // Lấy danh sách serial (sn_id != 0)
         $withSerial = InventoryLookup::with(['product', 'serialNumber', 'provider'])
             ->whereHas('serialNumber', function ($q) {
@@ -38,7 +39,7 @@ class InventoryLookupController extends Controller
             ->groupBy('product_id', 'provider_id', 'storage_duration', 'warehouse_id');
 
         // Áp điều kiện kho nếu cần
-        if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho']) && !Auth::user()->id == 9) {
+        if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho'])) {
             if ($warehouse_id) {
                 $withSerial = $withSerial->whereHas('serialNumber', function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
