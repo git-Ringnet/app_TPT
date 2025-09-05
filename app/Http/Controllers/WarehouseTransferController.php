@@ -94,25 +94,43 @@ class WarehouseTransferController extends Controller
                 $uniqueProductsArray = json_decode($data['data-test'], true);
                 if (is_array($uniqueProductsArray)) {
                     foreach ($uniqueProductsArray as $serial) {
-                        if (isset($serial['product_id']) && isset($serial['serial'])) {
+                        if (isset($serial['product_id'])) {
                             $product = Product::find($serial['product_id']);
                             if ($product && $product->product_code) {
                                 $productCode = $product->product_code;
                                 if (!isset($productData[$productCode])) {
                                     $productData[$productCode] = [];
                                 }
-                                $productData[$productCode][] = trim($serial['serial']);
+                                
+                                if ($data['from_warehouse_id'] == 2) {
+                                    // Trả bảo hành: hiển thị serial trả -> serial mượn
+                                    $serialReturn = isset($serial['serial']) ? trim($serial['serial']) : '';
+                                    $serialBorrow = isset($serial['serialBorrow']) ? trim($serial['serialBorrow']) : '';
+                                    if ($serialReturn && $serialBorrow) {
+                                        $productData[$productCode][] = "{$serialReturn} -> {$serialBorrow}";
+                                    }
+                                } else {
+                                    // Mượn: hiển thị serial trả
+                                    $serialReturn = isset($serial['serial']) ? trim($serial['serial']) : '';
+                                    if ($serialReturn) {
+                                        $productData[$productCode][] = $serialReturn;
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
             
-            // Tạo chuỗi note với format: MƯỢN/TRẢ BẢO HÀNH [product_code] ([serial1, serial2, ...])
+            // Tạo chuỗi note với format khác nhau cho từng loại
             $noteParts = [];
             foreach ($productData as $productCode => $serials) {
                 $serialsStr = implode(', ', array_unique($serials));
-                $noteParts[] = "{$productCode} ({$serialsStr})";
+                if ($data['from_warehouse_id'] == 2) {
+                    $noteParts[] = "{$productCode} ({$serialsStr})";
+                } else {
+                    $noteParts[] = "{$productCode} ({$serialsStr})";
+                }
             }
             $noteContent = implode(', ', $noteParts);
             
