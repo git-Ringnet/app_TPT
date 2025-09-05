@@ -90,13 +90,16 @@ class SerialNumberController extends Controller
         if ($request->nameModal == "PCK") {
             if ($request->warehouse_id == 1) {
                 $exists = SerialNumber::where('serial_code', $serial)
+                    ->where('product_id', $productId)
                     ->where('status', 1)
                     ->exists();
             }
             if ($request->warehouse_id == 2) {
                 $serial_borrow = $request->input('serial_borrow');
-                // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2)
-                $serialRecord = SerialNumber::where('serial_code', $serial)->first();
+                // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2) và đúng product_id
+                $serialRecord = SerialNumber::where('serial_code', $serial)
+                    ->where('product_id', $productId)
+                    ->first();
                 $existsSerial = !$serialRecord || ((int)$serialRecord->warehouse_id === 2);
 
                 $existsSerialBorrow = SerialNumber::where('serial_code', $serial_borrow)
@@ -172,6 +175,7 @@ class SerialNumberController extends Controller
             if ($request->warehouse == 1) {
                 // Kiểm tra trong bảng serial_numbers
                 $exists = SerialNumber::where('serial_code', $serialNumber)
+                    ->where('product_id', $productId)
                     ->where('status', 1)
                     ->exists();
                 if (!$exists) {
@@ -180,8 +184,10 @@ class SerialNumberController extends Controller
                     return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
                 }
             } else if ($request->warehouse == 2) {
-                // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2)
-                $serialRecord = SerialNumber::where('serial_code', $serialNumber)->first();
+                // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2) và đúng product_id
+                $serialRecord = SerialNumber::where('serial_code', $serialNumber)
+                    ->where('product_id', $productId)
+                    ->first();
                 if (!$serialRecord || ((int)$serialRecord->warehouse_id === 2)) {
                     return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
                 }
@@ -590,7 +596,7 @@ class SerialNumberController extends Controller
             if ($nameModal === "CXH" || $nameModal === "XH") {
                 // Kiểm tra phiếu xuất hàng
                 $errors = $this->checkExportBatch($serials, $products, $warehouse_id, $import_id, $nameModal);
-            } elseif ($nameModal === "PCK" || $nameModal === "CPCK") {
+            } elseif ($nameModal === "PCK") {
                 // Kiểm tra phiếu chuyển kho
                 $errors = $this->checkTransferBatch($serials, $warehouse_id);
             }
@@ -682,24 +688,36 @@ class SerialNumberController extends Controller
         $serialBorrowCodes = collect($serials)->pluck('serial_borrow')->filter()->toArray();
         
         if (!empty($serialCodes)) {
+            // Lấy thông tin product_id từ serials data
+            $serialProductMap = [];
+            foreach ($serials as $serialData) {
+                if (isset($serialData['serial']) && isset($serialData['product_id'])) {
+                    $serialProductMap[trim($serialData['serial'])] = $serialData['product_id'];
+                }
+            }
+
             if ($warehouse_id == 1) {
-                // Kho hàng mới - kiểm tra serial có tồn tại và status = 1
+                // Kho hàng mới - kiểm tra serial có tồn tại, status = 1 và đúng product_id
                 $existingSerials = SerialNumber::whereIn('serial_code', $serialCodes)
                     ->where('status', 1)
-                    ->select('serial_code')
+                    ->select('serial_code', 'product_id')
                     ->get()
-                    ->pluck('serial_code')
-                    ->toArray();
+                    ->keyBy('serial_code');
                 
                 foreach ($serialCodes as $serialCode) {
-                    if (!in_array($serialCode, $existingSerials)) {
+                    $record = $existingSerials->get($serialCode);
+                    $expectedProductId = $serialProductMap[$serialCode] ?? null;
+                    
+                    if (!$record) {
                         $errors[] = "S/N {$serialCode} không tồn tại trong kho hàng mới hoặc không có sẵn";
+                    } elseif ($expectedProductId && (int)$record->product_id !== (int)$expectedProductId) {
+                        $errors[] = "S/N {$serialCode} không thuộc sản phẩm này";
                     }
                 }
             } else {
-                // Kho bảo hành: Serial hợp lệ nếu không tồn tại hoặc tồn tại ở kho bảo hành (2)
+                // Kho bảo hành: Serial hợp lệ nếu không tồn tại hoặc tồn tại ở kho bảo hành (2) và đúng product_id
                 $serialRecords = SerialNumber::whereIn('serial_code', $serialCodes)
-                    ->select('serial_code', 'warehouse_id')
+                    ->select('serial_code', 'warehouse_id', 'product_id')
                     ->get()
                     ->keyBy('serial_code');
 
@@ -712,8 +730,14 @@ class SerialNumberController extends Controller
 
                 foreach ($serialCodes as $serialCode) {
                     $record = $serialRecords->get($serialCode);
-                    if ($record && (int)$record->warehouse_id !== 2) {
-                        $errors[] = "S/N {$serialCode} tồn tại nhưng không nằm trong kho Bảo hành";
+                    $expectedProductId = $serialProductMap[$serialCode] ?? null;
+                    
+                    if ($record) {
+                        if ((int)$record->warehouse_id !== 2) {
+                            $errors[] = "S/N {$serialCode} tồn tại nhưng không nằm trong kho Bảo hành";
+                        } elseif ($expectedProductId && (int)$record->product_id !== (int)$expectedProductId) {
+                            $errors[] = "S/N {$serialCode} không thuộc sản phẩm này";
+                        }
                     }
                 }
 

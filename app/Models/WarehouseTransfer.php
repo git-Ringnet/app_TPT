@@ -34,13 +34,51 @@ class WarehouseTransfer extends Model
     //funtion add
     public static function add($data)
     {
+        // Tạo note tự động nếu note trống
+        $note = $data['note'];
+        if (empty(trim($note))) {
+            // Lấy danh sách mã hàng và serial từ data-test
+            $productData = [];
+            if (isset($data['data-test'])) {
+                $uniqueProductsArray = json_decode($data['data-test'], true);
+                if (is_array($uniqueProductsArray)) {
+                    foreach ($uniqueProductsArray as $serial) {
+                        if (isset($serial['product_id']) && isset($serial['serial'])) {
+                            $product = Product::find($serial['product_id']);
+                            if ($product && $product->product_code) {
+                                $productCode = $product->product_code;
+                                if (!isset($productData[$productCode])) {
+                                    $productData[$productCode] = [];
+                                }
+                                $productData[$productCode][] = trim($serial['serial']);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Tạo chuỗi note với format: MƯỢN/TRẢ BẢO HÀNH [product_code] ([serial1, serial2, ...])
+            $noteParts = [];
+            foreach ($productData as $productCode => $serials) {
+                $serialsStr = implode(', ', array_unique($serials));
+                $noteParts[] = "{$productCode} ({$serialsStr})";
+            }
+            $noteContent = implode(', ', $noteParts);
+            
+            if ($data['from_warehouse_id'] == 2) {
+                $note = "TRẢ BẢO HÀNH {$noteContent}";
+            } else {
+                $note = "MƯỢN {$noteContent}";
+            }
+        }
+
         // Tạo phiếu chuyển kho
         $warehouseTransfer = new WarehouseTransfer();
         $warehouseTransfer->code = $data['code'];
         $warehouseTransfer->from_warehouse_id = $data['from_warehouse_id'];
         $warehouseTransfer->to_warehouse_id = $data['to_warehouse_id'];
         $warehouseTransfer->status = 1;
-        $warehouseTransfer->note = $data['note'];
+        $warehouseTransfer->note = $note;
         $warehouseTransfer->user_id = Auth::user()->id;
         $warehouseTransfer->save();
 

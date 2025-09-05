@@ -83,11 +83,51 @@ class WarehouseTransferController extends Controller
     {
         $warehouseTransfer = WarehouseTransfer::findorFail($warehouseTransfer->id);
         $data = $request->all();
-        $result = $this->warehouseTransfer->updateWarehouseTransfer($data, $warehouseTransfer->id);
-        $this->warehouseTransferItem->updateItemWarehouseTransfer($data, $warehouseTransfer->id);
-        if (!$result) {
-            return redirect()->back()->with('warning', 'Mã phiếu đã tồn tại, vui lòng nhập mã khác!');
+
+        // Chỉ cập nhật transfer_date và note của warehouse transfer
+        $warehouseTransfer->transfer_date = $data['transfer_date'];
+        $note = $data['note'];
+        if (empty(trim($note))) {
+            // Lấy danh sách mã hàng và serial từ data-test
+            $productData = [];
+            if (isset($data['data-test'])) {
+                $uniqueProductsArray = json_decode($data['data-test'], true);
+                if (is_array($uniqueProductsArray)) {
+                    foreach ($uniqueProductsArray as $serial) {
+                        if (isset($serial['product_id']) && isset($serial['serial'])) {
+                            $product = Product::find($serial['product_id']);
+                            if ($product && $product->product_code) {
+                                $productCode = $product->product_code;
+                                if (!isset($productData[$productCode])) {
+                                    $productData[$productCode] = [];
+                                }
+                                $productData[$productCode][] = trim($serial['serial']);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Tạo chuỗi note với format: MƯỢN/TRẢ BẢO HÀNH [product_code] ([serial1, serial2, ...])
+            $noteParts = [];
+            foreach ($productData as $productCode => $serials) {
+                $serialsStr = implode(', ', array_unique($serials));
+                $noteParts[] = "{$productCode} ({$serialsStr})";
+            }
+            $noteContent = implode(', ', $noteParts);
+            
+            if ($data['from_warehouse_id'] == 2) {
+                $note = "TRẢ BẢO HÀNH {$noteContent}";
+            } else {
+                $note = "MƯỢN {$noteContent}";
+            }
         }
+        $warehouseTransfer->note = $note;
+        $warehouseTransfer->save();
+
+        // Cập nhật note_seri của các warehouse transfer items
+        $this->warehouseTransferItem->updateItemWarehouseTransfer($data, $warehouseTransfer->id);
+
         return redirect()->route('warehouseTransfer.index')->with('msg', 'Cập nhật phiếu chuyển kho thành công!');
     }
 

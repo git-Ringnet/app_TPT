@@ -21,7 +21,7 @@
                                 <p class="m-0 p-0 text-dark">Hủy</p>
                             </button>
                         </a>
-                        {{-- @unlessrole('Kế toán')
+                        @unlessrole('Kế toán')
                         <button type="submit" class="custom-btn d-flex align-items-center h-100 mx-1 mr-4"
                             id="btn-get-unique-products">
                             <svg class="mx-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -32,7 +32,7 @@
                             </svg>
                             <p class="m-0 p-0">Xác nhận</p>
                         </button>
-                        @endunlessrole --}}
+                        @endunlessrole
                     </div>
                 </div>
             </div>
@@ -50,11 +50,11 @@
                         <div class="col-md-4 m-0 p-0">
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3 required-label font-weight-bold"
+                                <span class="text-13-black text-nowrap mr-3 font-weight-bold"
                                     style="width: 180px;">Mã phiếu</span>
-                                <input type="text" name="code" style="flex:2;" placeholder="Nhập thông tin"
+                                <input type="text" name="code" style="flex:2;" placeholder="Nhập thông tin" readonly
                                     required value="{{ $warehouseTransfer->code }}"
-                                    class="text-13-black w-50 border-0 bg-input-guest date_picker bg-input-guest-blue py-2 px-2">
+                                    class="text-13-black w-50 border-0 bg-input-guest date_picker py-2 px-2">
                             </div>
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
@@ -72,7 +72,7 @@
                         <div class="col-md-4 m-0 p-0">
                             <div
                                 class="d-flex w-100 justify-content-between py-2 px-3 border border-bottom-0 border-right-0 align-items-center text-left text-nowrap position-relative height-44">
-                                <span class="text-13-black text-nowrap mr-3 required-label font-weight-bold"
+                                <span class="text-13-black text-nowrap mr-3 font-weight-bold"
                                     style="width: 180px;">Người lập phiếu</span>
                                 <input autocomplete="off" placeholder="Nhập thông tin" required id="user_name" readonly
                                     class="text-13-black w-50 border-0 bg-input-guest py-2 px-2" style="flex:2;"
