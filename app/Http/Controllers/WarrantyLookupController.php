@@ -20,8 +20,13 @@ class WarrantyLookupController extends Controller
     public function index()
     {
         $title = "Tra cứu bảo hành";
-        $warranty = warrantyLookup::with(['product', 'serialNumber', 'customer', 'warrantyHistories.receiving'])->orderby('id', 'DESC')->get();
-        // dd($warranty);
+        
+        // Sử dụng pagination trực tiếp từ database để tối ưu performance
+        $warranty = warrantyLookup::with(['product', 'serialNumber', 'customer', 'warrantyHistories.receiving'])
+            ->orderby('id', 'DESC')
+            ->paginate(25);
+        
+        // Group dữ liệu cho trang hiện tại
         $grouped = $warranty->groupBy(function ($item) {
             return $item->sn_id . '_' . $item->export_id; // group theo cặp sn_id + export_id
         })->map(function ($items) {
@@ -64,12 +69,22 @@ class WarrantyLookupController extends Controller
             return $first;
         });
 
-        // Kết quả
+        // Tạo paginator mới với grouped data
         $grouped = $grouped->values();
+        $originalWarranty = $warranty; // Lưu pagination gốc
+        $warranty = new \Illuminate\Pagination\LengthAwarePaginator(
+            $grouped,
+            $originalWarranty->total(), // Sử dụng total từ pagination gốc
+            $originalWarranty->perPage(),
+            $originalWarranty->currentPage(),
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
 
-        //dd($grouped);
         $customers = Customers::all();
-        return view('expertise.warrantyLookup.index', compact('title', 'warranty', 'customers', 'grouped'));
+        return view('expertise.warrantyLookup.index', compact('title', 'warranty', 'customers'));
     }
 
     /**
@@ -181,7 +196,15 @@ class WarrantyLookupController extends Controller
         if ($request->ajax()) {
             $warrantyLookup = $this->warrantyLookup->getWarranAjax($data);
             return response()->json([
-                'data' => $warrantyLookup,
+                'data' => $warrantyLookup->items(),
+                'pagination' => [
+                    'current_page' => $warrantyLookup->currentPage(),
+                    'last_page' => $warrantyLookup->lastPage(),
+                    'per_page' => $warrantyLookup->perPage(),
+                    'total' => $warrantyLookup->total(),
+                    'from' => $warrantyLookup->firstItem(),
+                    'to' => $warrantyLookup->lastItem(),
+                ],
                 'filters' => $filters,
             ]);
         }

@@ -32,11 +32,38 @@ class InventoryLookupController extends Controller
                 $q->whereIn('status', [1, 5]);
             });
 
-        // Lấy danh sách không serial (sn_id = 0) và gom nhóm
-        $noSerial = InventoryLookup::with(['product', 'provider']) // không cần serialNumber vì sn_id = 0
-            ->where('sn_id', 0)
-            ->selectRaw('product_id, provider_id, storage_duration, warehouse_id, SUM(remaining_quantity) as remaining_quantity')
-            ->groupBy('product_id', 'provider_id', 'storage_duration', 'warehouse_id');
+        // Lấy danh sách không serial (sn_id = 0) - sử dụng raw query để tránh lỗi GROUP BY
+        $noSerial = DB::table('inventory_lookup')
+            ->join('products', 'products.id', '=', 'inventory_lookup.product_id')
+            ->join('providers', 'providers.id', '=', 'inventory_lookup.provider_id')
+            ->where('inventory_lookup.sn_id', 0)
+            ->select(
+                'inventory_lookup.id',
+                'inventory_lookup.product_id',
+                'inventory_lookup.sn_id',
+                'inventory_lookup.provider_id',
+                'inventory_lookup.import_date',
+                'inventory_lookup.storage_duration',
+                'inventory_lookup.status',
+                'inventory_lookup.warranty_date',
+                'inventory_lookup.note',
+                'inventory_lookup.warehouse_id',
+                'inventory_lookup.import_id',
+                DB::raw('SUM(inventory_lookup.remaining_quantity) as remaining_quantity')
+            )
+            ->groupBy(
+                'inventory_lookup.id',
+                'inventory_lookup.product_id',
+                'inventory_lookup.sn_id',
+                'inventory_lookup.provider_id',
+                'inventory_lookup.import_date',
+                'inventory_lookup.storage_duration',
+                'inventory_lookup.status',
+                'inventory_lookup.warranty_date',
+                'inventory_lookup.note',
+                'inventory_lookup.warehouse_id',
+                'inventory_lookup.import_id'
+            );
 
         // Áp điều kiện kho nếu cần
         if (Auth::user()->roles()->first()->id != 1 && !Auth::user()->hasAnyRole(['Quản lý kho'])) {
@@ -45,7 +72,7 @@ class InventoryLookupController extends Controller
                     $q->where('warehouse_id', $warehouse_id);
                 });
 
-                $noSerial = $noSerial->where('warehouse_id', $warehouse_id); // nếu có trường này
+                $noSerial = $noSerial->where('inventory_lookup.warehouse_id', $warehouse_id);
             }
         }
 
@@ -53,8 +80,50 @@ class InventoryLookupController extends Controller
         $withSerial = $withSerial->get();
         $noSerial = $noSerial->get();
 
-        // Gộp lại
-        $inventory = $withSerial->concat($noSerial)->sortByDesc('id')->values();
+        // Chuyển đổi noSerial thành collection của model
+        $noSerialModels = collect($noSerial)->map(function ($item) {
+            $model = new InventoryLookup();
+            $model->id = $item->id;
+            $model->product_id = $item->product_id;
+            $model->sn_id = $item->sn_id;
+            $model->provider_id = $item->provider_id;
+            $model->import_date = $item->import_date;
+            $model->storage_duration = $item->storage_duration;
+            $model->status = $item->status;
+            $model->warranty_date = $item->warranty_date;
+            $model->note = $item->note;
+            $model->warehouse_id = $item->warehouse_id;
+            $model->import_id = $item->import_id;
+            $model->remaining_quantity = $item->remaining_quantity;
+            
+            // Load relationships
+            $model->setRelation('product', Product::find($item->product_id));
+            $model->setRelation('provider', Providers::find($item->provider_id));
+            
+            return $model;
+        });
+
+        // Gộp lại và sắp xếp theo ID mới nhất
+        $allInventory = $withSerial->concat($noSerialModels)->sortByDesc('id')->values();
+        
+        // Tạo pagination tùy chỉnh cho 25 items per page
+        $perPage = 25;
+        $currentPage = request()->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $items = $allInventory->slice($offset, $perPage)->values();
+        
+        // Tạo paginator tùy chỉnh
+        $inventory = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $allInventory->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
+        
         $providers = Providers::all();
         return view('expertise.inventoryLookup.index', compact('title', 'inventory', 'providers'));
     }
@@ -175,7 +244,15 @@ class InventoryLookupController extends Controller
         if ($request->ajax()) {
             $inventoryLookup = $this->inventoryLookup->getInvenAjax($data);
             return response()->json([
-                'data' => $inventoryLookup,
+                'data' => $inventoryLookup->items(),
+                'pagination' => [
+                    'current_page' => $inventoryLookup->currentPage(),
+                    'last_page' => $inventoryLookup->lastPage(),
+                    'per_page' => $inventoryLookup->perPage(),
+                    'total' => $inventoryLookup->total(),
+                    'from' => $inventoryLookup->firstItem(),
+                    'to' => $inventoryLookup->lastItem(),
+                ],
                 'filters' => $filters,
             ]);
         }

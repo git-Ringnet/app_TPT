@@ -160,7 +160,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="tbody-warran-lookup">
-                                    @foreach ($grouped as $item)
+                                    @foreach ($warranty as $item)
                                         @php
                                             $firstHistory = $item->warrantyHistories->first();
                                             $branchId = $firstHistory?->receiving?->branch_id ?? 0;
@@ -243,6 +243,15 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="pagination-info opacity-0">
+                                Hiển thị {{ $warranty->firstItem() ?? 0 }} đến {{ $warranty->lastItem() ?? 0 }} trong tổng số {{ $warranty->total() }} kết quả
+                            </div>
+                            <div class="pagination-links">
+                                {{ $warranty->links() }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -269,7 +278,8 @@
             han_bao_hanh: retrieveComparisonData(this, 'han-bao-hanh'),
             bao_hanh_dich_vu: retrieveComparisonData(this, 'bao-hanh-dich-vu'),
             date_expired: retrieveDateData(this, 'ngay-kich-hoat-bhdv'),
-            sort: getSortData(buttonElement)
+            sort: getSortData(buttonElement),
+            page: 1 // Reset về trang 1 khi filter
         };
         // Ẩn tùy chọn nếu cần
         if (!$(e.target).closest('li, input[type="checkbox"]').length) {
@@ -280,5 +290,35 @@
         var nametable = 'warran-lookup'; // Thay tên bảng phù hợp
         handleAjaxRequest(formData, route, nametable);
     });
+    
+    // Xử lý pagination links
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var page = url.split('page=')[1];
+        
+        // Thu thập dữ liệu filter hiện tại
+        var formData = {
+            search: $('#search').val(),
+            ma: getData('#ma-hang', document),
+            ten: getData('#ten-hang', document),
+            sn: getData('#serial', document),
+            brand: getData('#hang', document),
+            date: retrieveDateData(document, 'ngay-xuat-hang'),
+            customer: getStatusData(document, 'khach-hang'),
+            status: getStatusData(document, 'tinh-trang'),
+            bao_hanh: retrieveComparisonData(document, 'bao-hanh'),
+            han_bao_hanh: retrieveComparisonData(document, 'han-bao-hanh'),
+            bao_hanh_dich_vu: retrieveComparisonData(document, 'bao-hanh-dich-vu'),
+            date_expired: retrieveDateData(document, 'ngay-kich-hoat-bhdv'),
+            page: page
+        };
+        
+        // Gọi AJAX với trang mới
+        var route = "{{ route('filter-warran-lookup') }}";
+        var nametable = 'warran-lookup';
+        handleAjaxRequest(formData, route, nametable);
+    });
+    
     exportTableToExcel("#exportBtn", "#example2", "bao_hanh.xlsx");
 </script>

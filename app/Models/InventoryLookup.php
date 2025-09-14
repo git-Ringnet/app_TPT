@@ -53,11 +53,11 @@ class InventoryLookup extends Model
         $invenLookup = InventoryLookup::join('products', 'products.id', '=', 'inventory_lookup.product_id')
             ->join('serial_numbers', 'serial_numbers.id', '=', 'inventory_lookup.sn_id')
             ->join('providers', 'providers.id', '=', 'inventory_lookup.provider_id')
-            ->with('product', 'serialNumber', 'provider')
+            ->with('product', 'serialNumber', 'provider', 'warehouse')
             ->whereHas('serialNumber', function ($query) {
                 $query->whereIn('status',[1,5]);
             })
-            ->select('inventory_lookup.*', 'serial_numbers.serial_code as sericode', 'products.*', 'providers.provider_name as providername', 'inventory_lookup.status as status', 'inventory_lookup.id as id');
+            ->select('inventory_lookup.*', 'serial_numbers.serial_code', 'serial_numbers.status as serial_status', 'products.*', 'providers.provider_name as providername', 'inventory_lookup.status as status', 'inventory_lookup.id as id');
         if (!empty($data['search'])) {
             $invenLookup->where(function ($query) use ($data) {
                 $query->where('products.product_code', 'like', '%' . $data['search'] . '%')
@@ -97,7 +97,15 @@ class InventoryLookup extends Model
         }
         if (isset($data['sort']) && isset($data['sort'][0])) {
             $invenLookup = $invenLookup->orderBy($data['sort'][0], $data['sort'][1]);
+        } else {
+            // Sắp xếp mặc định theo ID mới nhất
+            $invenLookup = $invenLookup->orderBy('inventory_lookup.id', 'desc');
         }
-        return $invenLookup->get();
+        
+        // Thêm pagination cho AJAX requests
+        $perPage = 25;
+        $currentPage = isset($data['page']) ? $data['page'] : 1;
+        
+        return $invenLookup->paginate($perPage, ['*'], 'page', $currentPage);
     }
 }

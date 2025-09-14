@@ -22,7 +22,7 @@
                 <x-filter-date name="ngay-nhap-hang" title="Ngày nhập hàng" />
                 <x-filter-status name="trang-thai" title="Trạng thái" :filters="[
                     ['key' => '1', 'value' => 'Tới hạn bào trì', 'color' => '#858585'],
-                    ['key' => '0', 'value' => 'Blank', 'color' => '#08AA36BF'],
+                    ['key' => '0', 'value' => '', 'color' => '#08AA36BF'],
                 ]" />
                 <x-filter-compare name="thoi-gian-ton-kho" title="Thời gian tồn kho" />
             </x-search-filter>
@@ -269,6 +269,15 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="pagination-info opacity-0">
+                                Hiển thị {{ $inventory->firstItem() ?? 0 }} đến {{ $inventory->lastItem() ?? 0 }} trong tổng số {{ $inventory->total() }} kết quả
+                            </div>
+                            <div class="pagination-links">
+                                {{ $inventory->links() }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -293,7 +302,8 @@
             provider: getStatusData(this, 'nha-cung-cap'),
             status: getStatusData(this, 'trang-thai'),
             time_inven: retrieveComparisonData(this, 'thoi-gian-ton-kho'),
-            sort: deepeningSort(getSortData(buttonElement)) // Điều chỉnh nếu cần để sort bảng tổng hợp
+            sort: deepeningSort(getSortData(buttonElement)), // Điều chỉnh nếu cần để sort bảng tổng hợp
+            page: 1 // Reset về trang 1 khi filter
         };
         // Ẩn tùy chọn nếu cần
         if (!$(e.target).closest('li, input[type="checkbox"]').length) {
@@ -386,4 +396,30 @@
         }
         return {};
     }
+
+    // Xử lý pagination links
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var page = url.split('page=')[1];
+        
+        // Thu thập dữ liệu filter hiện tại
+        var formData = {
+            search: $('#search').val(),
+            ma: getData('#ma-hang', document),
+            ten: getData('#ten-hang', document),
+            brand: getData('#hang', document),
+            sn: getData('#serial', document),
+            date: retrieveDateData(document, 'ngay-nhap-hang'),
+            provider: getStatusData(document, 'nha-cung-cap'),
+            status: getStatusData(document, 'trang-thai'),
+            time_inven: retrieveComparisonData(document, 'thoi-gian-ton-kho'),
+            page: page
+        };
+        
+        // Gọi AJAX với trang mới
+        var route = "{{ route('filter-inven-lookup') }}";
+        var nametable = 'inven-lookup';
+        handleAjaxRequest(formData, route, nametable);
+    });
 </script>

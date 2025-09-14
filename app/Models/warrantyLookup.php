@@ -50,6 +50,7 @@ class warrantyLookup extends Model
             ->select(
                 'warranty_lookup.*',
                 'serial_numbers.serial_code as sericode',
+                'serial_numbers.id as serial_id',
                 'products.*',
                 'customers.customer_name as customername',
                 'warranty_lookup.status as status',
@@ -112,18 +113,26 @@ class warrantyLookup extends Model
     
         if (isset($data['sort']) && isset($data['sort'][0])) {
             $warrantyLookup->orderBy($data['sort'][0], $data['sort'][1]);
+        } else {
+            // Sắp xếp mặc định theo ID mới nhất
+            $warrantyLookup->orderBy('warranty_lookup.id', 'desc');
         }
-    
-        $warranties = $warrantyLookup->get();
-    
-        // Nhóm dữ liệu theo `sn_id`
+        
+        // Sử dụng pagination trực tiếp từ database thay vì group sau
+        $perPage = 25;
+        $currentPage = isset($data['page']) ? $data['page'] : 1;
+        
+        $warranties = $warrantyLookup->paginate($perPage, ['*'], 'page', $currentPage);
+        
+        // Nhóm dữ liệu theo `sn_id` cho trang hiện tại
         $grouped = $warranties->groupBy('sn_id')->map(function ($items) {
             // Sao chép dữ liệu để tránh ảnh hưởng đến bản gốc
             $first = $items->first()->replicate();
             $first->id = $items->first()->sn_id;
             // Gộp name_warranty và warranty thành chuỗi
             $first->name_warranty = $items->map(function ($item) {
-                return $item->name_warranty . ": " . $item->warranty . " tháng";
+                $warrantyValue = $item->warrantyLookup ?: $item->warranty;
+                return $item->name_warranty . ": " . $warrantyValue . " tháng";
             })->join('; ');
     
             // Gộp status thành chuỗi theo định dạng yêu cầu
@@ -134,7 +143,20 @@ class warrantyLookup extends Model
     
             return $first;
         });
+        
+        // Tạo paginator mới với grouped data
+        $grouped = $grouped->values();
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $grouped,
+            $warranties->total(), // Sử dụng total từ pagination gốc
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
     
-        return $grouped->values();
+        return $paginated;
     }    
 }

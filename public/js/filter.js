@@ -338,38 +338,227 @@ function updateFilters(
         $(resultFilterClass).append(itemFilter);
     });
 
-    // Hide and show relevant elements based on id and optionally data-source
-    var ids = [];
-    Object.values(data.data).forEach(function (item) {
-        ids.push({ id: item.id, source: item.source_id || null });
-    });
-    $(elementClass).each(function () {
-        var value = parseInt($(this).find(idClass).val());
-        var source = $(this).find(idClass).data("source") || null;
-
-        var match = ids.find(function (obj) {
-            return (
-                obj.id === value &&
-                (obj.source === null || obj.source === source)
-            );
+    // Tạo HTML cho các row mới từ dữ liệu AJAX
+    var tbodyHtml = '';
+    if (data.data && data.data.length > 0) {
+        data.data.forEach(function (item, index) {
+            // Kiểm tra loại bảng dựa trên tbodyClass
+            if (tbodyClass.includes('warran-lookup')) {
+                tbodyHtml += generateWarrantyRow(item, index);
+            } else {
+                tbodyHtml += generateInventoryRow(item, index);
+            }
         });
+    } else {
+        // Kiểm tra số cột dựa trên header
+        var colCount = $(tbodyClass).closest('table').find('thead tr th').length;
+        tbodyHtml = '<tr><td colspan="' + colCount + '" class="text-center">Không có dữ liệu</td></tr>';
+    }
+    
+    // Cập nhật tbody
+    $(tbodyClass).html(tbodyHtml);
 
-        if (match) {
-            $(this).show();
-            $(this).attr("data-position", ids.indexOf(match) + 1);
-        } else {
-            $(this).hide();
-            $(this).attr("data-position", Number.MAX_SAFE_INTEGER); // Đưa về cuối nếu không khớp
-        }
-    });
-
-    // Sắp xếp và gắn lại các phần tử hiển thị
-    var clonedElements = $(elementClass).clone();
-    var sortedElements = clonedElements.sort(function (a, b) {
-        return $(a).data("position") - $(b).data("position");
-    });
-    $(tbodyClass).empty().append(sortedElements);
+    // Cập nhật pagination nếu có
+    if (data.pagination) {
+        updatePagination(data.pagination);
+    }
 }
+
+// Hàm cập nhật pagination
+function updatePagination(pagination) {
+    var paginationHtml = '';
+    
+    // Thông tin hiển thị
+    var infoHtml = 'Hiển thị ' + pagination.from + ' đến ' + pagination.to + ' trong tổng số ' + pagination.total + ' kết quả';
+    $('.pagination-info').html(infoHtml);
+    
+    // Tạo pagination links
+    if (pagination.last_page > 1) {
+        paginationHtml += '<nav><ul class="pagination justify-content-end">';
+        
+        // Previous button
+        if (pagination.current_page > 1) {
+            paginationHtml += '<li class="page-item"><a class="page-link" href="?page=' + (pagination.current_page - 1) + '">Trước</a></li>';
+        }
+        
+        // Page numbers
+        var startPage = Math.max(1, pagination.current_page - 2);
+        var endPage = Math.min(pagination.last_page, pagination.current_page + 2);
+        
+        if (startPage > 1) {
+            paginationHtml += '<li class="page-item"><a class="page-link" href="?page=1">1</a></li>';
+            if (startPage > 2) {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+        
+        for (var i = startPage; i <= endPage; i++) {
+            var activeClass = i === pagination.current_page ? ' active' : '';
+            paginationHtml += '<li class="page-item' + activeClass + '"><a class="page-link" href="?page=' + i + '">' + i + '</a></li>';
+        }
+        
+        if (endPage < pagination.last_page) {
+            if (endPage < pagination.last_page - 1) {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            paginationHtml += '<li class="page-item"><a class="page-link" href="?page=' + pagination.last_page + '">' + pagination.last_page + '</a></li>';
+        }
+        
+        // Next button
+        if (pagination.current_page < pagination.last_page) {
+            paginationHtml += '<li class="page-item"><a class="page-link" href="?page=' + (pagination.current_page + 1) + '">Sau</a></li>';
+        }
+        
+        paginationHtml += '</ul></nav>';
+    }
+    
+    $('.pagination-links').html(paginationHtml);
+}
+
+// Hàm tạo HTML cho mỗi row trong bảng inventory
+function generateInventoryRow(item, index) {
+    var statusHtml = '';
+    if (item.status == '1') {
+        statusHtml = '<span class="text-danger">Tới hạn bảo trì</span>';
+    }
+    
+    var serialHtml = '';
+    // Kiểm tra cả serialNumber object và serial_code trực tiếp
+    var serialCode = '';
+    var serialStatus = '';
+    
+    if (item.serialNumber && item.serialNumber.serial_code) {
+        serialCode = item.serialNumber.serial_code;
+        serialStatus = item.serialNumber.status;
+    } else if (item.serial_code) {
+        serialCode = item.serial_code;
+        serialStatus = item.serial_status || item.status;
+    }
+    
+    if (serialCode) {
+        serialHtml = '<a href="/inventoryLookup/' + item.id + '/edit">' + serialCode;
+        if (serialStatus == 5) {
+            serialHtml += ' <span class="text-13-black">(Hàng mượn)</span>';
+        }
+        serialHtml += '</a>';
+    }
+    
+    var providerHtml = '';
+    if (item.provider && item.provider.provider_name) {
+        providerHtml = '<span class="truncate-1line" title="' + item.provider.provider_name + '">' + item.provider.provider_name + '</span>';
+    }
+    
+    var warehouseHtml = '';
+    if (item.warehouse && item.warehouse.warehouse_name) {
+        warehouseHtml = item.warehouse.warehouse_name;
+    }
+    
+    var importDate = '';
+    if (item.import_date) {
+        var date = new Date(item.import_date);
+        importDate = date.getDate().toString().padStart(2, '0') + '/' + 
+                    (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                    date.getFullYear();
+    }
+    
+    // Kiểm tra xem có hiển thị cột warehouse không (dựa trên số cột trong header)
+    var headerCols = $('.tbody-inven-lookup').closest('table').find('thead tr th').length;
+    var showWarehouse = headerCols > 8; // Nếu có hơn 8 cột thì có cột warehouse
+    
+    var rowHtml = '<tr class="position-relative inven-lookup-info height-40">' +
+        '<input type="hidden" name="id-inven-lookup" class="id-inven-lookup" id="id-inven-lookup" value="' + item.id + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' + (item.product ? item.product.product_code : '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">' + (item.product ? item.product.product_name : '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.product ? item.product.brand : '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + serialHtml + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">' + providerHtml + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + importDate + '</td>';
+    
+    if (showWarehouse) {
+        rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + warehouseHtml + '</td>';
+    }
+    
+    rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.storage_duration || '') + ' ngày</td>';
+    
+    rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + statusHtml + '</td>' +
+        '</tr>';
+    
+    return rowHtml;
+}
+
+// Hàm tạo HTML cho mỗi row trong bảng warranty
+function generateWarrantyRow(item, index) {
+    var serialHtml = '';
+    // Kiểm tra cả serialNumber.serial_code và sericode (alias từ model)
+    var serialCode = (item.serialNumber && item.serialNumber.serial_code) ? item.serialNumber.serial_code : item.sericode;
+    var serialId = item.serial_id || (item.serialNumber ? item.serialNumber.id : item.sn_id);
+    if (serialCode) {
+        serialHtml = '<a href="/warrantyLookup/' + serialId + '/edit">' + serialCode + '</a>';
+    }
+    
+    var customerHtml = '';
+    if (item.customer && item.customer.customer_name) {
+        customerHtml = '<span class="truncate-1line" title="' + item.customer.customer_name + '">' + item.customer.customer_name + '</span>';
+    }
+    
+    var exportDate = '';
+    if (item.export_return_date) {
+        var date = new Date(item.export_return_date);
+        exportDate = date.getDate().toString().padStart(2, '0') + '/' + 
+                    (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                    date.getFullYear();
+    }
+    
+    // Tính toán thời gian bảo hành
+    var warrantyStatusHtml = '';
+    // Kiểm tra cả warranty và warrantyLookup (alias từ model)
+    var warrantyPeriod = parseInt(item.warrantyLookup || item.warranty) || 0;
+    if (item.export_return_date && warrantyPeriod > 0) {
+        var currentDate = new Date();
+        var purchaseDate = new Date(item.export_return_date);
+        
+        var expireDate = new Date(purchaseDate);
+        expireDate.setMonth(expireDate.getMonth() + warrantyPeriod);
+        
+        var isExpired = currentDate > expireDate;
+        var diffTime = Math.abs(expireDate - currentDate);
+        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        var years = Math.floor(diffDays / 365);
+        var months = Math.floor((diffDays % 365) / 30);
+        var days = diffDays % 30;
+        
+        if (isExpired) {
+            warrantyStatusHtml = '<span class="text-danger">Hết bảo hành (' + 
+                (years > 0 ? years + ' năm ' : '') + months + ' tháng ' + days + ' ngày trước)</span>';
+        } else {
+            warrantyStatusHtml = '<span class="text-success">Còn ' + 
+                (years > 0 ? years + ' năm ' : '') + months + ' tháng ' + days + ' ngày</span>';
+        }
+    }
+    
+    var returnDate = '';
+    if (item.return_date) {
+        var date = new Date(item.return_date);
+        returnDate = date.getDate().toString().padStart(2, '0') + '/' + 
+                    (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                    date.getFullYear();
+    }
+    
+    return '<tr class="position-relative warran-lookup-info height-40">' +
+        '<input type="hidden" name="id-warran-lookup" class="id-warran-lookup" id="id-warran-lookup" value="' + (item.sn_id || item.id) + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' + (item.product ? item.product.product_code : '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.product ? item.product.brand : '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + serialHtml + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">' + customerHtml + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + exportDate + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">' + (item.name_warranty || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">' + warrantyStatusHtml + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + returnDate + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.name_expire_date || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 max-width180">' + (item.status_string || '') + '</td>' +
+        '</tr>';
+}
+
 function getData(selector, element) {
     return $(element).data("delete") === selector.replace("#", "")
         ? ($(selector).val(""), null)
