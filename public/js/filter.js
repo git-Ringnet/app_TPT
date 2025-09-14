@@ -343,7 +343,7 @@ function updateFilters(
     if (data.data && data.data.length > 0) {
         data.data.forEach(function (item, index) {
             // Kiểm tra loại bảng dựa trên tbodyClass
-            if (tbodyClass.includes('warran-lookup')) {
+            if (tbodyClass.indexOf('warran-lookup') !== -1) {
                 tbodyHtml += generateWarrantyRow(item, index);
             } else {
                 tbodyHtml += generateInventoryRow(item, index);
