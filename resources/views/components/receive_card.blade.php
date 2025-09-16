@@ -8,6 +8,7 @@
                         <p class="m-0 p-0">196 Quách Đình Bảo, P.Phú Thạnh, Q.Tân Phú, TP. Hồ Chí Minh</p>
                         <p class="m-0 p-0">DT: 028 7777 8988 - MST: 0311999088</p>
                         <p class="m-0 p-0">Email: info@thienphattien.com</p>
+                        <p class="m-0 p-0">Zalo: 098 346 8473</p>
                         <p class="m-0 p-0">Mã phiếu:
                             <span class="font-weight-bold">{{ $receiving->form_code_receiving }}</span>
                         </p>
