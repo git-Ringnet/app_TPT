@@ -432,8 +432,8 @@
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
+                        console.log(response);
                         if (response.status === 'success' && serialNumber !== "") {
-                            console.log(serialNumber);
                             $checkIcon.text('✔').css('color', 'green').attr('title',
                                 response.message);
                         } else if (response.status === 'error') {

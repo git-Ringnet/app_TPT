@@ -7,6 +7,7 @@ use App\Models\ProductExport;
 use App\Models\ProductImport;
 use App\Models\SerialNumber;
 use App\Models\WarehouseTransferItem;
+use App\Models\ProductReturn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -95,16 +96,31 @@ class SerialNumberController extends Controller
                     ->exists();
             }
             if ($request->warehouse_id == 2) {
-                $serial_borrow = $request->input('serial_borrow');
+                $serial_borrow = $request->input('serial_borrow') ?? $request->input('serialBorrow');
+                if ($serial_borrow) {
+                    $serial_borrow = strtoupper(trim($serial_borrow));
+                }
                 // Hợp lệ nếu serial không tồn tại HOẶC tồn tại nhưng đang ở kho bảo hành (2) và đúng product_id
                 $serialRecord = SerialNumber::where('serial_code', $serial)
                     ->where('product_id', $productId)
                     ->first();
                 $existsSerial = !$serialRecord || ((int)$serialRecord->warehouse_id === 2);
 
-                $existsSerialBorrow = SerialNumber::where('serial_code', $serial_borrow)
-                    ->where('status', 5)
-                    ->exists();
+                // Cho phép serial mượn có status = 5
+                // hoặc status = 2 nếu đã được dùng làm serial thay thế trong phiếu trả hàng
+                $existsSerialBorrow = false;
+                if ($serial_borrow) {
+                    $borrowSn = SerialNumber::where('serial_code', $serial_borrow)->first();
+                    if ($borrowSn) {
+                        if ((int)$borrowSn->status === 5) {
+                            $existsSerialBorrow = true;
+                        } elseif ((int)$borrowSn->status === 2) {
+                            // Chấp nhận nếu đang ở kho bảo hành hoặc đã dùng làm serial thay thế
+                            $existsSerialBorrow = ((int)$borrowSn->warehouse_id === 2)
+                                || ProductReturn::where('replacement_serial_number_id', $borrowSn->id)->exists();
+                        }
+                    }
+                }
 
                 return response()->json([
                     'status' => 'success',
@@ -243,42 +259,61 @@ class SerialNumberController extends Controller
     public function checkSNImportBorrow(Request $request)
     {
         $serialNumber = $request->input('serial_number');
+        $serialNumber = $serialNumber ? strtoupper(trim($serialNumber)) : $serialNumber;
+        $productId = $request->input('product_id') ?? $request->input('productId');
         if ($request->nameModal == "PCK") {
             if ($request->warehouse == 2) {
                 // Kiểm tra trong bảng serial_numbers
-                $exists = SerialNumber::where('serial_code', $serialNumber)
-                    ->where('status', 5)
-                    ->exists();
-                if (!$exists) {
-                    return response()->json(['status' => 'error', 'message' => 'Số serial không hợp lệ.']);
-                } else {
-                    return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
+                $snQuery = SerialNumber::where('serial_code', $serialNumber);
+                if ($productId) {
+                    $snQuery->where('product_id', (int)$productId);
                 }
+                $sn = $snQuery->first();
+                $isValid = false;
+                if ($sn) {
+                    // Nếu có truyền product_id nhưng không khớp thì coi như không hợp lệ
+                    if ($productId && (int)$sn->product_id !== (int)$productId) {
+                        return response()->json(['status' => 'error', 'message' => 'Serial không thuộc sản phẩm này.']);
+                    }
+                    if ((int)$sn->status === 5) {
+                        $isValid = true;
+                    } elseif ((int)$sn->status === 2) {
+                        // Hợp lệ nếu đang ở kho BH hoặc đã dùng làm serial thay thế
+                        $isValid = ((int)$sn->warehouse_id === 2)
+                            || ProductReturn::where('replacement_serial_number_id', $sn->id)->exists();
+                    }
+                }
+                if (!$isValid) {
+                    return response()->json(['status' => 'error', 'message' => 'Số serial không hợp lệ hoặc không tồn tại.']);
+                }
+                return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
             }
         }
-        if ($request->nameModal == "CPCK") {
-            if ($request->warehouse == 2) {
-                // Lấy ID của serial cần kiểm tra
-                $serial = SerialNumber::where('serial_code', $serialNumber)
-                    ->first();
+        // if ($request->nameModal == "CPCK") {
+        //     if ($request->warehouse == 2) {
+        //         // Lấy ID của serial cần kiểm tra
+        //         $serial = SerialNumber::where('serial_code', $serialNumber)
+        //             ->first();
 
-                if (!$serial) {
-                    return response()->json(['status' => 'error', 'message' => 'Số serial không tồn tại.']);
-                }
+        //         if (!$serial) {
+        //             return response()->json(['status' => 'error', 'message' => 'Số serial không tồn tại.']);
+        //         }
 
-                // Kiểm tra nếu serial có status = 1
-                $existsInSerials = $serial->status == 5;
+        //         // Kiểm tra nếu serial có status = 5 hoặc status = 2 hợp lệ
+        //         $existsInSerials = ((int)$serial->status === 5)
+        //             || (((int)$serial->status === 2) && (((int)$serial->warehouse_id === 2)
+        //                 || ProductReturn::where('replacement_serial_number_id', $serial->id)->exists()));
 
-                // Kiểm tra nếu serial đã có trong WarehouseTransferItem
-                $existsInTransfer = WarehouseTransferItem::where('sn_id_borrow', $serial->id)->exists();
+        //         // Kiểm tra nếu serial đã có trong WarehouseTransferItem
+        //         $existsInTransfer = WarehouseTransferItem::where('sn_id_borrow', $serial->id)->exists();
 
-                if (!$existsInSerials && !$existsInTransfer) {
-                    return response()->json(['status' => 'error', 'message' => 'Số serial không hợp lệ.']);
-                } else {
-                    return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
-                }
-            }
-        }
+        //         if (!$existsInSerials && !$existsInTransfer) {
+        //             return response()->json(['status' => 'error', 'message' => 'Số serial không hợp lệ.']);
+        //         } else {
+        //             return response()->json(['status' => 'success', 'message' => 'Số serial hợp lệ.']);
+        //         }
+        //     }
+        // }
     }
     private function getSerialWarranty($serialCode)
     {
@@ -684,8 +719,14 @@ class SerialNumberController extends Controller
             return $errors;
         }
         
-        $serialCodes = collect($serials)->pluck('serial')->filter()->toArray();
-        $serialBorrowCodes = collect($serials)->pluck('serial_borrow')->filter()->toArray();
+        $serialCodes = collect($serials)->pluck('serial')->filter()->map(function ($code) {
+            return strtoupper(trim($code));
+        })->toArray();
+        // Hỗ trợ cả serial_borrow và serialBorrow từ frontend
+        $serialBorrowCodes = collect($serials)->map(function ($item) {
+            $code = $item['serial_borrow'] ?? ($item['serialBorrow'] ?? null);
+            return $code ? strtoupper(trim($code)) : null;
+        })->filter()->toArray();
         
         if (!empty($serialCodes)) {
             // Lấy thông tin product_id từ serials data
@@ -721,12 +762,24 @@ class SerialNumberController extends Controller
                     ->get()
                     ->keyBy('serial_code');
 
-                $borrowSerialRecords = SerialNumber::whereIn('serial_code', $serialBorrowCodes)
-                    ->where('status', 5)
-                    ->select('serial_code')
-                    ->get()
-                    ->pluck('serial_code')
-                    ->toArray();
+                // Tập serial mượn hợp lệ: status = 5
+                // hoặc status = 2 nếu đã dùng làm serial thay thế trong product_returns
+                $borrowSerials = SerialNumber::whereIn('serial_code', $serialBorrowCodes)
+                    ->select('id', 'serial_code', 'status', 'warehouse_id')
+                    ->get();
+                $borrowSerialRecords = [];
+                foreach ($borrowSerials as $sn) {
+                    if ((int)$sn->status === 5) {
+                        $borrowSerialRecords[] = $sn->serial_code;
+                        continue;
+                    }
+                    if ((int)$sn->status === 2) {
+                        $usedAsReplacement = ProductReturn::where('replacement_serial_number_id', $sn->id)->exists();
+                        if ($usedAsReplacement || (int)$sn->warehouse_id === 2) {
+                            $borrowSerialRecords[] = $sn->serial_code;
+                        }
+                    }
+                }
 
                 foreach ($serialCodes as $serialCode) {
                     $record = $serialRecords->get($serialCode);
