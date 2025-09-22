@@ -345,6 +345,18 @@ function updateFilters(
             // Kiểm tra loại bảng dựa trên tbodyClass
             if (tbodyClass.indexOf('warran-lookup') !== -1) {
                 tbodyHtml += generateWarrantyRow(item, index);
+            } else if (tbodyClass.indexOf('data') !== -1) {
+                // Bảng phiếu tiếp nhận
+                tbodyHtml += generateReceivingRow(item, index);
+            } else if (tbodyClass.indexOf('quotation') !== -1) {
+                // Bảng phiếu báo giá
+                tbodyHtml += generateQuotationRow(item, index);
+            } else if (tbodyClass.indexOf('returnform') !== -1) {
+                // Bảng phiếu trả hàng
+                tbodyHtml += generateReturnFormRow(item, index);
+            } else if (tbodyClass.indexOf('warehouse') !== -1) {
+                // Bảng phiếu chuyển kho
+                tbodyHtml += generateWarehouseTransferRow(item, index);
             } else {
                 tbodyHtml += generateInventoryRow(item, index);
             }
@@ -361,6 +373,17 @@ function updateFilters(
     // Cập nhật pagination nếu có
     if (data.pagination) {
         updatePagination(data.pagination);
+    }
+    
+    // Re-initialize event handlers for dynamically added elements
+    if (tbodyClass.indexOf('data') !== -1) {
+        // Re-initialize context menu for receiving rows
+        initializeReceivingRowEvents();
+    } else if (tbodyClass.indexOf('quotation') !== -1 || 
+               tbodyClass.indexOf('returnform') !== -1 || 
+               tbodyClass.indexOf('warehouse') !== -1) {
+        // Re-initialize basic events for other tables
+        initializeBasicTableEvents();
     }
 }
 
@@ -481,6 +504,546 @@ function generateInventoryRow(item, index) {
     rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.storage_duration || '') + ' ngày</td>';
     
     rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + statusHtml + '</td>' +
+        '</tr>';
+    
+    return rowHtml;
+}
+
+// Hàm tạo HTML cho mỗi row trong bảng phiếu tiếp nhận
+function generateReceivingRow(item, index) {
+    var formTypeHtml = '';
+    if (item.form_type == 1) {
+        formTypeHtml = 'Bảo hành';
+    } else if (item.form_type == 2) {
+        formTypeHtml = 'Dịch vụ';
+    } else if (item.form_type == 3) {
+        formTypeHtml = 'Bảo hành dịch vụ';
+    }
+    
+    var statusHtml = '';
+    if (item.status == 1) {
+        statusHtml = 'Tiếp nhận';
+    } else if (item.status == 2) {
+        statusHtml = 'Xử lý';
+    } else if (item.status == 3) {
+        statusHtml = 'Hoàn thành';
+    } else if (item.status == 4) {
+        statusHtml = 'Khách không đồng ý';
+    }
+    
+    var stateHtml = '';
+    if (item.state == 1) {
+        stateHtml = 'Chưa xử lý';
+    } else if (item.state == 2) {
+        stateHtml = 'Quá hạn';
+    }
+    
+    var dateCreated = '';
+    if (item.date_created) {
+        var date = new Date(item.date_created);
+        dateCreated = date.getDate().toString().padStart(2, '0') + '/' + 
+                    (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                    date.getFullYear();
+    }
+    
+    var closedAt = '';
+    if (item.closed_at) {
+        var date = new Date(item.closed_at);
+        closedAt = date.getDate().toString().padStart(2, '0') + '/' + 
+                  (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                  date.getFullYear();
+    }
+    
+    var customerName = '';
+    if (item.customer && item.customer.customer_name) {
+        customerName = '<span class="truncate-1line" title="' + item.customer.customer_name + '">' + item.customer.customer_name + '</span>';
+    } else if (item.customername) {
+        customerName = '<span class="truncate-1line" title="' + item.customername + '">' + item.customername + '</span>';
+    }
+    
+    var rowClass = 'position-relative data-info row-data height-40';
+    if (item.state == 1) {
+        rowClass += ' bg-custom-yl';
+    } else if (item.state == 2) {
+        rowClass += ' bg-custom-pink';
+    } else {
+        rowClass += ' bg-white';
+    }
+    
+    var hasReturn = item.returnForms ? item.returnForms.id : 0;
+    var hasQuote = item.quotation ? item.quotation.id : 0;
+    
+    var rowHtml = '<tr data-create-return-url="/returnforms/create" ' +
+        'data-edit-return-url="/returnforms/edit/:id" ' +
+        'data-create-quote-url="/quotations/create" ' +
+        'data-edit-quote-url="/quotations/edit/:id" ' +
+        'class="' + rowClass + '">' +
+        '<input type="hidden" name="id-data" class="id-data" id="id-data" ' +
+        'value="' + item.id + '" data-status="' + item.status + '" ' +
+        'data-has-return="' + hasReturn + '" data-has-quote="' + hasQuote + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        '<a href="/receivings/' + item.id + '/edit">' + item.form_code_receiving + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180">' +
+        customerName +
+        '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' +
+        dateCreated +
+        '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' +
+        closedAt +
+        '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' +
+        formTypeHtml +
+        '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 status-text' + item.id + '">' +
+        statusHtml +
+        '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 state-text' + item.id + '">' +
+        stateHtml +
+        '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0 note-text">' +
+        (item.notes || '') +
+        '</td>' +
+        '<td class="position-absolute m-0 p-0 bg-hover-icon icon-center">' +
+        '<div class="d-flex w-100">' +
+        '<a href="#">' +
+        '<div class="rounded">' +
+        '<form onclick="return confirm(\'Bạn có chắc chắn muốn xóa?\')" ' +
+        'action="/receivings/' + item.id + '" method="POST" class="d-inline">' +
+        '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+        '<input type="hidden" name="_method" value="DELETE">' +
+        '<button type="submit" class="btn btn-sm">' +
+        '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path opacity="0.936" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M6.40625 0.968766C7.44813 0.958304 8.48981 0.968772 9.53125 1.00016C9.5625 1.03156 9.59375 1.06296 9.625 1.09436C9.65625 1.49151 9.66663 1.88921 9.65625 2.28746C10.7189 2.277 11.7814 2.28747 12.8438 2.31886C12.875 2.35025 12.9063 2.38165 12.9375 2.41305C12.9792 2.99913 12.9792 3.58522 12.9375 4.17131C12.9063 4.24457 12.8542 4.2969 12.7813 4.32829C12.6369 4.35948 12.4911 4.36995 12.3438 4.35969C12.3542 7.45762 12.3438 10.5555 12.3125 13.6533C12.1694 14.3414 11.7632 14.7914 11.0938 15.0034C9.01044 15.0453 6.92706 15.0453 4.84375 15.0034C4.17433 14.7914 3.76808 14.3414 3.625 13.6533C3.59375 10.5555 3.58333 7.45762 3.59375 4.35969C3.3794 4.3844 3.18148 4.34254 3 4.2341C2.95833 3.62708 2.95833 3.02007 3 2.41305C3.03125 2.38165 3.0625 2.35025 3.09375 2.31886C4.15605 2.28747 5.21855 2.277 6.28125 2.28746C6.27088 1.88921 6.28125 1.49151 6.3125 1.09436C6.35731 1.06018 6.38856 1.01832 6.40625 0.968766ZM6.96875 1.65951C7.63544 1.65951 8.30206 1.65951 8.96875 1.65951C8.96875 1.86882 8.96875 2.07814 8.96875 2.28746C8.30206 2.28746 7.63544 2.28746 6.96875 2.28746C6.96875 2.07814 6.96875 1.86882 6.96875 1.65951ZM3.65625 2.9782C6.53125 2.9782 9.40625 2.9782 12.2813 2.9782C12.2813 3.18752 12.2813 3.39684 12.2813 3.60615C9.40625 3.60615 6.53125 3.60615 3.65625 3.60615C3.65625 3.39684 3.65625 3.18752 3.65625 2.9782ZM4.34375 4.35969C6.76044 4.35969 9.17706 4.35969 11.5938 4.35969C11.6241 7.5032 11.5929 10.643 11.5 13.7789C11.3553 14.05 11.1366 14.2279 10.8438 14.3127C8.92706 14.3546 7.01044 14.3546 5.09375 14.3127C4.80095 14.2279 4.5822 14.05 4.4375 13.7789C4.34462 10.643 4.31337 7.5032 4.34375 4.35969Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M5.78125 5.28118C6.0306 5.2259 6.20768 5.30924 6.3125 5.53118C6.35419 8.052 6.35419 10.5729 6.3125 13.0937C6.08333 13.427 5.85417 13.427 5.625 13.0937C5.58333 10.552 5.58333 8.01037 5.625 5.46868C5.69031 5.4141 5.7424 5.3516 5.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M7.78125 5.28118C8.03063 5.2259 8.20769 5.30924 8.3125 5.53118C8.35419 8.052 8.35419 10.5729 8.3125 13.0937C8.08331 13.427 7.85419 13.427 7.625 13.0937C7.58331 10.552 7.58331 8.01037 7.625 5.46868C7.69031 5.4141 7.74238 5.3516 7.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M9.78125 5.28118C10.0306 5.2259 10.2077 5.30924 10.3125 5.53118C10.3542 8.052 10.3542 10.5729 10.3125 13.0937C10.0833 13.427 9.85419 13.427 9.625 13.0937C9.58331 10.552 9.58331 8.01037 9.625 5.46868C9.69031 5.4141 9.74238 5.3516 9.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '</svg>' +
+        '</button>' +
+        '</form>' +
+        '</div>' +
+        '</a>' +
+        '</div>' +
+        '</td>' +
+        '</tr>';
+    
+    return rowHtml;
+}
+
+// Hàm khởi tạo sự kiện cho các hàng phiếu tiếp nhận
+function initializeReceivingRowEvents() {
+    // Re-initialize context menu for receiving rows
+    $(document).off('contextmenu', '.row-data').on('contextmenu', '.row-data', function(e) {
+        e.preventDefault();
+        const $row = $(this);
+        const $optionButton = $('.option-button');
+        const $statusList = $optionButton.find('.status-list');
+        const dataRecei = $row.find('.id-data').val();
+        const hasReturn = $row.find('.id-data').data('has-return');
+        const hasQuote = $row.find('.id-data').data('has-quote');
+        const dataStatus = $row.find('.id-data').data('status');
+
+        const urls = {
+            createReturn: `${$row.data('create-return-url')}?recei=${dataRecei}`,
+            editReturn: $row.data('edit-return-url').replace(':id', hasReturn),
+            createQuote: `${$row.data('create-quote-url')}?recei=${dataRecei}`,
+            editQuote: $row.data('edit-quote-url').replace(':id', hasQuote),
+        };
+
+        // Kiểm tra nếu dataStatus = 1 thì ẩn các nút tạo và sửa
+        if (dataStatus === 1) {
+            $optionButton.find('.return-form, .quotation').addClass('d-none');
+        } else {
+            // Hiển thị và cập nhật nút tạo/sửa khi dataStatus không phải là 1
+            $optionButton.find('.return-form, .quotation').removeClass('d-none');
+            updateButtonText($optionButton.find('.return-form'), hasReturn, 'Tạo phiếu trả hàng',
+                'Sửa phiếu trả hàng', urls.createReturn, urls.editReturn);
+            updateButtonText($optionButton.find('.quotation'), hasQuote, 'Tạo phiếu báo giá',
+                'Sửa phiếu báo giá', urls.createQuote, urls.editQuote);
+        }
+
+        const statusData = hasReturn !== 0 ? [{
+                status: 3,
+                label: 'Hoàn thành'
+            },
+            {
+                status: 4,
+                label: 'Không đồng ý'
+            }
+        ] : [{
+                status: 1,
+                label: 'Tiếp nhận'
+            },
+            {
+                status: 2,
+                label: 'Xử lý'
+            }
+        ];
+
+        $statusList.empty(); // Xóa danh sách cũ
+        statusData.forEach(({
+            status,
+            label
+        }) => {
+            $statusList.append(`
+            <li data-return="${hasReturn}" data-recei="${dataRecei}" data-status="${status}">
+                ${label}
+            </li>
+        `);
+        });
+
+        const {
+            clientX: x,
+            clientY: y
+        } = e;
+        $optionButton.css({
+            top: `${y}px`,
+            left: `${x}px`,
+            position: 'fixed',
+            zIndex: 1000,
+        }).show();
+    });
+
+    // Re-initialize status change functionality
+    $(document).off('click', '.status-list li').on('click', '.status-list li', function(e) {
+        e.stopPropagation();
+        const statusId = $(this).data('status');
+        const recei = $(this).data('recei');
+        const returndata = $(this).data('return');
+        const statusText = $(this).text();
+        const $td = $(`.status-text${recei}`);
+        const $state = $(`.state-text${recei}`);
+        $.ajax({
+            url: '/update-status',
+            method: 'POST',
+            data: {
+                status: statusId,
+                recei: recei,
+                returndata: returndata,
+                _token: $('meta[name="csrf-token"]').attr('content'),
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    $td.text(statusText);
+                    $state.text('');
+                    $('input.id-data[value="' + response.id + '"]').data('status',
+                        statusId);
+                    if (statusId != 1) {
+                        $('input.id-data[value="' + response.id + '"]').closest('tr')
+                            .removeClass('bg-custom-yl bg-custom-pink');
+                    }
+                    showAutoToast("success", 'Cập nhật trạng thái thành công.');
+                } else {
+                    showAutoToast("warning", 'Cập nhật trạng thái không thành công.');
+                }
+            },
+            error: function() {
+                showAutoToast("warning",
+                    'Không thể cập nhật trạng thái. Vui lòng thử lại.');
+            },
+        });
+
+        $(this).closest('.status-list').hide();
+        const optionButton = $(this).closest('.option-button');
+        optionButton.hide()
+    });
+
+    // Re-initialize option button clicks
+    $(document).off('click', '.option-btn').on('click', '.option-btn', function() {
+        const url = $(this).data('url');
+        if (url) window.open(url, '_blank');
+    });
+}
+
+// Hàm cập nhật text và URL cho button
+function updateButtonText($button, hasItem, createText, editText, createUrl, editUrl) {
+    if (hasItem === 0) {
+        $button.text(createText).data('url', createUrl);
+    } else {
+        $button.text(editText).data('url', editUrl);
+    }
+}
+
+// Hàm khởi tạo sự kiện cơ bản cho các bảng khác
+function initializeBasicTableEvents() {
+    // Re-initialize delete button clicks
+    $(document).off('click', 'form[action*="destroy"] button[type="submit"]').on('click', 'form[action*="destroy"] button[type="submit"]', function(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn xóa?')) {
+            $(this).closest('form').submit();
+        }
+    });
+}
+
+// Hàm tạo HTML cho mỗi row trong bảng phiếu báo giá
+function generateQuotationRow(item, index) {
+    var formTypeHtml = '';
+    if (item.reception && item.reception.form_type == 1) {
+        formTypeHtml = 'Bảo hành';
+    } else if (item.reception && item.reception.form_type == 2) {
+        formTypeHtml = 'Dịch vụ';
+    } else if (item.reception && item.reception.form_type == 3) {
+        formTypeHtml = 'Bảo hành dịch vụ';
+    }
+    
+    var quotationDate = '';
+    if (item.quotation_date) {
+        var date = new Date(item.quotation_date);
+        quotationDate = date.getDate().toString().padStart(2, '0') + '/' + 
+                       (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                       date.getFullYear();
+    }
+    
+    var customerName = '';
+    if (item.customer && item.customer.customer_name) {
+        customerName = '<span class="truncate-1line" title="' + item.customer.customer_name + '">' + item.customer.customer_name + '</span>';
+    }
+    
+    var receivingCode = '';
+    if (item.reception && item.reception.form_code_receiving) {
+        receivingCode = '<a href="/receivings/' + item.reception_id + '/edit">' + item.reception.form_code_receiving + '</a>';
+    }
+    
+    var totalAmount = '';
+    if (item.total_amount) {
+        totalAmount = new Intl.NumberFormat('vi-VN').format(item.total_amount);
+    }
+    
+    var rowHtml = '<tr class="position-relative quotation-info height-40">' +
+        '<input type="hidden" name="id-quotation" class="id-quotation" id="id-quotation" value="' + item.id + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        '<a href="/quotations/' + item.id + '/edit">' + item.quotation_code + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180" title="' + (item.customer ? item.customer.customer_name : '') + '">' +
+        customerName +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        quotationDate +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        receivingCode +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        totalAmount +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        formTypeHtml +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 note-text">' +
+        (item.notes || '') +
+        '</td>' +
+        '<td class="position-absolute m-0 p-0 bg-hover-icon icon-center">' +
+        '<div class="d-flex w-100">' +
+        '<a href="#">' +
+        '<div class="rounded">' +
+        '<form onclick="return confirm(\'Bạn có chắc chắn muốn xóa?\')" ' +
+        'action="/quotations/' + item.id + '" method="POST" class="d-inline">' +
+        '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+        '<input type="hidden" name="_method" value="DELETE">' +
+        '<button type="submit" class="btn btn-sm">' +
+        '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path opacity="0.936" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M6.40625 0.968766C7.44813 0.958304 8.48981 0.968772 9.53125 1.00016C9.5625 1.03156 9.59375 1.06296 9.625 1.09436C9.65625 1.49151 9.66663 1.88921 9.65625 2.28746C10.7189 2.277 11.7814 2.28747 12.8438 2.31886C12.875 2.35025 12.9063 2.38165 12.9375 2.41305C12.9792 2.99913 12.9792 3.58522 12.9375 4.17131C12.9063 4.24457 12.8542 4.2969 12.7813 4.32829C12.6369 4.35948 12.4911 4.36995 12.3438 4.35969C12.3542 7.45762 12.3438 10.5555 12.3125 13.6533C12.1694 14.3414 11.7632 14.7914 11.0938 15.0034C9.01044 15.0453 6.92706 15.0453 4.84375 15.0034C4.17433 14.7914 3.76808 14.3414 3.625 13.6533C3.59375 10.5555 3.58333 7.45762 3.59375 4.35969C3.3794 4.3844 3.18148 4.34254 3 4.2341C2.95833 3.62708 2.95833 3.02007 3 2.41305C3.03125 2.38165 3.0625 2.35025 3.09375 2.31886C4.15605 2.28747 5.21855 2.277 6.28125 2.28746C6.27088 1.88921 6.28125 1.49151 6.3125 1.09436C6.35731 1.06018 6.38856 1.01832 6.40625 0.968766ZM6.96875 1.65951C7.63544 1.65951 8.30206 1.65951 8.96875 1.65951C8.96875 1.86882 8.96875 2.07814 8.96875 2.28746C8.30206 2.28746 7.63544 2.28746 6.96875 2.28746C6.96875 2.07814 6.96875 1.86882 6.96875 1.65951ZM3.65625 2.9782C6.53125 2.9782 9.40625 2.9782 12.2813 2.9782C12.2813 3.18752 12.2813 3.39684 12.2813 3.60615C9.40625 3.60615 6.53125 3.60615 3.65625 3.60615C3.65625 3.39684 3.65625 3.18752 3.65625 2.9782ZM4.34375 4.35969C6.76044 4.35969 9.17706 4.35969 11.5938 4.35969C11.6241 7.5032 11.5929 10.643 11.5 13.7789C11.3553 14.05 11.1366 14.2279 10.8438 14.3127C8.92706 14.3546 7.01044 14.3546 5.09375 14.3127C4.80095 14.2279 4.5822 14.05 4.4375 13.7789C4.34462 10.643 4.31337 7.5032 4.34375 4.35969Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M5.78125 5.28118C6.0306 5.2259 6.20768 5.30924 6.3125 5.53118C6.35419 8.052 6.35419 10.5729 6.3125 13.0937C6.08333 13.427 5.85417 13.427 5.625 13.0937C5.58333 10.552 5.58333 8.01037 5.625 5.46868C5.69031 5.4141 5.7424 5.3516 5.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M7.78125 5.28118C8.03063 5.2259 8.20769 5.30924 8.3125 5.53118C8.35419 8.052 8.35419 10.5729 8.3125 13.0937C8.08331 13.427 7.85419 13.427 7.625 13.0937C7.58331 10.552 7.58331 8.01037 7.625 5.46868C7.69031 5.4141 7.74238 5.3516 7.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M9.78125 5.28118C10.0306 5.2259 10.2077 5.30924 10.3125 5.53118C10.3542 8.052 10.3542 10.5729 10.3125 13.0937C10.0833 13.427 9.85419 13.427 9.625 13.0937C9.58331 10.552 9.58331 8.01037 9.625 5.46868C9.69031 5.4141 9.74238 5.3516 9.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '</svg>' +
+        '</button>' +
+        '</form>' +
+        '</div>' +
+        '</a>' +
+        '</div>' +
+        '</td>' +
+        '</tr>';
+    
+    return rowHtml;
+}
+
+// Hàm tạo HTML cho mỗi row trong bảng phiếu trả hàng
+function generateReturnFormRow(item, index) {
+    var statusHtml = '';
+    if (item.status == 1) {
+        statusHtml = 'Hoàn thành';
+    } else if (item.status == 2) {
+        statusHtml = 'Khách không đồng ý';
+    }
+    
+    var formTypeHtml = '';
+    if (item.reception && item.reception.form_type == 1) {
+        formTypeHtml = 'Bảo hành';
+    } else if (item.reception && item.reception.form_type == 2) {
+        formTypeHtml = 'Dịch vụ';
+    } else if (item.reception && item.reception.form_type == 3) {
+        formTypeHtml = 'Bảo hành dịch vụ';
+    }
+    
+    var dateCreated = '';
+    if (item.date_created) {
+        var date = new Date(item.date_created);
+        dateCreated = date.getDate().toString().padStart(2, '0') + '/' + 
+                     (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                     date.getFullYear();
+    }
+    
+    var customerName = '';
+    if (item.customer && item.customer.customer_name) {
+        customerName = '<span class="truncate-1line" title="' + item.customer.customer_name + '">' + item.customer.customer_name + '</span>';
+    }
+    
+    var receivingCode = '';
+    if (item.reception && item.reception.form_code_receiving) {
+        receivingCode = '<a href="/receivings/' + item.reception_id + '/edit">' + item.reception.form_code_receiving + '</a>';
+    }
+    
+    var rowHtml = '<tr class="position-relative returnform-info height-40">' +
+        '<input type="hidden" name="id-returnform" class="id-returnform" id="id-returnform" value="' + item.id + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        '<a href="/returnforms/' + item.id + '/edit">' + item.return_code + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180">' +
+        customerName +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        dateCreated +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        receivingCode +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        statusHtml +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        formTypeHtml +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 note-text">' +
+        (item.notes || '') +
+        '</td>' +
+        '<td class="position-absolute m-0 p-0 bg-hover-icon icon-center">' +
+        '<div class="d-flex w-100">' +
+        '<a href="#">' +
+        '<div class="rounded">' +
+        '<form onclick="return confirm(\'Bạn có chắc chắn muốn xóa?\')" ' +
+        'action="/returnforms/' + item.id + '" method="POST" class="d-inline">' +
+        '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+        '<input type="hidden" name="_method" value="DELETE">' +
+        '<button type="submit" class="btn btn-sm">' +
+        '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path opacity="0.936" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M6.40625 0.968766C7.44813 0.958304 8.48981 0.968772 9.53125 1.00016C9.5625 1.03156 9.59375 1.06296 9.625 1.09436C9.65625 1.49151 9.66663 1.88921 9.65625 2.28746C10.7189 2.277 11.7814 2.28747 12.8438 2.31886C12.875 2.35025 12.9063 2.38165 12.9375 2.41305C12.9792 2.99913 12.9792 3.58522 12.9375 4.17131C12.9063 4.24457 12.8542 4.2969 12.7813 4.32829C12.6369 4.35948 12.4911 4.36995 12.3438 4.35969C12.3542 7.45762 12.3438 10.5555 12.3125 13.6533C12.1694 14.3414 11.7632 14.7914 11.0938 15.0034C9.01044 15.0453 6.92706 15.0453 4.84375 15.0034C4.17433 14.7914 3.76808 14.3414 3.625 13.6533C3.59375 10.5555 3.58333 7.45762 3.59375 4.35969C3.3794 4.3844 3.18148 4.34254 3 4.2341C2.95833 3.62708 2.95833 3.02007 3 2.41305C3.03125 2.38165 3.0625 2.35025 3.09375 2.31886C4.15605 2.28747 5.21855 2.277 6.28125 2.28746C6.27088 1.88921 6.28125 1.49151 6.3125 1.09436C6.35731 1.06018 6.38856 1.01832 6.40625 0.968766ZM6.96875 1.65951C7.63544 1.65951 8.30206 1.65951 8.96875 1.65951C8.96875 1.86882 8.96875 2.07814 8.96875 2.28746C8.30206 2.28746 7.63544 2.28746 6.96875 2.28746C6.96875 2.07814 6.96875 1.86882 6.96875 1.65951ZM3.65625 2.9782C6.53125 2.9782 9.40625 2.9782 12.2813 2.9782C12.2813 3.18752 12.2813 3.39684 12.2813 3.60615C9.40625 3.60615 6.53125 3.60615 3.65625 3.60615C3.65625 3.39684 3.65625 3.18752 3.65625 2.9782ZM4.34375 4.35969C6.76044 4.35969 9.17706 4.35969 11.5938 4.35969C11.6241 7.5032 11.5929 10.643 11.5 13.7789C11.3553 14.05 11.1366 14.2279 10.8438 14.3127C8.92706 14.3546 7.01044 14.3546 5.09375 14.3127C4.80095 14.2279 4.5822 14.05 4.4375 13.7789C4.34462 10.643 4.31337 7.5032 4.34375 4.35969Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M5.78125 5.28118C6.0306 5.2259 6.20768 5.30924 6.3125 5.53118C6.35419 8.052 6.35419 10.5729 6.3125 13.0937C6.08333 13.427 5.85417 13.427 5.625 13.0937C5.58333 10.552 5.58333 8.01037 5.625 5.46868C5.69031 5.4141 5.7424 5.3516 5.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M7.78125 5.28118C8.03063 5.2259 8.20769 5.30924 8.3125 5.53118C8.35419 8.052 8.35419 10.5729 8.3125 13.0937C8.08331 13.427 7.85419 13.427 7.625 13.0937C7.58331 10.552 7.58331 8.01037 7.625 5.46868C7.69031 5.4141 7.74238 5.3516 7.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M9.78125 5.28118C10.0306 5.2259 10.2077 5.30924 10.3125 5.53118C10.3542 8.052 10.3542 10.5729 10.3125 13.0937C10.0833 13.427 9.85419 13.427 9.625 13.0937C9.58331 10.552 9.58331 8.01037 9.625 5.46868C9.69031 5.4141 9.74238 5.3516 9.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '</svg>' +
+        '</button>' +
+        '</form>' +
+        '</div>' +
+        '</a>' +
+        '</div>' +
+        '</td>' +
+        '</tr>';
+    
+    return rowHtml;
+}
+
+// Hàm tạo HTML cho mỗi row trong bảng phiếu chuyển kho
+function generateWarehouseTransferRow(item, index) {
+    var statusHtml = '';
+    if (item.status == 1) {
+        statusHtml = '<span class="text-success">Hoàn thành</span>';
+    } else {
+        statusHtml = '<span class="text-danger">Hủy</span>';
+    }
+    
+    var transferDate = '';
+    if (item.transfer_date) {
+        var date = new Date(item.transfer_date);
+        transferDate = date.getDate().toString().padStart(2, '0') + '/' + 
+                      (date.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                      date.getFullYear();
+    }
+    
+    var fromWarehouse = '';
+    if (item.fromWarehouse && item.fromWarehouse.warehouse_name) {
+        fromWarehouse = item.fromWarehouse.warehouse_name;
+    }
+    
+    var toWarehouse = '';
+    if (item.toWarehouse && item.toWarehouse.warehouse_name) {
+        toWarehouse = item.toWarehouse.warehouse_name;
+    }
+    
+    var rowHtml = '<tr class="position-relative warehouse-info height-40">' +
+        '<input type="hidden" name="id-warehouse" class="id-warehouse" id="id-warehouse" value="' + item.id + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        '<a href="/warehouseTransfer/' + item.id + '/edit">' + item.code + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        transferDate +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        fromWarehouse +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        toWarehouse +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' +
+        statusHtml +
+        '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180 note-text">' +
+        (item.note || '') +
+        '</td>' +
+        '<td class="position-absolute m-0 p-0 bg-hover-icon icon-center border-top-0">' +
+        '<div class="d-flex w-100">' +
+        '<a href="#">' +
+        '<div class="rounded">' +
+        '<form onclick="return confirm(\'Bạn có chắc chắn muốn xóa?\')" ' +
+        'action="/warehouseTransfer/' + item.id + '" method="POST" class="d-inline">' +
+        '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+        '<input type="hidden" name="_method" value="DELETE">' +
+        '<button type="submit" class="btn btn-sm">' +
+        '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path opacity="0.936" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M6.40625 0.968766C7.44813 0.958304 8.48981 0.968772 9.53125 1.00016C9.5625 1.03156 9.59375 1.06296 9.625 1.09436C9.65625 1.49151 9.66663 1.88921 9.65625 2.28746C10.7189 2.277 11.7814 2.28747 12.8438 2.31886C12.875 2.35025 12.9063 2.38165 12.9375 2.41305C12.9792 2.99913 12.9792 3.58522 12.9375 4.17131C12.9063 4.24457 12.8542 4.2969 12.7813 4.32829C12.6369 4.35948 12.4911 4.36995 12.3438 4.35969C12.3542 7.45762 12.3438 10.5555 12.3125 13.6533C12.1694 14.3414 11.7632 14.7914 11.0938 15.0034C9.01044 15.0453 6.92706 15.0453 4.84375 15.0034C4.17433 14.7914 3.76808 14.3414 3.625 13.6533C3.59375 10.5555 3.58333 7.45762 3.59375 4.35969C3.3794 4.3844 3.18148 4.34254 3 4.2341C2.95833 3.62708 2.95833 3.02007 3 2.41305C3.03125 2.38165 3.0625 2.35025 3.09375 2.31886C4.15605 2.28747 5.21855 2.277 6.28125 2.28746C6.27088 1.88921 6.28125 1.49151 6.3125 1.09436C6.35731 1.06018 6.38856 1.01832 6.40625 0.968766ZM6.96875 1.65951C7.63544 1.65951 8.30206 1.65951 8.96875 1.65951C8.96875 1.86882 8.96875 2.07814 8.96875 2.28746C8.30206 2.28746 7.63544 2.28746 6.96875 2.28746C6.96875 2.07814 6.96875 1.86882 6.96875 1.65951ZM3.65625 2.9782C6.53125 2.9782 9.40625 2.9782 12.2813 2.9782C12.2813 3.18752 12.2813 3.39684 12.2813 3.60615C9.40625 3.60615 6.53125 3.60615 3.65625 3.60615C3.65625 3.39684 3.65625 3.18752 3.65625 2.9782ZM4.34375 4.35969C6.76044 4.35969 9.17706 4.35969 11.5938 4.35969C11.6241 7.5032 11.5929 10.643 11.5 13.7789C11.3553 14.05 11.1366 14.2279 10.8438 14.3127C8.92706 14.3546 7.01044 14.3546 5.09375 14.3127C4.80095 14.2279 4.5822 14.05 4.4375 13.7789C4.34462 10.643 4.31337 7.5032 4.34375 4.35969Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M5.78125 5.28118C6.0306 5.2259 6.20768 5.30924 6.3125 5.53118C6.35419 8.052 6.35419 10.5729 6.3125 13.0937C6.08333 13.427 5.85417 13.427 5.625 13.0937C5.58333 10.552 5.58333 8.01037 5.625 5.46868C5.69031 5.4141 5.7424 5.3516 5.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M7.78125 5.28118C8.03063 5.2259 8.20769 5.30924 8.3125 5.53118C8.35419 8.052 8.35419 10.5729 8.3125 13.0937C8.08331 13.427 7.85419 13.427 7.625 13.0937C7.58331 10.552 7.58331 8.01037 7.625 5.46868C7.69031 5.4141 7.74238 5.3516 7.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '<path opacity="0.891" fill-rule="evenodd" clip-rule="evenodd" ' +
+        'd="M9.78125 5.28118C10.0306 5.2259 10.2077 5.30924 10.3125 5.53118C10.3542 8.052 10.3542 10.5729 10.3125 13.0937C10.0833 13.427 9.85419 13.427 9.625 13.0937C9.58331 10.552 9.58331 8.01037 9.625 5.46868C9.69031 5.4141 9.74238 5.3516 9.78125 5.28118Z" ' +
+        'fill="#6C6F74" />' +
+        '</svg>' +
+        '</button>' +
+        '</form>' +
+        '</div>' +
+        '</a>' +
+        '</div>' +
+        '</td>' +
         '</tr>';
     
     return rowHtml;

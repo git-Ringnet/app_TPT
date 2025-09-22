@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Receiving extends Model
 {
@@ -67,38 +68,86 @@ class Receiving extends Model
     }
     public function getReceiAjax($data = null)
     {
+        // Subqueries để tổng hợp serial và sản phẩm theo mỗi phiếu tiếp nhận
+        $serialAggregate = DB::table('received_products')
+            ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'received_products.serial_id')
+            ->select(
+                'received_products.reception_id',
+                DB::raw('GROUP_CONCAT(DISTINCT serial_numbers.serial_code ORDER BY serial_numbers.serial_code SEPARATOR ", ") AS serial_number')
+            )
+            ->groupBy('received_products.reception_id');
+
+        $productAggregate = DB::table('received_products')
+            ->leftJoin('products', 'products.id', '=', 'received_products.product_id')
+            ->select(
+                'received_products.reception_id',
+                DB::raw('GROUP_CONCAT(DISTINCT products.product_name ORDER BY products.product_name SEPARATOR ", ") AS product_name'),
+                DB::raw('GROUP_CONCAT(DISTINCT products.product_code ORDER BY products.product_code SEPARATOR ", ") AS product_code')
+            )
+            ->groupBy('received_products.reception_id');
+
         $receivings = Receiving::with(['user', 'customer'])
             ->join('users', 'receiving.user_id', '=', 'users.id') // Join với bảng users
             ->join('customers', 'receiving.customer_id', '=', 'customers.id')
-            ->leftJoin('received_products', 'received_products.reception_id', '=', 'receiving.id')
-            ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'received_products.serial_id')
-            ->leftJoin('products', 'products.id', '=', 'received_products.product_id')
+            ->leftJoinSub($serialAggregate, 'agg_serials', function ($join) {
+                $join->on('agg_serials.reception_id', '=', 'receiving.id');
+            })
+            ->leftJoinSub($productAggregate, 'agg_products', function ($join) {
+                $join->on('agg_products.reception_id', '=', 'receiving.id');
+            })
             ->select(
                 'receiving.*',
                 'users.name as username',
                 'customers.customer_name as customername',
-                'serial_numbers.serial_code as serial_number',
-                'products.product_name as product_name',
-                'products.product_code as product_code'
+                DB::raw('agg_serials.serial_number as serial_number'),
+                DB::raw('agg_products.product_name as product_name'),
+                DB::raw('agg_products.product_code as product_code')
             );
         if (!empty($data)) {
             if (!empty($data['search'])) {
                 $receivings->where(function ($query) use ($data) {
                     $query->where('form_code_receiving', 'like', '%' . $data['search'] . '%')
                         ->orWhere('notes', 'like', '%' . $data['search'] . '%')
-                        ->orWhere('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%')
-                        ->orWhere('products.product_name', 'like', '%' . $data['search'] . '%')
-                        ->orWhere('products.product_code', 'like', '%' . $data['search'] . '%');
+                        ->orWhereExists(function ($sub) use ($data) {
+                            $sub->from('received_products')
+                                ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'received_products.serial_id')
+                                ->whereColumn('received_products.reception_id', 'receiving.id')
+                                ->where('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%');
+                        })
+                        ->orWhereExists(function ($sub) use ($data) {
+                            $sub->from('received_products')
+                                ->leftJoin('products', 'products.id', '=', 'received_products.product_id')
+                                ->whereColumn('received_products.reception_id', 'receiving.id')
+                                ->where(function ($q) use ($data) {
+                                    $q->where('products.product_name', 'like', '%' . $data['search'] . '%')
+                                      ->orWhere('products.product_code', 'like', '%' . $data['search'] . '%');
+                                });
+                        });
                 });
             }
             if (!empty($data['serial'])) {
-                $receivings->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+                $receivings->whereExists(function ($sub) use ($data) {
+                    $sub->from('received_products')
+                        ->leftJoin('serial_numbers', 'serial_numbers.id', '=', 'received_products.serial_id')
+                        ->whereColumn('received_products.reception_id', 'receiving.id')
+                        ->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+                });
             }
             if (!empty($data['product_name'])) {
-                $receivings->where('products.product_name', 'like', '%' . $data['product_name'] . '%');
+                $receivings->whereExists(function ($sub) use ($data) {
+                    $sub->from('received_products')
+                        ->leftJoin('products', 'products.id', '=', 'received_products.product_id')
+                        ->whereColumn('received_products.reception_id', 'receiving.id')
+                        ->where('products.product_name', 'like', '%' . $data['product_name'] . '%');
+                });
             }
             if (!empty($data['product_code'])) {
-                $receivings->where('products.product_code', 'like', '%' . $data['product_code'] . '%');
+                $receivings->whereExists(function ($sub) use ($data) {
+                    $sub->from('received_products')
+                        ->leftJoin('products', 'products.id', '=', 'received_products.product_id')
+                        ->whereColumn('received_products.reception_id', 'receiving.id')
+                        ->where('products.product_code', 'like', '%' . $data['product_code'] . '%');
+                });
             }
             if (!empty($data['ma'])) {
                 $receivings->where('form_code_receiving', 'like', '%' . $data['ma'] . '%');

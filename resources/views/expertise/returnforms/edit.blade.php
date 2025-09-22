@@ -332,7 +332,7 @@
                                                 @if ($index == 0)
                                                     <td class="border-right p-2 text-13 align-top pl-4 border-bottom">
                                                         <input type="hidden"
-                                                            name="return[{{ $item->id }}][product_id]"
+                                                            name="return[{{ $loop->index }}][product_id]"
                                                             value="{{ $item->product_id }}">
                                                         <input type="text"
                                                             class="border-0 pl-1 pr-2 py-1 w-100 product_code" readonly
@@ -349,10 +349,13 @@
                                                     <td class="border-right p-2 text-13 align-top border-bottom">
                                                         <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                             readonly value="{{ $item->quantity }}">
+                                                        <input type="hidden" name="return[{{ $loop->index }}][quantity]" value="{{ $item->quantity }}">
                                                     </td>
                                                     <td class="border-right p-2 text-13 align-top border-bottom">
                                                         <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                             readonly value="{{ $item->serialNumber->serial_code }}">
+                                                        <input type="hidden" name="return[{{ $loop->index }}][serial_id]" value="{{ $item->serial_number_id }}">
+                                                        <input type="hidden" name="return[{{ $loop->index }}][serial_code]" value="{{ $item->serialNumber->serial_code }}">
                                                     </td>
                                                     <td
                                                         class="border-right p-2 text-13 align-top border-bottom {{ $hideReplacement }}">
@@ -377,6 +380,8 @@
                                                     <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                         readonly
                                                         value="{{ $item->replacementSerialNumber->serial_code ?? '' }}">
+                                                    <input type="hidden" name="return[{{ $loop->index }}][replacement_code]" value="{{ $item->replacement_code ?? '' }}">
+                                                    <input type="hidden" name="return[{{ $loop->index }}][replacement_serial_number_id]" value="{{ $item->replacementSerialNumber->serial_code ?? '' }}">
                                                 </td>
 
                                                 {{-- Extra Warranty & Ghi chú (nếu cần) --}}
@@ -384,16 +389,19 @@
                                                     class="border-right p-2 text-13 align-top {{ $hideExtraWarranty }}">
                                                     <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                         readonly value="{{ $item->warranties->name_warranty ?? '' }}">
+                                                    <input type="hidden" name="return[{{ $loop->index }}][name_warranty]" value="{{ $item->warranties->name_warranty ?? '' }}">
                                                 </td>
                                                 <td
                                                     class="border-right p-2 text-13 align-top {{ $hideExtraWarranty }}">
                                                     <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                         readonly value="{{ $item->extra_warranty ?? '' }}">
+                                                    <input type="hidden" name="return[{{ $loop->index }}][extra_warranty]" value="{{ $item->extra_warranty ?? '' }}">
                                                 </td>
                                                 @if ($index == 0)
                                                 <td class="border-right p-2 text-13 align-top border-bottom">
                                                     <input type="text"
                                                         class="border-0 pl-1 pr-2 py-1 w-100 bg-input-guest-blue"
+                                                        name="return[{{ $loop->index }}][note]"
                                                         value="{{ $item->notes ?? '' }}">
                                                 </td>
                                                 @else
