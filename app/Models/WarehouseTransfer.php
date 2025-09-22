@@ -141,15 +141,24 @@ class WarehouseTransfer extends Model
     public function getAllWarehouseTransfer($data = null)
     {
         $warehouse = DB::table('warehouse_transfers')
-            ->leftJoin('warehouses', 'warehouses.id', 'warehouse_transfers.from_warehouse_id')
-            ->select('warehouse_transfers.*','warehouses.warehouse_name','warehouses.warehouse_code');
+            ->leftJoin('warehouses as from_w', 'from_w.id', '=', 'warehouse_transfers.from_warehouse_id')
+            ->leftJoin('warehouses as to_w', 'to_w.id', '=', 'warehouse_transfers.to_warehouse_id')
+            ->select(
+                'warehouse_transfers.*',
+                DB::raw('from_w.warehouse_name as from_warehouse_name'),
+                DB::raw('from_w.warehouse_code as from_warehouse_code'),
+                DB::raw('to_w.warehouse_name as to_warehouse_name'),
+                DB::raw('to_w.warehouse_code as to_warehouse_code')
+            );
         // Tìm kiếm chung
         if (!empty($data['search'])) {
             $warehouse->where(function ($query) use ($data) {
                 $query->where('warehouse_transfers.code', 'like', '%' . $data['search'] . '%')
-                    ->orWhere('warehouse_name', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('from_w.warehouse_name', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('to_w.warehouse_name', 'like', '%' . $data['search'] . '%')
                     ->orWhere('warehouse_transfers.note', 'like', '%' . $data['search'] . '%')
-                    ->orWhere('warehouse_code', 'like', '%' . $data['search'] . '%');
+                    ->orWhere('from_w.warehouse_code', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('to_w.warehouse_code', 'like', '%' . $data['search'] . '%');
             });
         }
         // Lọc theo các trường cụ thể

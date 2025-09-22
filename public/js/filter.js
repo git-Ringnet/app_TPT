@@ -985,15 +985,19 @@ function generateWarehouseTransferRow(item, index) {
                       date.getFullYear();
     }
     
-    var fromWarehouse = '';
-    if (item.fromWarehouse && item.fromWarehouse.warehouse_name) {
-        fromWarehouse = item.fromWarehouse.warehouse_name;
-    }
-    
-    var toWarehouse = '';
-    if (item.toWarehouse && item.toWarehouse.warehouse_name) {
-        toWarehouse = item.toWarehouse.warehouse_name;
-    }
+    var fromWarehouse =
+        (item.fromWarehouse && item.fromWarehouse.warehouse_name) ||
+        item.from_warehouse_name ||
+        item.fromWarehouseName ||
+        item.from_warehouse ||
+        '';
+
+    var toWarehouse =
+        (item.toWarehouse && item.toWarehouse.warehouse_name) ||
+        item.to_warehouse_name ||
+        item.toWarehouseName ||
+        item.to_warehouse ||
+        '';
     
     var rowHtml = '<tr class="position-relative warehouse-info height-40">' +
         '<input type="hidden" name="id-warehouse" class="id-warehouse" id="id-warehouse" value="' + item.id + '">' +
