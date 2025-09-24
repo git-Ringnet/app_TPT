@@ -11,6 +11,7 @@
                 'Tình trạng',
                 'Loại phiếu',
                 'Ghi chú',
+                'Serial',
             ]">
                 <x-filter-text name="ma-phieu" title="Mã phiếu" />
                 <x-filter-status name="tinh-trang" title="Loại phiếu" :filters="[
@@ -27,6 +28,7 @@
                 <x-filter-date name="ngay-lap-phieu" title="Ngày lập phiếu" />
                 <x-filter-text name="phieu-tiep-nhan" title="Phiếu tiếp nhận" />
                 <x-filter-text name="ghi-chu" title="Ghi chú" />
+                <x-filter-text name="serial" title="Serial" />
             </x-search-filter>
             <div class="d-flex content__heading--right">
             <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
@@ -249,6 +251,7 @@
             ma: getData('#ma-phieu', this),
             note: getData('#ghi-chu', this),
             receiving_code: getData('#phieu-tiep-nhan', this),
+            serial: getData('#serial', this),
             status: getStatusData(this, 'tinh-trang'),
             form_type: getStatusData(this, 'loai-phieu'),
             date: retrieveDateData(this, 'ngay-lap-phieu'),

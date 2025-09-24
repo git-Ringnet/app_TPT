@@ -158,7 +158,21 @@ class WarehouseTransfer extends Model
                     ->orWhere('to_w.warehouse_name', 'like', '%' . $data['search'] . '%')
                     ->orWhere('warehouse_transfers.note', 'like', '%' . $data['search'] . '%')
                     ->orWhere('from_w.warehouse_code', 'like', '%' . $data['search'] . '%')
-                    ->orWhere('to_w.warehouse_code', 'like', '%' . $data['search'] . '%');
+                    ->orWhere('to_w.warehouse_code', 'like', '%' . $data['search'] . '%')
+                    ->orWhereExists(function ($subQuery) use ($data) {
+                        $subQuery->select(DB::raw(1))
+                            ->from('warehouse_transfer_items')
+                            ->join('serial_numbers', 'warehouse_transfer_items.serial_number_id', '=', 'serial_numbers.id')
+                            ->whereColumn('warehouse_transfer_items.transfer_id', 'warehouse_transfers.id')
+                            ->where('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%');
+                    })
+                    ->orWhereExists(function ($subQuery) use ($data) {
+                        $subQuery->select(DB::raw(1))
+                            ->from('warehouse_transfer_items')
+                            ->join('serial_numbers', 'warehouse_transfer_items.sn_id_borrow', '=', 'serial_numbers.id')
+                            ->whereColumn('warehouse_transfer_items.transfer_id', 'warehouse_transfers.id')
+                            ->where('serial_numbers.serial_code', 'like', '%' . $data['search'] . '%');
+                    });
             });
         }
         // Lọc theo các trường cụ thể
@@ -171,7 +185,27 @@ class WarehouseTransfer extends Model
                 $warehouse->where($field, 'like', '%' . $data[$key] . '%');
             }
         }
-        if (!empty($data['date'][0]) && !empty($data['date'][1])) {
+        
+        // Lọc theo serial number
+        if (!empty($data['serial'])) {
+            $warehouse->where(function ($query) use ($data) {
+                $query->whereExists(function ($subQuery) use ($data) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('warehouse_transfer_items')
+                        ->join('serial_numbers', 'warehouse_transfer_items.serial_number_id', '=', 'serial_numbers.id')
+                        ->whereColumn('warehouse_transfer_items.transfer_id', 'warehouse_transfers.id')
+                        ->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+                })
+                ->orWhereExists(function ($subQuery) use ($data) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('warehouse_transfer_items')
+                        ->join('serial_numbers', 'warehouse_transfer_items.sn_id_borrow', '=', 'serial_numbers.id')
+                        ->whereColumn('warehouse_transfer_items.transfer_id', 'warehouse_transfers.id')
+                        ->where('serial_numbers.serial_code', 'like', '%' . $data['serial'] . '%');
+                });
+            });
+        }
+        if (isset($data['date']) && is_array($data['date']) && count($data['date']) >= 2 && !empty($data['date'][0]) && !empty($data['date'][1])) {
             $dateStart = Carbon::parse($data['date'][0]);
             $dateEnd = Carbon::parse($data['date'][1])->endOfDay();
             $warehouse->whereBetween('transfer_date', [$dateStart, $dateEnd]);

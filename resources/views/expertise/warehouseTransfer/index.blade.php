@@ -3,7 +3,7 @@
 <div class="content-wrapper m-0 min-height--none p-0">
     <div class="content-header-fixed px-1">
         <div class="content__header--inner">
-            <x-search-filter :keywords="request('keywords')" :filters="['Mã phiếu', 'Ngày lập phiếu', 'Kho chuyển', 'kho nhận', 'Trạng thái','Ghi chú']">
+            <x-search-filter :keywords="request('keywords')" :filters="['Mã phiếu', 'Ngày lập phiếu', 'Kho chuyển', 'kho nhận', 'Trạng thái','Ghi chú', 'Serial']">
                 <x-filter-text name="ma-phieu" title="Mã phiếu" />
                 <x-filter-checkbox :dataa='$warehouse' name="kho-chuyen" title="Khách hàng" button="kho-chuyen"
                 namedisplay="warehouse_name" />
@@ -15,6 +15,7 @@
                 ]" />
                 <x-filter-date name="ngay-lap-phieu" title="Ngày lập phiếu" />
                 <x-filter-text name="ghi-chu" title="Ghi chú" />
+                <x-filter-text name="serial" title="Serial" />
             </x-search-filter>
             <div class="d-flex content__heading--right">
                 <button class="m-0 btn-outline-primary" id="exportBtn">Export Excel</button>
@@ -214,6 +215,7 @@
             search: $('#search').val(),
             ma: getData('#ma-phieu', this),
             note: getData('#ghi-chu', this),
+            serial: getData('#serial', this),
             kho_chuyen: getStatusData(this, 'kho-chuyen'),
             kho_nhan: getStatusData(this, 'kho-nhan'),
             date: retrieveDateData(this, 'ngay-lap-phieu'),

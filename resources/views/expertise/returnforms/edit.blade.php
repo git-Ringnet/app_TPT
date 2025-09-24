@@ -386,13 +386,13 @@
 
                                                 {{-- Extra Warranty & Ghi chú (nếu cần) --}}
                                                 <td
-                                                    class="border-right p-2 text-13 align-top {{ $hideExtraWarranty }}">
+                                                    class="border-right p-2 text-13 align-top border-bottom {{ $hideExtraWarranty }}">
                                                     <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                         readonly value="{{ $item->warranties->name_warranty ?? '' }}">
                                                     <input type="hidden" name="return[{{ $loop->index }}][name_warranty]" value="{{ $item->warranties->name_warranty ?? '' }}">
                                                 </td>
                                                 <td
-                                                    class="border-right p-2 text-13 align-top {{ $hideExtraWarranty }}">
+                                                    class="border-right p-2 text-13 align-top border-bottom {{ $hideExtraWarranty }}">
                                                     <input type="text" class="border-0 pl-1 pr-2 py-1 w-100"
                                                         readonly value="{{ $item->extra_warranty ?? '' }}">
                                                     <input type="hidden" name="return[{{ $loop->index }}][extra_warranty]" value="{{ $item->extra_warranty ?? '' }}">

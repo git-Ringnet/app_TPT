@@ -57,7 +57,13 @@ class ReturnForm extends Model
         if (!empty($data['search'])) {
             $returnForms->where(function ($query) use ($data) {
                 $query->where('return_code', 'like', '%' . $data['search'] . '%')
-                    ->orWhere('return_form.notes', 'like', '%' . $data['search'] . '%');
+                    ->orWhere('return_form.notes', 'like', '%' . $data['search'] . '%')
+                    ->orWhereHas('productReturns.serialNumber', function ($subQuery) use ($data) {
+                        $subQuery->where('serial_code', 'like', '%' . $data['search'] . '%');
+                    })
+                    ->orWhereHas('productReturns.replacementSerialNumber', function ($subQuery) use ($data) {
+                        $subQuery->where('serial_code', 'like', '%' . $data['search'] . '%');
+                    });
             });
         }
         // Lọc theo các trường cụ thể
@@ -69,6 +75,18 @@ class ReturnForm extends Model
             if (!empty($data[$key])) {
                 $returnForms->where($field, 'like', '%' . $data[$key] . '%');
             }
+        }
+        
+        // Lọc theo serial number
+        if (!empty($data['serial'])) {
+            $returnForms->where(function ($query) use ($data) {
+                $query->whereHas('productReturns.serialNumber', function ($subQuery) use ($data) {
+                    $subQuery->where('serial_code', 'like', '%' . $data['serial'] . '%');
+                })
+                ->orWhereHas('productReturns.replacementSerialNumber', function ($subQuery) use ($data) {
+                    $subQuery->where('serial_code', 'like', '%' . $data['serial'] . '%');
+                });
+            });
         }
         if (!empty($data['customer'])) {
             $returnForms->whereHas('customer', function ($query) use ($data) {
@@ -86,12 +104,12 @@ class ReturnForm extends Model
             });
         }
         if (isset($data['status'])) {
-            $returnForms = $returnForms->whereIn('status', $data['status']);
+            $returnForms = $returnForms->whereIn('return_form.status', $data['status']);
         }
-        if (!empty($data['date'][0]) && !empty($data['date'][1])) {
+        if (isset($data['date']) && is_array($data['date']) && count($data['date']) >= 2 && !empty($data['date'][0]) && !empty($data['date'][1])) {
             $dateStart = Carbon::parse($data['date'][0]);
             $dateEnd = Carbon::parse($data['date'][1])->endOfDay();
-            $returnForms->whereBetween('date_created', [$dateStart, $dateEnd]);
+            $returnForms->whereBetween('return_form.date_created', [$dateStart, $dateEnd]);
         }
         if (isset($data['sort']) && isset($data['sort'][0])) {
             $returnForms = $returnForms->orderBy($data['sort'][0], $data['sort'][1]);
