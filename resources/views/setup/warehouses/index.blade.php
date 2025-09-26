@@ -31,17 +31,6 @@
                         <table id="example2" class="table table-hover bg-white rounded">
                             <thead class="border-custom">
                                 <tr>
-                                    <th class="height-40 py-0 border-right pl-4" scope="col" style="">
-                                        <span class="d-flex justify-content-start">
-                                            <a href="#" class="sort-link btn-submit" data-sort-by="id"
-                                                data-sort-type="DESC">
-                                                <button class="btn-sort" type="submit">
-                                                    <span class="text-14">STT</span>
-                                                </button>
-                                            </a>
-                                            <div class="icon" id="icon-id"></div>
-                                        </span>
-                                    </th>
                                     <th class="height-40 py-0 border-right" scope="col" style="">
                                         <span class="d-flex justify-content-start">
                                             <a href="#" class="sort-link btn-submit" data-sort-by="warehouse_code"
@@ -86,10 +75,6 @@
                                         onclick="handleRowClick('checkbox', event);">
                                         <input type="hidden" name="id-warehouse" class="id-warehouse"
                                             id="id-warehouse" value="{{ $item->id }}">
-                                        <td
-                                            class="text-13-black border-bottom border py-0 pl-4 border-top-0 border-left-0">
-                                            {{ $loop->iteration }}
-                                        </td>
                                         <td
                                             class="text-13-black border-bottom border py-0 pl-4 border-top-0 border-left-0">
                                             {{ $item->warehouse_code }}

@@ -342,8 +342,31 @@ function updateFilters(
     var tbodyHtml = '';
     if (data.data && data.data.length > 0) {
         data.data.forEach(function (item, index) {
-            // Kiểm tra loại bảng dựa trên tbodyClass
-            if (tbodyClass.indexOf('warran-lookup') !== -1) {
+            // Ưu tiên xác định theo buttonName (nametable) để tránh nhầm
+            if (buttonName === 'guest') {
+                tbodyHtml += generateCustomerRow(item, index);
+            } else if (buttonName === 'provide') {
+                tbodyHtml += generateProviderRow(item, index);
+            } else if (buttonName === 'product') {
+                tbodyHtml += generateProductSetupRow(item, index);
+            } else if (buttonName === 'user') {
+                tbodyHtml += generateUserRow(item, index);
+            } else if (buttonName === 'group') {
+                tbodyHtml += generateGroupRow(item, index);
+            } else if (buttonName === 'rp_export_import') {
+                tbodyHtml += generateReportExportImportRow(item, index);
+            } else if (buttonName === 'rp_receipt_return') {
+                tbodyHtml += generateReportReceiptReturnRow(item, index);
+            } else if (buttonName === 'rp_quotation') {
+                tbodyHtml += generateReportQuotationRow(item, index);
+            } else if (buttonName === 'warehouse') {
+                // Phân biệt: nếu có trường transfer_date hoặc from/toWarehouse thì là phiếu chuyển kho
+                if (item.transfer_date !== undefined || item.fromWarehouse !== undefined || item.code !== undefined) {
+                    tbodyHtml += generateWarehouseTransferRow(item, index);
+                } else {
+                    tbodyHtml += generateWarehouseSetupRow(item, index);
+                }
+            } else if (tbodyClass.indexOf('warran-lookup') !== -1) {
                 tbodyHtml += generateWarrantyRow(item, index);
             } else if (tbodyClass.indexOf('data') !== -1) {
                 // Bảng phiếu tiếp nhận
@@ -358,6 +381,7 @@ function updateFilters(
                 // Bảng phiếu chuyển kho
                 tbodyHtml += generateWarehouseTransferRow(item, index);
             } else {
+                // Mặc định: inventory lookup
                 tbodyHtml += generateInventoryRow(item, index);
             }
         });
@@ -1296,4 +1320,169 @@ function setFilterValues(buttonName) {
     }
 
     return { month, quarter, year };
+}
+
+// ============== New generators for Setup pages ==============
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function generateCustomerRow(item, index) {
+    return (
+        '<tr class="position-relative guest-info height-40">' +
+        '<input type="hidden" name="id-guest" class="id-guest" id="id-guest" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black border-right-0 border-bottom border-top-0 py-0 pl-4" style="width:10%;">' +
+        '<a href="/customers/' + (item.id || '') + '/edit">' + escapeHtml(item.customer_code || '') + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width:20%;">' + escapeHtml(item.customer_name || '') + '</td>' +
+        '<td class="text-13-black border border-right-0 border-bottom border-top-0 py-0 max-width180" style="width:20%;">' + escapeHtml(item.address || '') + '</td>' +
+        '<td class="text-13-black border border-right-0 border-bottom border-top-0 py-0 max-width180" style="width:15%;">' + escapeHtml(item.phone || '') + '</td>' +
+        '<td class="text-13-black border border-right-0 border-bottom border-top-0 py-0" style="width:15%;">' + escapeHtml(item.email || '') + '</td>' +
+        '<td class="text-13-black border-bottom border text-left py-0 border-top-0 border-right-0 max-width180">' + escapeHtml(item.note || '') + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateProviderRow(item, index) {
+    return (
+        '<tr class="position-relative provide-info height-40">' +
+        '<input type="hidden" name="id-provide" class="id-provide" id="id-provide" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black border-right-0 border-bottom border-top-0 py-0 pl-4" style="width:10%;">' +
+        '<a href="/providers/' + (item.id || '') + '/edit">' + escapeHtml(item.provider_code || '') + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width:20%;">' + escapeHtml(item.provider_name || '') + '</td>' +
+        '<td class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width:20%;">' + escapeHtml(item.address || '') + '</td>' +
+        '<td class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180" style="width:15%;">' + escapeHtml(item.phone || '') + '</td>' +
+        '<td class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0" style="width:15%;">' + escapeHtml(item.email || '') + '</td>' +
+        '<td class="text-13-black border-bottom border-right-0 border py-0 pl-4 border-top-0 max-width180">' + escapeHtml(item.note || '') + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateProductSetupRow(item, index) {
+    return (
+        '<tr class="position-relative product-info height-40">' +
+        '<input type="hidden" name="id-product" class="id-product" id="id-product" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black border-bottom border py-0 pl-4 border-top-0">' +
+        '<a class="duongdan" href="/products/' + (item.id || '') + '/edit">' + escapeHtml(item.product_code || '') + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-bottom border py-0 border-top-0 border-left-0 max-width180">' + escapeHtml(item.product_name || '') + '</td>' +
+        '<td class="text-13-black border-bottom border py-0 border-top-0 border-left-0">' + escapeHtml(item.brand || '') + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateUserRow(item, index) {
+    // roles may be returned as rolename or array; prefer rolename text
+    var roleText = '';
+    if (Array.isArray(item.roles)) {
+        roleText = item.roles.map(function(r){ return escapeHtml(r.name || r); }).join(', ');
+    } else if (item.rolename) {
+        roleText = escapeHtml(item.rolename);
+    }
+    return (
+        '<tr class="position-relative user-info height-40">' +
+        '<input type="hidden" name="id-user" class="id-user" id="id-user" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black border-bottom border py-0 pl-4 border-top-0">' + escapeHtml(item.employee_code || '') + '</td>' +
+        '<td class="text-13-black border-bottom border py-0 border-top-0 border-left-0 max-width180">' +
+        '<a class="duongdan" href="/users/' + (item.id || '') + '/edit">' + escapeHtml(item.name || '') + '</a>' +
+        '</td>' +
+        '<td class="text-13-black border-bottom border py-0 border-top-0 border-left-0">' + roleText + '</td>' +
+        '<td class="text-13-black border-bottom border py-0 border-top-0 border-left-0">' + escapeHtml(item.address || '') + '</td>' +
+        '<td class="text-13-black border-bottom border py-0 border-top-0 border-left-0">' + escapeHtml(item.phone || '') + '</td>' +
+        '<td class="text-13-black border-bottom border text-left py-0 border-top-0 border-left-0">' + escapeHtml(item.email || '') + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateGroupRow(item, index) {
+    return (
+        '<tr class="position-relative group-info height-40">' +
+        '<input type="hidden" name="id-group" class="id-group" id="id-group" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black text-left border-bottom border-top-0 py-0 border-right pl-4">' +
+        '<a href="/groups/' + (item.id || '') + '/edit">' + escapeHtml(item.group_code || '') + '</a>' +
+        '</td>' +
+        '<td class="text-13-black text-left border-bottom border-top-0 py-0 border-right max-width180">' + escapeHtml(item.group_name || '') + '</td>' +
+        '<td class="text-13-black border-bottom border-top-0 py-0">' + escapeHtml(item.nameGroup || (item.groupType && item.groupType.group_name) || '') + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateWarehouseSetupRow(item, index) {
+    return (
+        '<tr class="position-relative warehouse-info height-40">' +
+        '<input type="hidden" name="id-warehouse" class="id-warehouse" id="id-warehouse" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' + escapeHtml(item.warehouse_code || '') + '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0">' + escapeHtml(item.warehouse_name || '') + '</td>' +
+        '<td class="text-13-black border-right border-bottom border-top-0 border-right-0 py-0 max-width180">' + escapeHtml(item.address || '') + '</td>' +
+        '</tr>'
+    );
+}
+
+// ============== Report generators ==============
+function formatDateDMY(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return escapeHtml(dateStr);
+    var dd = d.getDate().toString().padStart(2, '0');
+    var mm = (d.getMonth() + 1).toString().padStart(2, '0');
+    var yyyy = d.getFullYear();
+    return dd + '/' + mm + '/' + yyyy;
+}
+
+function generateReportExportImportRow(item, index) {
+    // expects: id, product_code, product_name, product_import, product_export
+    return (
+        '<tr class="position-relative rp_export_import-info height-40">' +
+        '<input type="hidden" name="id-rp_export_import" class="id-rp_export_import" id="id-rp_export_import" value="' + (item.id || item.product_id || '') + '">' +
+        '<td class="text-13-black border-right product-code border-bottom py-0">' + escapeHtml(item.product_code || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 product_name text-left border-bottom py-0 max-width180">' + escapeHtml(item.product_name || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 product_import_' + (item.id || item.product_id || '') + ' border-bottom py-0">' + (item.product_import != null ? item.product_import : (item.total_import || 0)) + '</td>' +
+        '<td class="text-13-black border border-left-0 product_export_' + (item.id || item.product_id || '') + ' border-bottom py-0">' + (item.product_export != null ? item.product_export : (item.total_export || 0)) + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateReportReceiptReturnRow(item, index) {
+    // expects: id, product_code, product_name, product_import(total_receive), product_export(total_return)
+    return (
+        '<tr class="position-relative rp_receipt_return-info height-40">' +
+        '<input type="hidden" name="id-rp_receipt_return" class="id-rp_receipt_return" id="id-rp_receipt_return" value="' + (item.id || item.product_id || '') + '">' +
+        '<td class="text-13-black border-right product-code border-bottom py-0">' + escapeHtml(item.product_code || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 product_name text-left border-bottom py-0 max-width180">' + escapeHtml(item.product_name || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 product_import_' + (item.id || item.product_id || '') + ' border-bottom py-0">' + (item.product_import != null ? item.product_import : (item.total_receive || 0)) + '</td>' +
+        '<td class="text-13-black border border-left-0 product_export_' + (item.id || item.product_id || '') + ' border-bottom py-0">' + (item.product_export != null ? item.product_export : (item.total_return || 0)) + '</td>' +
+        '</tr>'
+    );
+}
+
+function generateReportQuotationRow(item, index) {
+    // expects: id, quotation_code, customer_name or customer.customer_name, quotation_date, total_amount, form_code_receiving, status_recei or reception.status
+    var customerName = item.customer_name || (item.customer && item.customer.customer_name) || '';
+    var receivingCode = item.form_code_receiving || (item.reception && item.reception.form_code_receiving) || '';
+    var statusText = '';
+    var status = item.status_recei != null ? item.status_recei : (item.reception ? item.reception.status : undefined);
+    if (status === 1) statusText = 'Tiếp nhận';
+    else if (status === 2) statusText = 'Xử lý';
+    else if (status === 3) statusText = 'Hoàn thành';
+    else if (status === 4) statusText = 'Khách không đồng ý';
+    var totalAmount = item.total_amount != null ? new Intl.NumberFormat('vi-VN').format(item.total_amount) : '';
+    var dateText = formatDateDMY(item.quotation_date);
+    return (
+        '<tr class="position-relative rp_quotation-info height-40">' +
+        '<input type="hidden" name="id-rp_quotation" class="id-rp_quotation" id="id-rp_quotation" value="' + (item.id || '') + '">' +
+        '<td class="text-13-black border-right border-bottom py-0">' + escapeHtml(item.quotation_code || '') + '</td>' +
+        '<td class="text-13-black border border-left-0 text-left border-bottom py-0 max-width180">' + escapeHtml(customerName) + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom py-0">' + dateText + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom py-0">' + totalAmount + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom py-0">' + escapeHtml(receivingCode) + '</td>' +
+        '<td class="text-13-black border border-left-0 border-bottom py-0">' + statusText + '</td>' +
+        '</tr>'
+    );
 }

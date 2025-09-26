@@ -1,0 +1,160 @@
+Module,Test Case ID,Test Case Description,Test Steps,Test Data,Expected Result,Priority,Status,Notes
+
+Quản lý Nhập hàng,REC-001,Nhập hàng thông thường,"1. Vào menu Nhập hàng > Tạo mới
+2. Chọn nhà cung cấp
+3. Thêm sản phẩm có sẵn
+4. Nhập đầy đủ thông tin
+5. Lưu phiếu nhập","- Nhà cung cấp: Có sẵn
+- Sản phẩm: Đã có trong hệ thống
+- Số lượng: >0
+- Đơn giá: >0
+- Ngày nhập: Hôm nay","- Tạo phiếu nhập thành công
+- Cập nhật tồn kho
+- Tự động sinh mã phiếu",Cao,,
+
+Quản lý Nhập hàng,REC-002,Nhập hàng với sản phẩm mới,"1. Vào menu Nhập hàng > Tạo mới
+2. Chọn nhà cung cấp
+3. Thêm sản phẩm mới
+4. Nhập đầy đủ thông tin sản phẩm
+5. Lưu phiếu nhập","- Sản phẩm: Chưa có trong hệ thống
+- Đầy đủ thông tin bắt buộc
+- Hình ảnh sản phẩm (nếu có)","- Tạo mới sản phẩm
+- Cập nhật tồn kho
+- Lưu thông tin nhập hàng",Cao,,
+
+Quản lý Nhập hàng,REC-003,Nhập hàng với số lượng lớn,"1. Vào menu Nhập hàng > Tạo mới
+2. Thêm nhiều sản phẩm (50+)
+3. Import từ file Excel
+4. Kiểm tra dữ liệu
+5. Lưu phiếu nhập","- File Excel đúng định dạng
+- Đầy đủ thông tin bắt buộc
+- Số lượng lớn các sản phẩm","- Import thành công
+- Hiển thị đầy đủ thông tin
+- Cảnh báo nếu có lỗi",Trung bình,,
+
+Quản lý Xuất hàng,EXP-001,Xuất hàng thông thường,"1. Vào menu Xuất hàng > Tạo mới
+2. Chọn khách hàng
+3. Thêm sản phẩm từ kho
+4. Nhập số lượng
+5. Lưu phiếu xuất","- Khách hàng: Có sẵn
+- Sản phẩm: Có sẵn trong kho
+- Số lượng: <= tồn kho
+- Ngày xuất: Hôm nay","- Tạo phiếu xuất thành công
+- Trừ tồn kho
+- Tự động sinh mã phiếu",Cao,,
+
+Quản lý Xuất hàng,EXP-002,Xuất hàng vượt quá tồn kho,"1. Vào menu Xuất hàng > Tạo mới
+2. Chọn sản phẩm
+3. Nhập số lượng > tồn kho
+4. Lưu phiếu","- Số lượng yêu cầu > tồn kho thực tế","- Hiển thị cảnh báo
+- Không cho phép lưu
+- Yêu cầu điều chỉnh số lượng",Cao,,
+
+Quản lý Xuất hàng,EXP-003,Xuất hàng theo lô/seri,"1. Vào menu Xuất hàng > Tạo mới
+2. Chọn sản phẩm có quản lý lô/seri
+3. Quét/Chọn lô/seri
+4. Lưu phiếu","- Sản phẩm: Có quản lý lô/seri
+- Số lượng: Đúng với số lô/seri đã chọn","- Ghi nhận chính xác lô/seri xuất
+- Cập nhật trạng thái lô/seri",Trung bình,,
+
+Quản lý Bảo hành,WAR-001,Tiếp nhận sản phẩm bảo hành,"1. Vào menu Bảo hành > Tiếp nhận
+2. Quét mã vạch/tra cứu sản phẩm
+3. Kiểm tra tình trạng
+4. Lập phiếu tiếp nhận","- Mã sản phẩm/Seri
+- Thông tin khách hàng
+- Mô tả lỗi
+- Tình trạng sản phẩm","- Tạo phiếu tiếp nhận
+- In phiếu giao nhận
+- Cập nhật trạng thái sản phẩm",Cao,,
+
+Quản lý Bảo hành,WAR-002,Xử lý bảo hành,"1. Vào menu Bảo hành > Danh sách chờ
+2. Chọn phiếu cần xử lý
+3. Cập nhật tình trạng
+4. Ghi chú quá trình sửa chữa
+5. Cập nhật kết quả","- Mã phiếu bảo hành
+- Tình trạng: Đang sửa chữa/Đã hoàn thành
+- Linh kiện thay thế (nếu có)
+- Chi phí (nếu có)","- Cập nhật trạng thái phiếu
+- Lưu lịch sử xử lý
+- Thông báo cho khách hàng",Cao,,
+
+Quản lý Bảo hành,WAR-003,Trả sản phẩm bảo hành,"1. Vào menu Bảo hành > Hoàn trả
+2. Quét mã phiếu/sản phẩm
+3. Kiểm tra thông tin
+4. Xác nhận trả khách","- Mã phiếu bảo hành
+- Chữ ký khách hàng
+- Hóa đơn (nếu phát sinh chi phí)","- Cập nhật trạng thái đã trả
+- In phiếu hoàn thành
+- Lưu thông tin người nhận",Cao,,
+
+Quản lý Chuyển kho,TRF-001,Chuyển kho thông thường,"1. Vào menu Chuyển kho > Tạo mới
+2. Chọn kho nguồn và đích
+3. Thêm sản phẩm và số lượng
+4. Xác nhận chuyển","- Kho nguồn: Có đủ số lượng
+- Kho đích: Khác kho nguồn
+- Số lượng: Hợp lệ","- Trừ tồn kho nguồn
+- Cộng tồn kho đích
+- Tạo phiếu chuyển kho",Cao,,
+
+Quản lý Chuyển kho,TRF-002,Chuyển kho có sản phẩm hạn chế,"1. Vào menu Chuyển kho
+2. Chọn sản phẩm có điều kiện bảo quản đặc biệt
+3. Thêm thông tin đóng gói
+4. Xác nhận chuyển","- Sản phẩm: Dễ vỡ/Hạn sử dụng ngắn
+- Yêu cầu đóng gói đặc biệt
+- Điều kiện vận chuyển","- Cảnh báo đặc biệt
+- Yêu cầu xác nhận
+- Ghi chú đầy đủ",Trung bình,,
+
+Quản lý Trả hàng,RET-001,Trả hàng do lỗi sản phẩm,"1. Vào menu Trả hàng > Tạo mới
+2. Tra cứu đơn hàng gốc
+3. Chọn sản phẩm trả
+4. Chọn lý do: Lỗi sản phẩm
+5. Lưu phiếu","- Đơn hàng: Đã xuất trong vòng 7 ngày
+- Sản phẩm: Còn nguyên seal
+- Lý do: Lỗi kỹ thuật/Không đúng mô tả","- Tạo phiếu trả hàng
+- Hoàn tiền/Đổi trả sản phẩm
+- Cập nhật tồn kho",Cao,,
+
+Quản lý Trả hàng,RET-002,Trả hàng không đúng quy định,"1. Thử tạo phiếu trả hàng
+2. Chọn sản phẩm không đủ điều kiện
+3. Lưu phiếu","- Đơn hàng: Quá hạn trả
+- Sản phẩm: Không còn đủ điều kiện
+- Không có lý do chính đáng","- Từ chối tạo phiếu
+- Hiển thị thông báo lý do
+- Hướng dẫn chính sách",Cao,,
+
+Tra cứu Tồn kho,INV-001,Kiểm kho tổng thể,"1. Vào menu Tồn kho > Kiểm kê
+2. Chọn kho cần kiểm
+3. Quét/tra cứu sản phẩm
+4. Nhập số lượng thực tế
+5. Xác nhận kết quả","- Danh sách tất cả sản phẩm trong kho
+- Số lượng tồn kho hiện tại","- So sánh tồn kho thực tế và hệ thống
+- Tạo phiếu chênh lệch nếu có
+- Điều chỉnh tồn kho",Cao,,
+
+Tra cứu Tồn kho,INV-002,Tra cứu nhanh tồn kho,"1. Vào màn hình chính
+2. Sử dụng chức năng tìm kiếm
+3. Nhập mã/tên sản phẩm","- Từ khóa tìm kiếm
+- Bộ lọc kho (nếu có)","- Hiển thị nhanh thông tin tồn kho
+- Vị trí lưu kho
+- Lịch sử nhập xuất gần nhất",Trung bình,,
+
+Quản lý Báo giá,QUO-001,Tạo báo giá mới,"1. Vào menu Báo giá > Tạo mới
+2. Chọn khách hàng
+3. Thêm sản phẩm và giá
+4. Nhập thông tin chi tiết
+5. Lưu báo giá","- Khách hàng: Có sẵn hoặc mới
+- Sản phẩm: Có sẵn
+- Giá: Có thể điều chỉnh
+- Thời hạn: Hợp lệ","- Tạo báo giá thành công
+- Tự động đánh số
+- Có thể in/xuất file",Cao,,
+
+Quản lý Báo giá,QUO-002,Chuyển báo giá thành đơn hàng,"1. Vào chi tiết báo giá
+2. Nhấn 'Tạo đơn hàng'
+3. Kiểm tra thông tin
+4. Xác nhận tạo đơn","- Báo giá: Đã được duyệt
+- Sản phẩm: Còn đủ số lượng
+- Giá: Vẫn còn hiệu lực","- Tạo đơn hàng từ báo giá
+- Giữ nguyên thông tin
+- Chuyển trạng thái báo giá",Cao,

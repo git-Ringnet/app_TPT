@@ -218,6 +218,15 @@
                                 Khách hàng
                             </button>
                         </a>
+                    @else
+                        @if (auth()->user()->id == 9)
+                            <a href="{{ route('customers.index') }}" class="height-36">
+                                <button type="button"
+                                    class="h-100 border text-dark justify-content-center align-items-center text-13 rounded bg-white ml-2 @if (!empty($activeName) && $activeName == 'customers') active @endif ">
+                                    Khách hàng
+                                </button>
+                            </a>
+                        @endif
                     @endhasanyrole
                     @hasanyrole('Admin|Quản lý kho')
                         <a href="{{ route('providers.index') }}" class="height-36">
@@ -226,6 +235,15 @@
                                 Nhà cung cấp
                             </button>
                         </a>
+                    @else
+                        @if (auth()->user()->id == 9)
+                            <a href="{{ route('providers.index') }}" class="height-36">
+                                <button type="button"
+                                    class="h-100 border text-dark justify-content-center align-items-center text-13 rounded bg-white ml-2 @if (!empty($activeName) && $activeName == 'providers') active @endif">
+                                    Nhà cung cấp
+                                </button>
+                            </a>
+                        @endif
                     @endhasanyrole
                     <a href="{{ route('products.index') }}" class="height-36">
                         <button type="button"
