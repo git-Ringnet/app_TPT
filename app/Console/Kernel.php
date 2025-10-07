@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\SyncInventoryLookupWarehouse;
 use App\Console\Commands\UpdateInventoryStatus;
 use App\Console\Commands\UpdateReceivingStatus;
 use App\Console\Commands\UpdateWanrratyStatus;
@@ -15,6 +16,7 @@ class Kernel extends ConsoleKernel
      * Đăng ký các lệnh Artisan của bạn.
      */
     protected $commands = [
+        SyncInventoryLookupWarehouse::class,
         UpdateInventoryStatus::class,
         UpdateWanrratyStatus::class,
         UpdateReceivingStatus::class,

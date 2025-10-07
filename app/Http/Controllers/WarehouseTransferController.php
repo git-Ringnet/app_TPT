@@ -161,9 +161,16 @@ class WarehouseTransferController extends Controller
             foreach ($warehouseTransferItem as $item) {
                 if ($warehouseTransfer->from_warehouse_id == 1) {
                     $serial = SerialNumber::where('id', $item->serial_number_id)->first();
-                    $serial->status = 1;
-                    $serial->warehouse_id = $warehouseTransfer->from_warehouse_id;
-                    $serial->save();
+                    if ($serial) {
+                        $serial->status = 1;
+                        $serial->warehouse_id = $warehouseTransfer->from_warehouse_id;
+                        $serial->save();
+                        
+                        // Cập nhật warehouse_id trong inventory_lookup
+                        DB::table('inventory_lookup')
+                            ->where('sn_id', $serial->id)
+                            ->update(['warehouse_id' => $warehouseTransfer->from_warehouse_id]);
+                    }
                     $item->delete();
                 } else {
                     $serial = SerialNumber::where('id', $item->serial_number_id)->first();
@@ -183,9 +190,16 @@ class WarehouseTransferController extends Controller
                             ->update(['warehouse_id' => $warehouseTransfer->from_warehouse_id]);
                     }
                     $borrow = SerialNumber::where('id', $item->sn_id_borrow)->first();
-                    $borrow->status = 5;
-                    $borrow->warehouse_id = $warehouseTransfer->from_warehouse_id;
-                    $borrow->save();
+                    if ($borrow) {
+                        $borrow->status = 5;
+                        $borrow->warehouse_id = $warehouseTransfer->from_warehouse_id;
+                        $borrow->save();
+                        
+                        // Cập nhật warehouse_id trong inventory_lookup cho serial borrow
+                        DB::table('inventory_lookup')
+                            ->where('sn_id', $borrow->id)
+                            ->update(['warehouse_id' => $warehouseTransfer->from_warehouse_id]);
+                    }
                     $item->delete();
                 }
             }

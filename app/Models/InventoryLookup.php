@@ -58,6 +58,14 @@ class InventoryLookup extends Model
                 $query->whereIn('status',[1,5]);
             })
             ->select('inventory_lookup.*', 'serial_numbers.serial_code', 'serial_numbers.status as serial_status', 'products.*', 'providers.provider_name as providername', 'inventory_lookup.status as status', 'inventory_lookup.id as id');
+        
+        // Áp dụng phân quyền theo warehouse
+        $warehouse_id = \App\Helpers\GlobalHelper::getWarehouseId();
+        if (\Illuminate\Support\Facades\Auth::user()->roles()->first()->id != 1 && !\Illuminate\Support\Facades\Auth::user()->hasAnyRole(['Quản lý kho'])) {
+            if ($warehouse_id) {
+                $invenLookup->where('serial_numbers.warehouse_id', $warehouse_id);
+            }
+        }
         if (!empty($data['search'])) {
             $invenLookup->where(function ($query) use ($data) {
                 $query->where('products.product_code', 'like', '%' . $data['search'] . '%')

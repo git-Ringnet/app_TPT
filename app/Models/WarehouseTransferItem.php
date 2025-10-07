@@ -51,6 +51,11 @@ class WarehouseTransferItem extends Model
                     $existingSerial->update([
                         'warehouse_id' => $data['to_warehouse_id'],
                     ]);
+                    
+                    // Cập nhật warehouse_id trong inventory_lookup
+                    InventoryLookup::where('sn_id', $existingSerial->id)
+                        ->update(['warehouse_id' => $data['to_warehouse_id']]);
+                    
                     $sn = $existingSerial;
                 } else {
                     // Serial chưa tồn tại -> tạo mới ở kho nhận
@@ -69,6 +74,7 @@ class WarehouseTransferItem extends Model
                         'storage_duration' => 0,
                         'status' => 0,
                         'remaining_quantity' => 1,
+                        'warehouse_id' => $data['to_warehouse_id'],
                     ]);
                 }
 
@@ -86,6 +92,10 @@ class WarehouseTransferItem extends Model
                         'status' => 5, // Đánh dấu "Đang mượn"
                         'warehouse_id' => $data['to_warehouse_id'],
                     ]);
+                    
+                    // Cập nhật warehouse_id trong inventory_lookup
+                    InventoryLookup::where('sn_id', $sn->id)
+                        ->update(['warehouse_id' => $data['to_warehouse_id']]);
                 }
             }
 
