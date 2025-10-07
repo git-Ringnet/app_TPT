@@ -103,7 +103,7 @@ class ReturnFormController extends Controller
                 Receiving::find($validated['reception_id'])->update([
                     'status' => $stateRecei,
                     'state' => 0,
-                    'closed_at' => $validated['return'] ? now() : null,
+                    'closed_at' => $validated['status'] == 1 ? $validated['date_created'] : null,
                 ]);
 
                 if ($returnForm->reception->form_type != 2) {
@@ -403,7 +403,7 @@ class ReturnFormController extends Controller
                 Receiving::find($validated['reception_id'])->update([
                     'status' => $stateRecei,
                     'state' => 0,
-                    'closed_at' => $validated['return'] ? now() : null,
+                    'closed_at' => $validated['status'] == 1 ? $validated['date_created'] : null,
                 ]);
 
                 $data = [

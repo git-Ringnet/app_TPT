@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Receiving;
+use App\Models\ReturnForm;
 use App\Models\SerialNumber;
 use App\Models\User;
 use Carbon\Carbon;
@@ -92,6 +93,9 @@ class UpdateReceivingStatus extends Command
         Receiving::whereIn('status', [3, 4])
             ->update(['state' => 0]);
 
+        // Đồng bộ ngày lập phiếu của phiếu trả hàng với ngày đóng phiếu của phiếu tiếp nhận
+        // $this->syncReturnFormDates();
+
         // $ids = [2646, 2645, 2644, 2643];
         // $updated = SerialNumber::whereIn('id', $ids)
         //     ->update(['status' => 4]);
@@ -106,7 +110,7 @@ class UpdateReceivingStatus extends Command
         //     $return->replacement_serial_number_id = $ids[$index];
         //     $return->save();
         // }
-
+    
         $this->info('Receiving statuses updated successfully.');
         return Command::SUCCESS;
     }
@@ -128,5 +132,27 @@ class UpdateReceivingStatus extends Command
                 $user->notify(new \App\Notifications\ReceiNotification($receiving, $newState, $message));
             }
         }
+    }
+
+    /**
+     * Đồng bộ ngày đóng phiếu của phiếu tiếp nhận với ngày lập phiếu của phiếu trả hàng
+     */
+    private function syncReturnFormDates()
+    {
+        // Lấy tất cả phiếu trả hàng có status = 1 (hoàn thành)
+        $returnForms = ReturnForm::where('status', 1)
+            ->with('reception')
+            ->get();
+
+        foreach ($returnForms as $returnForm) {
+            if ($returnForm->reception) {
+                // Cập nhật ngày đóng phiếu của phiếu tiếp nhận = ngày lập phiếu của phiếu trả hàng
+                $returnForm->reception->update([
+                    'closed_at' => $returnForm->date_created
+                ]);
+            }
+        }
+
+        $this->info('Synchronized receiving closed dates with return form dates.');
     }
 }
