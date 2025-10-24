@@ -8,6 +8,7 @@ use App\Models\ReturnForm;
 use App\Models\SerialNumber;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UpdateReceivingStatus extends Command
 {
@@ -112,6 +113,7 @@ class UpdateReceivingStatus extends Command
         // }
     
         $this->info('Receiving statuses updated successfully.');
+        DB::disconnect();
         return Command::SUCCESS;
     }
 

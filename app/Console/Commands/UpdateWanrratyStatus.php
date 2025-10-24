@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\warrantyLookup;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class UpdateWanrratyStatus extends Command
 {
@@ -86,5 +87,6 @@ class UpdateWanrratyStatus extends Command
         }
 
         $this->info('Đã cập nhật tình trạng bảo hành.');
+        DB::disconnect();
     }
 }

@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('inventory:update-storage')->everyMinute();
+        $schedule->command('inventory:update-storage')->hourly();
         $schedule->command('warranty:update-storage')->daily();
         $schedule->command('receiving:update-status')->hourly();
     }

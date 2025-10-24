@@ -13,6 +13,7 @@ use App\Notifications\InventoryLookupNotification;
 use App\Notifications\ReceiNotification;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UpdateInventoryStatus extends Command
@@ -119,6 +120,7 @@ class UpdateInventoryStatus extends Command
         // $count = SerialNumber::whereIn('id', $ids)->delete();
 
         $this->info('Đã cập nhật thời gian tồn kho cho tất cả các sản phẩm.');
+        DB::disconnect();
     }
     private function notifyStatusChange($record, $message)
     {
