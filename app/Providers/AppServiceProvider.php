@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Ép toàn bộ link sinh ra phải là HTTPS
+    if($this->app->environment('production') || true) {
+        URL::forceScheme('https');
+    }
         // Ensure Bootstrap pagination view and Vietnamese labels
         Paginator::useBootstrap();
     }
