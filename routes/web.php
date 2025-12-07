@@ -21,9 +21,19 @@ use App\Http\Controllers\ReturnFormController;
 use App\Http\Controllers\SerialNumberController;
 use App\Http\Controllers\WarehouseTransferController;
 use App\Http\Controllers\WarrantyLookupController;
+use App\Http\Controllers\DatabaseController;
 use App\Http\Middleware\CorsMiddleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// Database Management Routes (Admin only)
+Route::group(['middleware' => ['permission:admin']], function () {
+    Route::prefix('database')->group(function () {
+        Route::get('/', [DatabaseController::class, 'index'])->name('database.index');
+        Route::post('/export', [DatabaseController::class, 'export'])->name('database.export');
+        Route::post('/import', [DatabaseController::class, 'import'])->name('database.import');
+    });
+});
 
 Route::group(['middleware' => ['permission:admin']], function () {
     Route::prefix('admin')->group(function () {
