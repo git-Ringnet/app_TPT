@@ -525,7 +525,7 @@ function generateInventoryRow(item, index) {
         rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + warehouseHtml + '</td>';
     }
     
-    rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.storage_duration || '') + ' ngày</td>';
+    rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + (item.storage_duration != null ? item.storage_duration : 0) + ' ngày</td>';
     
     rowHtml += '<td class="text-13-black border border-left-0 border-bottom border-top-0 border-right-0 py-0">' + statusHtml + '</td>' +
         '</tr>';
