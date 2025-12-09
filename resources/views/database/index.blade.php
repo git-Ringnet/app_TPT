@@ -41,13 +41,13 @@
                     </form>
                 </div>
 
-                {{-- Import Card --}}
+                {{-- Import/Restore Card --}}
                 <div class="action-card import-card">
                     <div class="card-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
+                        <i class="fas fa-history"></i>
                     </div>
-                    <h3>Import Database</h3>
-                    <p>Khôi phục dữ liệu từ file SQL backup. Dữ liệu hiện tại sẽ bị ghi đè.</p>
+                    <h3>Restore Database</h3>
+                    <p>Khôi phục toàn bộ database từ file SQL backup. <strong>Dữ liệu hiện tại sẽ bị XÓA SẠCH!</strong></p>
                     <form action="{{ route('database.import') }}" method="POST" enctype="multipart/form-data"
                         id="importForm">
                         @csrf
@@ -62,8 +62,8 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                         <button type="button" class="btn-action btn-import" onclick="confirmImport()">
-                            <i class="fas fa-upload"></i>
-                            <span>Import Database</span>
+                            <i class="fas fa-undo-alt"></i>
+                            <span>Restore Database</span>
                         </button>
                     </form>
                 </div>
@@ -105,28 +105,29 @@
             }
 
             Swal.fire({
-                title: 'Xác nhận Import?',
+                title: 'Xác nhận Restore Database?',
                 html: '<div style="text-align: left; padding: 10px;">' +
-                    '<p style="margin-bottom: 10px;"><strong>⚠️ Cảnh báo:</strong></p>' +
-                    '<ul style="margin-left: 20px;">' +
-                    '<li>Toàn bộ dữ liệu hiện tại sẽ bị ghi đè</li>' +
-                    '<li>Thao tác không thể hoàn tác</li>' +
+                    '<p style="margin-bottom: 10px; color: #e74c3c;"><strong>🚨 CẢNH BÁO QUAN TRỌNG:</strong></p>' +
+                    '<ul style="margin-left: 20px; color: #333;">' +
+                    '<li><strong>Tất cả bảng dữ liệu hiện tại sẽ bị XÓA SẠCH</strong></li>' +
+                    '<li>Database sẽ được khôi phục hoàn toàn từ file backup</li>' +
+                    '<li>Thao tác này <strong>KHÔNG THỂ hoàn tác</strong></li>' +
                     '</ul>' +
-                    '<p style="margin-top: 15px;">Bạn có chắc chắn muốn tiếp tục?</p>' +
+                    '<p style="margin-top: 15px; font-weight: bold;">Bạn có chắc chắn muốn tiếp tục?</p>' +
                     '</div>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e74c3c',
                 cancelButtonColor: '#95a5a6',
-                confirmButtonText: '<i class="fas fa-check"></i> Có, Import ngay!',
+                confirmButtonText: '<i class="fas fa-check"></i> Có, Restore ngay!',
                 cancelButtonText: '<i class="fas fa-times"></i> Hủy bỏ',
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Show loading
                     Swal.fire({
-                        title: 'Đang import...',
-                        html: 'Vui lòng đợi trong giây lát',
+                        title: 'Đang restore database...',
+                        html: 'Đang xóa dữ liệu cũ và khôi phục từ file backup. Vui lòng đợi...',
                         allowOutsideClick: false,
                         didOpen: () => {
                             Swal.showLoading();

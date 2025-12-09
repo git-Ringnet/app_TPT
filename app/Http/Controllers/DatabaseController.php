@@ -31,7 +31,7 @@ class DatabaseController extends Controller
             // Tên file backup
             $filename = 'backup_' . $database . '_' . date('d-m-Y_His') . '.sql';
 
-            // Export trực tiếp qua PHP (không cần mysqldump)
+            // Export trực tiếp qua PHP
             return $this->exportViaPhp($filename, $database);
 
         } catch (\Exception $e) {
@@ -40,11 +40,15 @@ class DatabaseController extends Controller
     }
 
     /**
-     * Export database qua PHP - Phiên bản đơn giản, tương thích cao
+     * Export database qua PHP - Format đơn giản, mỗi INSERT một dòng
      */
     private function exportViaPhp($filename, $database)
     {
         try {
+            // Tăng thời gian thực thi cho database lớn
+            set_time_limit(0);
+            ini_set('memory_limit', '512M');
+
             $tables = DB::select('SHOW TABLES');
             $tableKey = 'Tables_in_' . $database;
 
@@ -53,7 +57,6 @@ class DatabaseController extends Controller
             $sql .= "-- Database: " . $database . "\n";
             $sql .= "-- ----------------------------------------------------\n\n";
 
-            // Đơn giản hóa - chỉ dùng các lệnh SET cơ bản
             $sql .= "SET NAMES utf8mb4;\n";
             $sql .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
 
@@ -68,40 +71,32 @@ class DatabaseController extends Controller
                 $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
                 $sql .= $createTable[0]->{'Create Table'} . ";\n\n";
 
-                // Get table data
+                // Get table data - INSERT từng dòng một để đơn giản
                 $rows = DB::table($tableName)->get();
                 if ($rows->count() > 0) {
                     $sql .= "-- ----------------------------\n";
                     $sql .= "-- Records of `{$tableName}`\n";
                     $sql .= "-- ----------------------------\n";
 
-                    // Batch insert để tối ưu
-                    $batchSize = 50;
-                    $batches = $rows->chunk($batchSize);
-
-                    foreach ($batches as $batch) {
-                        $firstRow = true;
-                        $insertSql = "INSERT INTO `{$tableName}` VALUES ";
-
-                        foreach ($batch as $row) {
-                            $rowArray = (array) $row;
-                            $values = array_map(function ($value) {
-                                if (is_null($value)) {
-                                    return 'NULL';
-                                }
-                                // Escape special characters properly
-                                $value = addslashes($value);
-                                $value = str_replace(["\r\n", "\r", "\n"], ["\\r\\n", "\\r", "\\n"], $value);
-                                return "'" . $value . "'";
-                            }, $rowArray);
-
-                            if (!$firstRow) {
-                                $insertSql .= ",";
+                    foreach ($rows as $row) {
+                        $rowArray = (array) $row;
+                        $columns = array_keys($rowArray);
+                        $values = array_map(function ($value) {
+                            if (is_null($value)) {
+                                return 'NULL';
                             }
-                            $insertSql .= "(" . implode(',', $values) . ")";
-                            $firstRow = false;
-                        }
-                        $sql .= $insertSql . ";\n";
+                            // Escape đúng cách cho MySQL
+                            $value = str_replace("\\", "\\\\", $value);
+                            $value = str_replace("'", "\\'", $value);
+                            $value = str_replace("\r\n", "\\r\\n", $value);
+                            $value = str_replace("\n", "\\n", $value);
+                            $value = str_replace("\r", "\\r", $value);
+                            return "'" . $value . "'";
+                        }, array_values($rowArray));
+
+                        $columnList = '`' . implode('`, `', $columns) . '`';
+                        $valueList = implode(', ', $values);
+                        $sql .= "INSERT INTO `{$tableName}` ({$columnList}) VALUES ({$valueList});\n";
                     }
                     $sql .= "\n";
                 }
@@ -110,7 +105,6 @@ class DatabaseController extends Controller
             $sql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
             $sql .= "-- Dump completed on " . date('Y-m-d H:i:s') . "\n";
 
-            // Tạo response download trực tiếp (không lưu file)
             return response($sql)
                 ->header('Content-Type', 'application/sql')
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
@@ -122,7 +116,7 @@ class DatabaseController extends Controller
     }
 
     /**
-     * Import database từ file SQL
+     * Import database từ file SQL (Restore - xóa sạch dữ liệu cũ rồi import)
      */
     public function import(Request $request)
     {
@@ -135,32 +129,61 @@ class DatabaseController extends Controller
         ]);
 
         try {
+            // Tăng thời gian thực thi và memory cho database lớn
+            set_time_limit(0); // Không giới hạn thời gian
+            ini_set('memory_limit', '512M');
+
             $file = $request->file('sql_file');
             $filename = $file->getClientOriginalName();
             $sql = file_get_contents($file->getRealPath());
+            $database = config('database.connections.mysql.database');
 
             // Tắt foreign key checks
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
-            // Tách các câu lệnh SQL
-            $statements = $this->parseSqlStatements($sql);
+            // Xóa tất cả các bảng hiện tại
+            $tables = DB::select('SHOW TABLES');
+            $tableKey = 'Tables_in_' . $database;
+
+            foreach ($tables as $table) {
+                $tableName = $table->$tableKey;
+                DB::statement("DROP TABLE IF EXISTS `{$tableName}`");
+            }
+
+            // Parse và thực thi từng câu lệnh SQL
             $successCount = 0;
             $errorCount = 0;
+            $errors = [];
 
-            foreach ($statements as $statement) {
-                $statement = trim($statement);
+            // Tách SQL thành các dòng
+            $lines = explode("\n", $sql);
+            $currentStatement = '';
 
-                // Bỏ qua comments và các lệnh không cần thiết
-                if ($this->shouldSkipStatement($statement)) {
+            foreach ($lines as $line) {
+                $line = trim($line);
+
+                // Bỏ qua dòng trống và comments
+                if (empty($line) || strpos($line, '--') === 0 || strpos($line, '#') === 0) {
                     continue;
                 }
 
-                try {
-                    DB::unprepared($statement);
-                    $successCount++;
-                } catch (\Exception $e) {
-                    $errorCount++;
-                    \Log::warning('SQL Import Warning: ' . $e->getMessage() . ' - Statement: ' . substr($statement, 0, 100));
+                $currentStatement .= $line . ' ';
+
+                // Nếu dòng kết thúc bằng ; thì thực thi
+                if (substr(rtrim($line), -1) === ';') {
+                    $stmt = trim($currentStatement);
+                    $currentStatement = '';
+
+                    if (!empty($stmt)) {
+                        try {
+                            DB::unprepared($stmt);
+                            $successCount++;
+                        } catch (\Exception $e) {
+                            $errorCount++;
+                            $errors[] = $e->getMessage();
+                            \Log::error('SQL Import Error: ' . $e->getMessage() . ' - Statement: ' . substr($stmt, 0, 200));
+                        }
+                    }
                 }
             }
 
@@ -168,105 +191,16 @@ class DatabaseController extends Controller
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
             if ($errorCount > 0) {
+                \Log::error('SQL Import completed with errors', ['success' => $successCount, 'errors' => $errorCount, 'sample_errors' => array_slice($errors, 0, 5)]);
                 return redirect()->route('database.index')
-                    ->with('msg', "Import hoàn tất! ({$successCount} câu lệnh thành công, {$errorCount} bỏ qua)");
+                    ->with('msg', "Restore hoàn tất! ({$successCount} câu lệnh thành công, {$errorCount} lỗi)");
             }
 
-            return redirect()->route('database.index')->with('msg', 'Import database thành công từ file: ' . $filename);
+            return redirect()->route('database.index')->with('msg', "Restore database thành công! ({$successCount} câu lệnh) - File: " . $filename);
         } catch (\Exception $e) {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
-            return redirect()->route('database.index')->with('warning', 'Lỗi import: ' . $e->getMessage());
+            \Log::error('SQL Import Fatal Error: ' . $e->getMessage());
+            return redirect()->route('database.index')->with('warning', 'Lỗi restore: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Tách các câu lệnh SQL
-     */
-    private function parseSqlStatements($sql)
-    {
-        $statements = [];
-        $currentStatement = '';
-        $inString = false;
-        $stringChar = '';
-        $escaped = false;
-
-        $length = strlen($sql);
-        for ($i = 0; $i < $length; $i++) {
-            $char = $sql[$i];
-
-            // Handle escape character
-            if ($escaped) {
-                $currentStatement .= $char;
-                $escaped = false;
-                continue;
-            }
-
-            if ($char === '\\') {
-                $escaped = true;
-                $currentStatement .= $char;
-                continue;
-            }
-
-            if (!$inString) {
-                if ($char === '"' || $char === "'" || $char === '`') {
-                    $inString = true;
-                    $stringChar = $char;
-                } elseif ($char === ';') {
-                    $trimmed = trim($currentStatement);
-                    if (!empty($trimmed)) {
-                        $statements[] = $trimmed;
-                    }
-                    $currentStatement = '';
-                    continue;
-                }
-            } else {
-                if ($char === $stringChar) {
-                    $inString = false;
-                }
-            }
-
-            $currentStatement .= $char;
-        }
-
-        // Add last statement if exists
-        $trimmed = trim($currentStatement);
-        if (!empty($trimmed)) {
-            $statements[] = $trimmed;
-        }
-
-        return $statements;
-    }
-
-    /**
-     * Kiểm tra xem statement có nên bỏ qua không
-     */
-    private function shouldSkipStatement($statement)
-    {
-        $statement = trim($statement);
-
-        // Skip empty statements
-        if (empty($statement)) {
-            return true;
-        }
-
-        // Skip comment lines
-        if (strpos($statement, '--') === 0) {
-            return true;
-        }
-        if (strpos($statement, '#') === 0) {
-            return true;
-        }
-
-        // Skip MySQL conditional comments (/*!40101 ... */)
-        if (preg_match('/^\/\*!\d+/', $statement)) {
-            return true;
-        }
-
-        // Skip LOCK/UNLOCK TABLES
-        if (preg_match('/^(LOCK|UNLOCK)\s+TABLES/i', $statement)) {
-            return true;
-        }
-
-        return false;
     }
 }
