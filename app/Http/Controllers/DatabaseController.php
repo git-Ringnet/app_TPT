@@ -40,7 +40,7 @@ class DatabaseController extends Controller
     }
 
     /**
-     * Export database qua PHP
+     * Export database qua PHP - Phiên bản đơn giản, tương thích cao
      */
     private function exportViaPhp($filename, $database)
     {
@@ -53,42 +53,30 @@ class DatabaseController extends Controller
             $sql .= "-- Database: " . $database . "\n";
             $sql .= "-- ----------------------------------------------------\n\n";
 
-            $sql .= "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n";
-            $sql .= "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n";
-            $sql .= "/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n";
-            $sql .= "/*!40101 SET NAMES utf8mb4 */;\n";
-            $sql .= "/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\n";
-            $sql .= "/*!40103 SET TIME_ZONE='+00:00' */;\n";
-            $sql .= "/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;\n";
-            $sql .= "/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n";
-            $sql .= "/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n";
-            $sql .= "/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n\n";
+            // Đơn giản hóa - chỉ dùng các lệnh SET cơ bản
+            $sql .= "SET NAMES utf8mb4;\n";
+            $sql .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
 
             foreach ($tables as $table) {
                 $tableName = $table->$tableKey;
 
                 // Get create table statement
                 $createTable = DB::select("SHOW CREATE TABLE `{$tableName}`");
-                $sql .= "--\n";
-                $sql .= "-- Table structure for table `{$tableName}`\n";
-                $sql .= "--\n\n";
+                $sql .= "-- ----------------------------\n";
+                $sql .= "-- Table structure for `{$tableName}`\n";
+                $sql .= "-- ----------------------------\n";
                 $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
-                $sql .= "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n";
-                $sql .= "/*!40101 SET character_set_client = utf8 */;\n";
-                $sql .= $createTable[0]->{'Create Table'} . ";\n";
-                $sql .= "/*!40101 SET character_set_client = @saved_cs_client */;\n\n";
+                $sql .= $createTable[0]->{'Create Table'} . ";\n\n";
 
                 // Get table data
                 $rows = DB::table($tableName)->get();
                 if ($rows->count() > 0) {
-                    $sql .= "--\n";
-                    $sql .= "-- Dumping data for table `{$tableName}`\n";
-                    $sql .= "--\n\n";
-                    $sql .= "LOCK TABLES `{$tableName}` WRITE;\n";
-                    $sql .= "/*!40000 ALTER TABLE `{$tableName}` DISABLE KEYS */;\n";
+                    $sql .= "-- ----------------------------\n";
+                    $sql .= "-- Records of `{$tableName}`\n";
+                    $sql .= "-- ----------------------------\n";
 
                     // Batch insert để tối ưu
-                    $batchSize = 100;
+                    $batchSize = 50;
                     $batches = $rows->chunk($batchSize);
 
                     foreach ($batches as $batch) {
@@ -101,8 +89,9 @@ class DatabaseController extends Controller
                                 if (is_null($value)) {
                                     return 'NULL';
                                 }
-                                // Escape special characters
-                                $value = str_replace(['\\', "\x00", "\n", "\r", "'", '"', "\x1a"], ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'], $value);
+                                // Escape special characters properly
+                                $value = addslashes($value);
+                                $value = str_replace(["\r\n", "\r", "\n"], ["\\r\\n", "\\r", "\\n"], $value);
                                 return "'" . $value . "'";
                             }, $rowArray);
 
@@ -114,20 +103,11 @@ class DatabaseController extends Controller
                         }
                         $sql .= $insertSql . ";\n";
                     }
-
-                    $sql .= "/*!40000 ALTER TABLE `{$tableName}` ENABLE KEYS */;\n";
-                    $sql .= "UNLOCK TABLES;\n\n";
+                    $sql .= "\n";
                 }
             }
 
-            $sql .= "/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;\n";
-            $sql .= "/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;\n";
-            $sql .= "/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n";
-            $sql .= "/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;\n";
-            $sql .= "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n";
-            $sql .= "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n";
-            $sql .= "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
-            $sql .= "/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n\n";
+            $sql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
             $sql .= "-- Dump completed on " . date('Y-m-d H:i:s') . "\n";
 
             // Tạo response download trực tiếp (không lưu file)
@@ -169,14 +149,18 @@ class DatabaseController extends Controller
 
             foreach ($statements as $statement) {
                 $statement = trim($statement);
-                if (!empty($statement) && !$this->isComment($statement)) {
-                    try {
-                        DB::unprepared($statement);
-                        $successCount++;
-                    } catch (\Exception $e) {
-                        $errorCount++;
-                        \Log::warning('SQL Import Warning: ' . $e->getMessage() . ' - Statement: ' . substr($statement, 0, 100));
-                    }
+
+                // Bỏ qua comments và các lệnh không cần thiết
+                if ($this->shouldSkipStatement($statement)) {
+                    continue;
+                }
+
+                try {
+                    DB::unprepared($statement);
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    \Log::warning('SQL Import Warning: ' . $e->getMessage() . ' - Statement: ' . substr($statement, 0, 100));
                 }
             }
 
@@ -185,7 +169,7 @@ class DatabaseController extends Controller
 
             if ($errorCount > 0) {
                 return redirect()->route('database.index')
-                    ->with('msg', "Import thành công! ({$successCount} câu lệnh). Có {$errorCount} lỗi nhỏ đã bỏ qua.");
+                    ->with('msg', "Import hoàn tất! ({$successCount} câu lệnh thành công, {$errorCount} bỏ qua)");
             }
 
             return redirect()->route('database.index')->with('msg', 'Import database thành công từ file: ' . $filename);
@@ -254,9 +238,9 @@ class DatabaseController extends Controller
     }
 
     /**
-     * Kiểm tra xem dòng có phải là comment không
+     * Kiểm tra xem statement có nên bỏ qua không
      */
-    private function isComment($statement)
+    private function shouldSkipStatement($statement)
     {
         $statement = trim($statement);
 
@@ -273,9 +257,14 @@ class DatabaseController extends Controller
             return true;
         }
 
-        // Skip MySQL conditional comments that are just settings
-        if (preg_match('/^\/\*!\d+\s*(SET|SELECT)\s/i', $statement)) {
-            return false; // These are valid SQL
+        // Skip MySQL conditional comments (/*!40101 ... */)
+        if (preg_match('/^\/\*!\d+/', $statement)) {
+            return true;
+        }
+
+        // Skip LOCK/UNLOCK TABLES
+        if (preg_match('/^(LOCK|UNLOCK)\s+TABLES/i', $statement)) {
+            return true;
         }
 
         return false;
