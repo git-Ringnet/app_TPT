@@ -26,56 +26,13 @@ class DatabaseController extends Controller
     public function export(Request $request)
     {
         try {
-            $host = config('database.connections.mysql.host');
             $database = config('database.connections.mysql.database');
-            $username = config('database.connections.mysql.username');
-            $password = config('database.connections.mysql.password');
-            $port = config('database.connections.mysql.port', 3306);
 
             // Tên file backup
             $filename = 'backup_' . $database . '_' . date('d-m-Y_His') . '.sql';
-            $tempPath = storage_path('app/temp');
 
-            if (!file_exists($tempPath)) {
-                mkdir($tempPath, 0755, true);
-            }
-
-            $filePath = $tempPath . '/' . $filename;
-
-            // Đường dẫn mysqldump (XAMPP)
-            $mysqldumpPath = 'C:\\xampp\\mysql\\bin\\mysqldump.exe';
-
-            // Fallback nếu không tìm thấy mysqldump
-            if (!file_exists($mysqldumpPath)) {
-                $mysqldumpPath = 'mysqldump';
-            }
-
-            // Xây dựng command
-            $command = sprintf(
-                '"%s" --host=%s --port=%s --user=%s %s %s > "%s"',
-                $mysqldumpPath,
-                escapeshellarg($host),
-                escapeshellarg($port),
-                escapeshellarg($username),
-                $password ? '--password=' . escapeshellarg($password) : '',
-                escapeshellarg($database),
-                $filePath
-            );
-
-            // Thực thi command
-            $output = [];
-            $returnVar = 0;
-            exec($command . ' 2>&1', $output, $returnVar);
-
-            if ($returnVar !== 0 || !file_exists($filePath) || filesize($filePath) === 0) {
-                // Thử phương pháp thay thế: Export qua PHP
-                return $this->exportViaPhp($filename, $database);
-            }
-
-            // Download file và xóa sau khi download
-            return response()->download($filePath, $filename, [
-                'Content-Type' => 'application/sql',
-            ])->deleteFileAfterSend(true);
+            // Export trực tiếp qua PHP (không cần mysqldump)
+            return $this->exportViaPhp($filename, $database);
 
         } catch (\Exception $e) {
             return redirect()->route('database.index')->with('warning', 'Lỗi export: ' . $e->getMessage());
@@ -83,68 +40,101 @@ class DatabaseController extends Controller
     }
 
     /**
-     * Export database qua PHP (phương pháp thay thế)
+     * Export database qua PHP
      */
     private function exportViaPhp($filename, $database)
     {
         try {
-            $tempPath = storage_path('app/temp');
-            if (!file_exists($tempPath)) {
-                mkdir($tempPath, 0755, true);
-            }
-
-            $filePath = $tempPath . '/' . $filename;
-
             $tables = DB::select('SHOW TABLES');
             $tableKey = 'Tables_in_' . $database;
 
             $sql = "-- Database Backup\n";
             $sql .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
-            $sql .= "-- Database: " . $database . "\n\n";
-            $sql .= "SET FOREIGN_KEY_CHECKS=0;\n";
-            $sql .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
-            $sql .= "SET time_zone = \"+00:00\";\n\n";
+            $sql .= "-- Database: " . $database . "\n";
+            $sql .= "-- ----------------------------------------------------\n\n";
+
+            $sql .= "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n";
+            $sql .= "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n";
+            $sql .= "/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n";
+            $sql .= "/*!40101 SET NAMES utf8mb4 */;\n";
+            $sql .= "/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\n";
+            $sql .= "/*!40103 SET TIME_ZONE='+00:00' */;\n";
+            $sql .= "/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;\n";
+            $sql .= "/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n";
+            $sql .= "/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n";
+            $sql .= "/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n\n";
 
             foreach ($tables as $table) {
                 $tableName = $table->$tableKey;
 
                 // Get create table statement
                 $createTable = DB::select("SHOW CREATE TABLE `{$tableName}`");
-                $sql .= "-- Structure for table `{$tableName}`\n";
+                $sql .= "--\n";
+                $sql .= "-- Table structure for table `{$tableName}`\n";
+                $sql .= "--\n\n";
                 $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
-                $sql .= $createTable[0]->{'Create Table'} . ";\n\n";
+                $sql .= "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n";
+                $sql .= "/*!40101 SET character_set_client = utf8 */;\n";
+                $sql .= $createTable[0]->{'Create Table'} . ";\n";
+                $sql .= "/*!40101 SET character_set_client = @saved_cs_client */;\n\n";
 
                 // Get table data
                 $rows = DB::table($tableName)->get();
                 if ($rows->count() > 0) {
-                    $sql .= "-- Data for table `{$tableName}`\n";
+                    $sql .= "--\n";
+                    $sql .= "-- Dumping data for table `{$tableName}`\n";
+                    $sql .= "--\n\n";
+                    $sql .= "LOCK TABLES `{$tableName}` WRITE;\n";
+                    $sql .= "/*!40000 ALTER TABLE `{$tableName}` DISABLE KEYS */;\n";
 
-                    foreach ($rows as $row) {
-                        $rowArray = (array) $row;
-                        $values = array_map(function ($value) {
-                            if (is_null($value)) {
-                                return 'NULL';
+                    // Batch insert để tối ưu
+                    $batchSize = 100;
+                    $batches = $rows->chunk($batchSize);
+
+                    foreach ($batches as $batch) {
+                        $firstRow = true;
+                        $insertSql = "INSERT INTO `{$tableName}` VALUES ";
+
+                        foreach ($batch as $row) {
+                            $rowArray = (array) $row;
+                            $values = array_map(function ($value) {
+                                if (is_null($value)) {
+                                    return 'NULL';
+                                }
+                                // Escape special characters
+                                $value = str_replace(['\\', "\x00", "\n", "\r", "'", '"', "\x1a"], ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'], $value);
+                                return "'" . $value . "'";
+                            }, $rowArray);
+
+                            if (!$firstRow) {
+                                $insertSql .= ",";
                             }
-                            return "'" . addslashes($value) . "'";
-                        }, $rowArray);
-
-                        $columns = array_map(function ($col) {
-                            return "`{$col}`";
-                        }, array_keys($rowArray));
-
-                        $sql .= "INSERT INTO `{$tableName}` (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $values) . ");\n";
+                            $insertSql .= "(" . implode(',', $values) . ")";
+                            $firstRow = false;
+                        }
+                        $sql .= $insertSql . ";\n";
                     }
-                    $sql .= "\n";
+
+                    $sql .= "/*!40000 ALTER TABLE `{$tableName}` ENABLE KEYS */;\n";
+                    $sql .= "UNLOCK TABLES;\n\n";
                 }
             }
 
-            $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
+            $sql .= "/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;\n";
+            $sql .= "/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;\n";
+            $sql .= "/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n";
+            $sql .= "/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;\n";
+            $sql .= "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n";
+            $sql .= "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n";
+            $sql .= "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
+            $sql .= "/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n\n";
+            $sql .= "-- Dump completed on " . date('Y-m-d H:i:s') . "\n";
 
-            file_put_contents($filePath, $sql);
-
-            return response()->download($filePath, $filename, [
-                'Content-Type' => 'application/sql',
-            ])->deleteFileAfterSend(true);
+            // Tạo response download trực tiếp (không lưu file)
+            return response($sql)
+                ->header('Content-Type', 'application/sql')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Content-Length', strlen($sql));
 
         } catch (\Exception $e) {
             return redirect()->route('database.index')->with('warning', 'Lỗi export: ' . $e->getMessage());
@@ -167,70 +157,6 @@ class DatabaseController extends Controller
         try {
             $file = $request->file('sql_file');
             $filename = $file->getClientOriginalName();
-
-            // Lưu file tạm
-            $tempPath = storage_path('app/temp');
-            if (!file_exists($tempPath)) {
-                mkdir($tempPath, 0755, true);
-            }
-
-            $file->move($tempPath, 'import_temp.sql');
-            $filePath = $tempPath . '/import_temp.sql';
-
-            $host = config('database.connections.mysql.host');
-            $database = config('database.connections.mysql.database');
-            $username = config('database.connections.mysql.username');
-            $password = config('database.connections.mysql.password');
-            $port = config('database.connections.mysql.port', 3306);
-
-            // Đường dẫn mysql (XAMPP)
-            $mysqlPath = 'C:\\xampp\\mysql\\bin\\mysql.exe';
-
-            if (!file_exists($mysqlPath)) {
-                $mysqlPath = 'mysql';
-            }
-
-            // Xây dựng command
-            $command = sprintf(
-                '"%s" --host=%s --port=%s --user=%s %s %s < "%s"',
-                $mysqlPath,
-                escapeshellarg($host),
-                escapeshellarg($port),
-                escapeshellarg($username),
-                $password ? '--password=' . escapeshellarg($password) : '',
-                escapeshellarg($database),
-                $filePath
-            );
-
-            // Thực thi command
-            $output = [];
-            $returnVar = 0;
-            exec($command . ' 2>&1', $output, $returnVar);
-
-            // Xóa file tạm
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-
-            if ($returnVar !== 0) {
-                // Thử phương pháp thay thế: Import qua PHP
-                return $this->importViaPhp($request);
-            }
-
-            return redirect()->route('database.index')->with('msg', 'Import database thành công từ file: ' . $filename);
-        } catch (\Exception $e) {
-            return redirect()->route('database.index')->with('warning', 'Lỗi import: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Import database qua PHP (phương pháp thay thế)
-     */
-    private function importViaPhp(Request $request)
-    {
-        try {
-            $file = $request->file('sql_file');
-            $filename = $file->getClientOriginalName();
             $sql = file_get_contents($file->getRealPath());
 
             // Tắt foreign key checks
@@ -238,21 +164,29 @@ class DatabaseController extends Controller
 
             // Tách các câu lệnh SQL
             $statements = $this->parseSqlStatements($sql);
+            $successCount = 0;
+            $errorCount = 0;
 
             foreach ($statements as $statement) {
                 $statement = trim($statement);
                 if (!empty($statement) && !$this->isComment($statement)) {
                     try {
                         DB::unprepared($statement);
+                        $successCount++;
                     } catch (\Exception $e) {
-                        // Bỏ qua lỗi và tiếp tục
-                        \Log::warning('SQL Import Warning: ' . $e->getMessage());
+                        $errorCount++;
+                        \Log::warning('SQL Import Warning: ' . $e->getMessage() . ' - Statement: ' . substr($statement, 0, 100));
                     }
                 }
             }
 
             // Bật lại foreign key checks
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+            if ($errorCount > 0) {
+                return redirect()->route('database.index')
+                    ->with('msg', "Import thành công! ({$successCount} câu lệnh). Có {$errorCount} lỗi nhỏ đã bỏ qua.");
+            }
 
             return redirect()->route('database.index')->with('msg', 'Import database thành công từ file: ' . $filename);
         } catch (\Exception $e) {
@@ -266,29 +200,43 @@ class DatabaseController extends Controller
      */
     private function parseSqlStatements($sql)
     {
-        // Loại bỏ comments
-        $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
-
         $statements = [];
         $currentStatement = '';
         $inString = false;
         $stringChar = '';
+        $escaped = false;
 
         $length = strlen($sql);
         for ($i = 0; $i < $length; $i++) {
             $char = $sql[$i];
 
+            // Handle escape character
+            if ($escaped) {
+                $currentStatement .= $char;
+                $escaped = false;
+                continue;
+            }
+
+            if ($char === '\\') {
+                $escaped = true;
+                $currentStatement .= $char;
+                continue;
+            }
+
             if (!$inString) {
-                if ($char === '"' || $char === "'") {
+                if ($char === '"' || $char === "'" || $char === '`') {
                     $inString = true;
                     $stringChar = $char;
                 } elseif ($char === ';') {
-                    $statements[] = $currentStatement;
+                    $trimmed = trim($currentStatement);
+                    if (!empty($trimmed)) {
+                        $statements[] = $trimmed;
+                    }
                     $currentStatement = '';
                     continue;
                 }
             } else {
-                if ($char === $stringChar && ($i === 0 || $sql[$i - 1] !== '\\')) {
+                if ($char === $stringChar) {
                     $inString = false;
                 }
             }
@@ -296,8 +244,10 @@ class DatabaseController extends Controller
             $currentStatement .= $char;
         }
 
-        if (!empty(trim($currentStatement))) {
-            $statements[] = $currentStatement;
+        // Add last statement if exists
+        $trimmed = trim($currentStatement);
+        if (!empty($trimmed)) {
+            $statements[] = $trimmed;
         }
 
         return $statements;
@@ -309,6 +259,25 @@ class DatabaseController extends Controller
     private function isComment($statement)
     {
         $statement = trim($statement);
-        return strpos($statement, '--') === 0 || strpos($statement, '#') === 0;
+
+        // Skip empty statements
+        if (empty($statement)) {
+            return true;
+        }
+
+        // Skip comment lines
+        if (strpos($statement, '--') === 0) {
+            return true;
+        }
+        if (strpos($statement, '#') === 0) {
+            return true;
+        }
+
+        // Skip MySQL conditional comments that are just settings
+        if (preg_match('/^\/\*!\d+\s*(SET|SELECT)\s/i', $statement)) {
+            return false; // These are valid SQL
+        }
+
+        return false;
     }
 }
