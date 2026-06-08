@@ -18,16 +18,10 @@ class UserSeeder extends Seeder
     public function run()
     {
         $users = [
-            ['name' => 'Nguyễn Văn Thiên', 'email' => 'thiennv@thienphattien.com', 'phone' => '0908 779 167', 'role' => 'Admin'],
-            ['name' => 'Nguyễn Đình Thành', 'email' => 'thanhnd@thienphattien.com', 'phone' => '0914 994 997', 'role' => 'Admin'],
-            ['name' => 'Đoàn Thanh Trang', 'email' => 'trangdt@thienphattien.com', 'phone' => '0911 788 488', 'role' => 'Admin'],
-            ['name' => 'Đoàn Thanh Giang', 'email' => 'giangdt@thienphattien.com', 'phone' => '0915 779 167', 'role' => 'Admin'],
-            ['name' => 'Trần Lê Thục Uyên', 'email' => 'thucuyen.tran@thienphattien.com', 'phone' => '0906 146 426', 'role' => 'Admin'],
-            ['name' => 'Nguyễn Thị Xuân Hậu', 'email' => 'hauntx@thienphattien.com', 'phone' => '0345 051 482', 'role' => 'Kế toán'],
-            ['name' => 'Thạch Hoài Bảo', 'email' => 'bao.thach@thienphattien.com', 'phone' => '0387 823 982', 'role' => 'Quản lý kho'],
-            ['name' => 'Phạm Lê Quốc Khởi', 'email' => 'khoi.pham@thienphattien.com', 'phone' => '0386 068 693', 'role' => 'Quản lý kho'],
-            ['name' => 'Huỳnh Lê Thiên Phúc', 'email' => 'phuc.huynh@thienphattien.com', 'phone' => '0983 468 473', 'role' => 'Bảo hành'],
-            ['name' => 'Phan Thành Nhân', 'email' => 'nhanpt@thienphattien.com', 'phone' => '0867 551 488', 'role' => 'Bảo hành'],
+            ['name' => 'Demo Admin', 'email' => 'admin@demo.com', 'phone' => '0908 779 167', 'role' => 'Admin'],
+            ['name' => 'Demo Kế toán', 'email' => 'ketoan@demo.com', 'phone' => '0345 051 482', 'role' => 'Kế toán'],
+            ['name' => 'Demo Quản lý kho', 'email' => 'quankho@demo.com', 'phone' => '0387 823 982', 'role' => 'Quản lý kho'],
+            ['name' => 'Demo Bảo hành', 'email' => 'baohanh@demo.com', 'phone' => '0983 468 473', 'role' => 'Bảo hành'],
         ];
 
         foreach ($users as $userData) {
@@ -35,7 +29,7 @@ class UserSeeder extends Seeder
                 'name' => $userData['name'],
                 'email' => $userData['email'],
                 'phone' => $userData['phone'],
-                'password' => Hash::make($userData['email']),
+                'password' => Hash::make('123456'),
             ]);
 
             if (!empty($userData['role'])) {
