@@ -92,7 +92,8 @@
                 </div>
 
                 <!-- Toggle Link -->
-                <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/50 text-center text-sm text-gray-600 dark:text-gray-400">
+                <div
+                    class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/50 text-center text-sm text-gray-600 dark:text-gray-400">
                     Đã có tài khoản?
                     <a href="#" id="toggle-to-login" @click.prevent="tab = 'login'"
                         class="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 underline focus:outline-none">
@@ -104,81 +105,81 @@
     </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const CONFIG = {
-            hubUrl: "http://127.0.0.1:8001/api/demo-register",
-            siteName: "Thiên Phát Tiến"
-        };
-
-        const registerForm = document.getElementById("register-form");
-        if (!registerForm) return;
-
-        registerForm.addEventListener("submit", async (e) => {
-            // 1. Ngăn chặn hành vi gửi form tải lại trang ban đầu
-            e.preventDefault();
-
-            const usernameInput = registerForm.querySelector('input[name="username"]') || registerForm.querySelector('#username') || registerForm.querySelector('input[name="name"]');
-            const emailInput = registerForm.querySelector('input[name="email"]') || registerForm.querySelector('#register_email');
-            const phoneInput = registerForm.querySelector('input[name="phone"]') || registerForm.querySelector('input[name="tel"]') || registerForm.querySelector('#phone');
-            const submitButton = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('input[type="submit"]');
-
-            if (!usernameInput || !emailInput || !phoneInput) {
-                alert("Không tìm thấy các trường thông tin đăng ký (Username, Email, Phone) trong form.");
-                return;
-            }
-
-            const payload = {
-                username: usernameInput.value.trim(),
-                email: emailInput.value.trim(),
-                phone: phoneInput.value.trim(),
-                site_name: CONFIG.siteName
+        document.addEventListener("DOMContentLoaded", () => {
+            const CONFIG = {
+                hubUrl: "https://portal.app.ringnet.vn/api/demo-register",
+                siteName: "Thiên Phát Tiến"
             };
 
-            const originalButtonHtml = submitButton.innerHTML;
-            submitButton.disabled = true;
-            submitButton.innerHTML = "Đang xử lý...";
+            const registerForm = document.getElementById("register-form");
+            if (!registerForm) return;
 
-            try {
-                // 2. Gửi thông tin đăng ký lên Hub cha để ghi nhận log quan tâm
-                const response = await fetch(CONFIG.hubUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
+            registerForm.addEventListener("submit", async (e) => {
+                // 1. Ngăn chặn hành vi gửi form tải lại trang ban đầu
+                e.preventDefault();
 
-                const result = await response.json();
+                const usernameInput = registerForm.querySelector('input[name="username"]') || registerForm.querySelector('#username') || registerForm.querySelector('input[name="name"]');
+                const emailInput = registerForm.querySelector('input[name="email"]') || registerForm.querySelector('#register_email');
+                const phoneInput = registerForm.querySelector('input[name="phone"]') || registerForm.querySelector('input[name="tel"]') || registerForm.querySelector('#phone');
+                const submitButton = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('input[type="submit"]');
 
-                if (response.ok) {
-                    // 3. Hiển thị tài khoản dùng thử mẫu từ seeder cho khách hàng
-                    alert(`Đăng ký thông tin thành công!\n\nVui lòng sử dụng tài khoản dùng thử sau để trải nghiệm hệ thống:\n- Email: admin@demo.com\n- Mật khẩu: 123456\n- Vai trò: Admin\n\n(Hệ thống có sẵn các tài khoản demo khác: ketoan@demo.com, quankho@demo.com, baohanh@demo.com với mật khẩu 123456)`);
+                if (!usernameInput || !emailInput || !phoneInput) {
+                    alert("Không tìm thấy các trường thông tin đăng ký (Username, Email, Phone) trong form.");
+                    return;
+                }
 
-                    // 4. Tự động điền tài khoản demo vào form đăng nhập
-                    const loginEmailInput = document.getElementById("email");
-                    const loginPasswordInput = document.getElementById("password");
-                    if (loginEmailInput) loginEmailInput.value = "admin@demo.com";
-                    if (loginPasswordInput) loginPasswordInput.value = "123456";
+                const payload = {
+                    username: usernameInput.value.trim(),
+                    email: emailInput.value.trim(),
+                    phone: phoneInput.value.trim(),
+                    site_name: CONFIG.siteName
+                };
 
-                    // 5. Reset form đăng ký và chuyển về tab đăng nhập
-                    registerForm.reset();
-                    const toggleToLogin = document.getElementById("toggle-to-login");
-                    if (toggleToLogin) {
-                        toggleToLogin.click();
+                const originalButtonHtml = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = "Đang xử lý...";
+
+                try {
+                    // 2. Gửi thông tin đăng ký lên Hub cha để ghi nhận log quan tâm
+                    const response = await fetch(CONFIG.hubUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // 3. Hiển thị tài khoản dùng thử mẫu từ seeder cho khách hàng
+                        alert(`Đăng ký thông tin thành công!\n\nVui lòng sử dụng tài khoản dùng thử sau để trải nghiệm hệ thống:\n- Email: admin@demo.com\n- Mật khẩu: 123456\n- Vai trò: Admin\n\n(Hệ thống có sẵn các tài khoản demo khác: ketoan@demo.com, quankho@demo.com, baohanh@demo.com với mật khẩu 123456)`);
+
+                        // 4. Tự động điền tài khoản demo vào form đăng nhập
+                        const loginEmailInput = document.getElementById("email");
+                        const loginPasswordInput = document.getElementById("password");
+                        if (loginEmailInput) loginEmailInput.value = "admin@demo.com";
+                        if (loginPasswordInput) loginPasswordInput.value = "123456";
+
+                        // 5. Reset form đăng ký và chuyển về tab đăng nhập
+                        registerForm.reset();
+                        const toggleToLogin = document.getElementById("toggle-to-login");
+                        if (toggleToLogin) {
+                            toggleToLogin.click();
+                        }
+                    } else {
+                        alert(`Lỗi: ${result.message || "Đăng ký thất bại"}`);
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonHtml;
                     }
-                } else {
-                    alert(`Lỗi: ${result.message || "Đăng ký thất bại"}`);
+                } catch (error) {
+                    console.error(error);
+                    alert("Không thể kết nối đến hệ thống Hub trung tâm.");
                     submitButton.disabled = false;
                     submitButton.innerHTML = originalButtonHtml;
                 }
-            } catch (error) {
-                console.error(error);
-                alert("Không thể kết nối đến hệ thống Hub trung tâm.");
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonHtml;
-            }
+            });
         });
-    });
     </script>
 </x-guest-layout>
