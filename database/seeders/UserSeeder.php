@@ -37,52 +37,5 @@ class UserSeeder extends Seeder
                 $user->assignRole($role);
             }
         }
-    
-        // Customers::create([
-        //     'customer_code' => 'kh1',
-        //     'customer_name' => 'kh1',
-        // ]);
-        // Providers::create([
-        //     'provider_code' => 'ncc1',
-        //     'provider_name' => 'ncc1',
-        // ]);
-        // Product::insert([
-        //     [
-        //         'product_code' => 'sp1',
-        //         'product_name' => 'sp1',
-        //     ],
-        //     [
-        //         'product_code' => 'sp2',
-        //         'product_name' => 'sp2',
-        //     ],
-        // ]);
-        // // Tạo người dùng mặc định
-        // $admin = User::create([
-        //     'name' => 'Admin User',
-        //     'email' => 'admin@thienphattien.com',
-        //     'password' => Hash::make('Admin@123'),
-        // ]);
-        // $admin->assignRole('Admin');
-
-        // $warehouseManager = User::create([
-        //     'name' => 'Quản lý kho',
-        //     'email' => 'quankho@thienphattien.com',
-        //     'password' => Hash::make('Quankho@123'),
-        // ]);
-        // $warehouseManager->assignRole('Quản lý kho');
-
-        // $serviceUser = User::create([
-        //     'name' => 'Bảo hành',
-        //     'email' => 'baohanh@thienphattien.com',
-        //     'password' => Hash::make('Baohanh@123'),
-        // ]);
-        // $serviceUser->assignRole('Bảo hành');
-
-        // $serviceUser = User::create([
-        //     'name' => 'Kế toán',
-        //     'email' => 'ketoan@thienphattien.com',
-        //     'password' => Hash::make('Ketoan@123'),
-        // ]);
-        // $serviceUser->assignRole('Kế toán');
     }
 }

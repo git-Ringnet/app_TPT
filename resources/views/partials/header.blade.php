@@ -71,7 +71,7 @@
             <!-- Main Sidebar Container -->
             <div class="d-flex align-items-center justify-content-between w-100 height-47" id="head-nav">
                 <div class="logo-tpt align-baseline">
-                    <img src="{{ asset('images/loto-tpp.png') }}" alt="" width="148px" height="54px">
+                    <img src="{{ asset('images/tpt (2).png') }}" alt="" width="100px" height="54px">
                 </div>
                 <div class="d-flex content__heading--right flex-grow-1 justify-content-center">
 

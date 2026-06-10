@@ -4,16 +4,16 @@
             <div class="header">
                 <div class="d-flex justify-content-between">
                     <div class="">
-                        <h3 class="text-header-print font-weight-bold m-0">CÔNG TY TNHH TM DV THIÊN PHÁT TIẾN</h3>
-                        <p class="m-0 p-0">196 Quách Đình Bảo, P.Phú Thạnh, Q.Tân Phú, TP. Hồ Chí Minh</p>
-                        <p class="m-0 p-0">DT: 028 7777 8988 - MST: 0311999088</p>
-                        <p class="m-0 p-0">Email: info@thienphattien.com</p>
+                        <h3 class="text-header-print font-weight-bold m-0">CÔNG TY TNHH TM DV DEMO</h3>
+                        <p class="m-0 p-0">123 Đường Demo, P. Demo, Q. Demo, TP. Hồ Chí Minh</p>
+                        <p class="m-0 p-0">DT: 0123 456 789 - MST: 0123456789</p>
+                        <p class="m-0 p-0">Email: info@demo.com</p>
                         <p class="m-0 p-0">Mã phiếu:
                             <span class="font-weight-bold">{{ $returnForm->return_code }}</span>
                         </p>
                     </div>
                     <div style="width:250px;">
-                        <img src="{{ asset('images/logo-tpt-print.png') }}" class="w-100" alt="">
+                        <img src="{{ asset('images/logo.png') }}" class="w-100" alt="">
                     </div>
                 </div>
             </div>

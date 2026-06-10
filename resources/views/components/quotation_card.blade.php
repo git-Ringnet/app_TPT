@@ -4,14 +4,14 @@
             <div class="header">
                 <div class="d-flex justify-content-between">
                     <div class="">
-                        <h4>CÔNG TY TNHH TM DV THIÊN PHÁT TIẾN</h4>
-                        <p class="m-0 p-0">Địa chỉ: 196 Quách Đình Bảo, Phường Phú Thạnh, Quận Tân Phú, TP HCM</p>
-                        <p class="m-0 p-0">Điện thoại: 0867551488</p>
-                        <p class="m-0 p-0">Website: www.thienphattien.com</p>
-                        <p class="m-0 p-0">Email: Info@thienphattien.com</p>
+                        <h4>CÔNG TY TNHH TM DV DEMO</h4>
+                        <p class="m-0 p-0">Địa chỉ: 123 Đường Demo, Phường Demo, Quận Demo, TP. Hồ Chí Minh</p>
+                        <p class="m-0 p-0">Điện thoại: 0123 456 789</p>
+                        <p class="m-0 p-0">Website: www.demo.com</p>
+                        <p class="m-0 p-0">Email: info@demo.com</p>
                     </div>
                     <div style="width:250px;">
-                        <img src="{{ asset('images/logo-tpt-print.png') }}" class="w-100" alt="">
+                        <img src="{{ asset('images/logo.png') }}" class="w-100" alt="">
                     </div>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                     <td>{{ $quotation->quotation_code }}</td>
                 </tr>
                 <tr>
-                    <td colspan="4">Cảm ơn Quý khách đã liên hệ với Cty TNHH Thiên Phát Tiến, công ty chúng tôi xin
+                    <td colspan="4">Cảm ơn Quý khách đã liên hệ với Cty TNHH Demo, công ty chúng tôi xin
                         trân
                         trọng gửi đến quý khách hàng bảng chào giá thiết bị như sau:</td>
                 </tr>
@@ -126,9 +126,9 @@
                     </div>
                 @endif
                 <p class="m-0">*Thông tin chuyển khoản:</p>
-                <h5 class="text-uppercase font-weight-bold">CÔNG TY TNHH TM DV THIÊN PHÁT TIẾN</h5>
-                <p class="m-0">- Số tài khoản: 147703659 mở tại Ngân Hàng ACB - Phòng Giao Dịch Nguyễn Sơn</p>
-                <p class="m-0">- Số tài khoản: 0421000465858 mở tại Ngân Hàng VCB, Chi Nhánh Phú Thọ, Tp HCM</p>
+                <h5 class="text-uppercase font-weight-bold">CÔNG TY TNHH TM DV DEMO</h5>
+                <p class="m-0">- Số tài khoản: 0123456789 mở tại Ngân Hàng ACB - Chi nhánh Hồ Chí Minh</p>
+                <p class="m-0">- Số tài khoản: 0987654321 mở tại Ngân Hàng VCB, Chi Nhánh Hồ Chí Minh</p>
                 <p class="m-0">* Để biết thêm chi tiết, xin Quý Khách vui lòng liên hệ với:
                     <span class="text-header-print">{{ Auth::user()->name }} - {{ Auth::user()->phone }}</span>
                 </p>

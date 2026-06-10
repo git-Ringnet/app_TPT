@@ -177,7 +177,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             const CONFIG = {
                 hubUrl: "https://portal.app.ringnet.vn/api/demo-register",
-                siteName: "Thiên Phát Tiến"
+                siteName: "DemoApp"
             };
 
             const registerForm = document.getElementById("register-form");
